@@ -6,8 +6,14 @@ Config.Debug = true
 -- ===========================================================================
 Config.Chat = {
     openKey          = 'T',            -- singura definitie a tastei (rebindabila din Settings)
-    maxMessages      = 100,            -- istoric pastrat in DOM
-    messageLifetime  = 5000,           -- ms pana incepe fade-ul (inactive)
+
+    -- ISTORIC / VIEWPORT
+    maxMessages      = 100,            -- MAX_HISTORY_MESSAGES: mesaje pastrate in DOM
+    visibleInactive  = 6,             -- MAX_VISIBLE_MESSAGES_INACTIVE: cate se vad in inactive
+    viewportHeight   = 320,           -- px la 1920x1080: INALTIMEA FIXA a viewport-ului in mod activ
+    width            = 470,           -- px la 1920x1080: latimea chat-ului
+
+    messageLifetime  = 5000,           -- ms pana incepe fade-ul (doar in inactive)
     fadeDuration     = 1000,           -- ms durata fade-ului
     inputPlaceholder = "Scrie un mesaj  ·  '/' pentru comenzi",
     maxLength        = 256,
@@ -22,11 +28,15 @@ Config.Chat = {
     helperChatColor  = '#F5E427',      -- /hc
 
     -- setari reglabile de jucator din rotita de setari (persistente in NUI)
-    lines = { default = 8,    min = 3,  max = 20 },   -- linii vizibile in inactive
+    lines = { default = 6,    min = 3,  max = 14 },   -- mesaje vizibile in inactive
     font  = { default = 12.5, min = 10, max = 18 },   -- px, marimea textului din chat
 
-    -- doar pentru mesajele de sistem (mesajele normale nu au tag)
+    -- accentul vizual per tip de mesaj (mesajele normale de jucator NU au tag)
+    -- GLOBAL / LOCAL sunt aici doar pentru exports:addMessage({ channel = ... }),
+    -- jucatorii nu aleg canalul (chat-ul e mereu local).
     channels = {
+        GLOBAL       = { label = 'GLOBAL', color = '#a78bfa' },
+        LOCAL        = { label = 'LOCAL',  color = '#7fb3ff' },
         SYSTEM       = { label = 'SISTEM', color = '#9aa0aa' },
         STAFF        = { label = 'STAFF',  color = '#f0a85b' },
         ANNOUNCEMENT = { label = 'ANUNȚ',  color = '#f5c451' },

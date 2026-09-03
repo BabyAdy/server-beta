@@ -14,13 +14,16 @@ function HUD.send(msg) SendNUIMessage(msg) end
 local function pushConfig()
     HUD.send({ mod = 'root', action = 'config', value = {
         chat = {
-            placeholder  = Config.Chat.inputPlaceholder,
-            channels     = Config.Chat.channels,
-            lifetime     = Config.Chat.messageLifetime,
-            fade         = Config.Chat.fadeDuration,
-            maxMessages  = Config.Chat.maxMessages,
-            lines        = Config.Chat.lines,
-            font         = Config.Chat.font,
+            placeholder     = Config.Chat.inputPlaceholder,
+            channels        = Config.Chat.channels,
+            lifetime        = Config.Chat.messageLifetime,
+            fade            = Config.Chat.fadeDuration,
+            maxMessages     = Config.Chat.maxMessages,
+            visibleInactive = Config.Chat.visibleInactive,
+            viewportHeight  = Config.Chat.viewportHeight,
+            width           = Config.Chat.width,
+            lines           = Config.Chat.lines,
+            font            = Config.Chat.font,
         },
         speedo = { unit = Config.Speedo.unit, maxSpeed = Config.Speedo.maxSpeed },
     }})

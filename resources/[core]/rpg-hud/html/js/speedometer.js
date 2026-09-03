@@ -78,18 +78,25 @@ HUD.mods.speedo = (function () {
 HUD.demo = function () {
     HUD.$('#hud').hidden = false;
     var C = { chat: { placeholder: "Scrie un mesaj  ·  '/' pentru comenzi", lifetime: 999999, fade: 1000,
+        maxMessages: 100, visibleInactive: 6, viewportHeight: 320, width: 470,
         channels: { SYSTEM: { label: 'SISTEM', color: '#9aa0aa' }, SUCCESS: { label: 'OK', color: '#46d6a2' },
             STAFF: { label: 'STAFF', color: '#f0a85b' } } },
         speedo: { unit: 'KM/H', maxSpeed: 300 } };
     Object.keys(HUD.mods).forEach(function (k) { if (HUD.mods[k].config) HUD.mods[k].config(C); });
 
     var chat = HUD.mods.chat;
-    chat.on('message', { time: '21:29', id: 137, author: 'Andrei', text: 'Salut, cine e prin zonă?' });
-    chat.on('message', { time: '21:29', id: 92, author: 'Mihai', text: 'Sunt lângă benzinărie.' });
-    chat.on('message', { time: '21:30', channel: 'SYSTEM', text: 'Ai primit $500 (salariu).' });
-    chat.on('message', { time: '21:30', channel: 'STAFF_ADMIN', author: 'Vlad', text: 'preiau ticketul #42', color: '#F5B427',
+    var names = [['Andrei', 137], ['Mihai', 92], ['Ioana', 44], ['Radu', 301], ['Vlad', 88], ['Ana', 205]];
+    var lines = ['Salut, cine e prin zonă?', 'Sunt lângă benzinărie.', 'Vând Sultan, cine e interesat?', 'Unde?',
+        'La dealership-ul din centru.', 'ok, vin acum', 'ai pe /me activ?', 'da, te aștept afară', 'cât ceri?',
+        'negociem pe loc', 'bag și eu un anunț mai târziu', 'mișto, mersi'];
+    for (var i = 0; i < 18; i++) {
+        var n = names[i % names.length];
+        chat.on('message', { time: '21:' + (20 + i), id: n[1], author: n[0], text: lines[i % lines.length] });
+    }
+    chat.on('message', { time: '21:39', channel: 'SYSTEM', text: 'Ai primit $500 (salariu).' });
+    chat.on('message', { time: '21:39', channel: 'STAFF_ADMIN', author: 'Vlad', text: 'preiau ticketul #42', color: '#F5B427',
         staff: { label: 'Head Admin', color: '#ff6a00', id: 88, kind: 'admin' } });
-    chat.on('message', { time: '21:30', channel: 'STAFF_HELPER', author: 'Ana', text: 'raspund eu pe /report', color: '#F5E427',
+    chat.on('message', { time: '21:39', channel: 'STAFF_HELPER', author: 'Ana', text: 'raspund eu pe /report', color: '#F5E427',
         staff: { label: 'Helper', color: '#37ff00', id: 205, kind: 'helper' } });
 
     var h = HUD.mods.hud;

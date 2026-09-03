@@ -10,6 +10,14 @@
     <!-- ================================ CHAT ================================ -->
     <div id="chat" class="mod">
         <div id="chat-log"></div>
+
+        <button id="chat-newmsgs" type="button" hidden>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 5v14M6 13l6 6 6-6" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+            <span id="chat-newmsgs-t">mesaje noi</span>
+        </button>
+
         <div id="chat-input-wrap" hidden>
             <input id="chat-input" type="text" maxlength="256" spellcheck="false" autocomplete="off" />
             <button id="chat-cog" type="button" title="Setări chat">
@@ -22,8 +30,8 @@
             <div id="chat-settings" hidden>
                 <div class="cs-title">Setări chat</div>
                 <label class="cs-row">
-                    <span>Linii vizibile</span><b id="cs-lines-v">8</b>
-                    <input id="cs-lines" type="range" min="3" max="20" step="1" value="8" />
+                    <span>Mesaje vizibile (inactiv)</span><b id="cs-lines-v">6</b>
+                    <input id="cs-lines" type="range" min="3" max="14" step="1" value="6" />
                 </label>
                 <label class="cs-row">
                     <span>Mărime text</span><b id="cs-font-v">12.5px</b>

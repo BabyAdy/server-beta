@@ -1,26 +1,35 @@
 /* ==========================================================================
-   rpg-hud — CHAT (mereu local; fara canale GLOBAL/LOCAL de ales)
-   Mesaj normal:  21:29  Player: text
-   Staff chat  :  (icon) [Grad] Nume (id): text     (/a  ·  /hc)
-   Sistem      :  21:30  [SISTEM] text
+   rpg-hud — CHAT
+   VIEWPORT FIX + SCROLL HISTORY:
+     - inactive  : se vad doar ultimele N mesaje, apoi fade (istoricul ramane)
+     - active (T): viewport cu INALTIME FIXA, scroll intern in istoric
+     - auto-scroll inteligent + indicator "N mesaje noi"
+   Backend-ul NU e atins (doar UI-ul).
    ========================================================================== */
 HUD.mods.chat = (function () {
-    var log = function () { return HUD.$('#chat-log'); };
-    var wrap = function () { return HUD.$('#chat-input-wrap'); };
-    var input = function () { return HUD.$('#chat-input'); };
+    var log     = function () { return HUD.$('#chat-log'); };
+    var wrap    = function () { return HUD.$('#chat-input-wrap'); };
+    var input   = function () { return HUD.$('#chat-input'); };
+    var pillEl  = function () { return HUD.$('#chat-newmsgs'); };
 
     var cfg = {
-        lifetime: 5000, fade: 1000, maxMessages: 100,
+        lifetime: 5000, fade: 1000,
+        maxMessages: 100, visibleInactive: 6, viewportHeight: 320, width: 470,
         channels: {}, placeholder: '',
-        lines: { default: 8, min: 3, max: 20 },
+        lines: { default: 6, min: 3, max: 14 },
         font: { default: 12.5, min: 10, max: 18 },
     };
+
     var active = false;
-    var history = [];
+    var atBottom = true;
+    var unseen = 0;
+    var scrollLock = 0;   // token: anuleaza auto-scroll-urile amanate daca playerul deruleaza sus
+    var history = [];       // input-ul trimis, pt. recall cu sageti
     var histIdx = -1;
     var fadeTimers = [];
+    var scrollTO = null;
     var settingsOpen = false;
-    var settings = { lines: 8, font: 12.5 };
+    var settings = { lines: 6, font: 12.5 };
 
     var ICON_ADMIN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l7 3v5c0 4.5-3 8.3-7 9.5C8 19.3 5 15.5 5 11V6l7-3z" stroke-linecap="round" stroke-linejoin="round"/></svg>';
     var ICON_HELPER = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3.5"/><path d="M5.6 5.6l3.6 3.6M14.8 14.8l3.6 3.6M18.4 5.6l-3.6 3.6M9.2 14.8l-3.6 3.6" stroke-linecap="round"/></svg>';
@@ -38,18 +47,18 @@ HUD.mods.chat = (function () {
         initSettings();
     }
 
-    /* ---- setari jucator (linii vizibile + marime text), persistente ---- */
+    /* --------------------------------------------------- setari jucator -- */
     function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
 
     function applySettings() {
         var chat = HUD.$('#chat');
-        var px = settings.font;
-        var h = Math.round(settings.lines * (px * 1.5 + 5) + 16);
-        chat.style.setProperty('--chat-font', px + 'px');
-        chat.style.setProperty('--chat-h', h + 'px');
+        chat.style.setProperty('--chat-font', settings.font + 'px');
+        chat.style.setProperty('--chat-vh', (cfg.viewportHeight || 320) + 'px');
+        chat.style.setProperty('--chat-w', (cfg.width || 470) + 'px');
+        markBeyondVisible();
         var lv = HUD.$('#cs-lines-v'), fv = HUD.$('#cs-font-v');
         if (lv) lv.textContent = settings.lines;
-        if (fv) fv.textContent = px + 'px';
+        if (fv) fv.textContent = settings.font + 'px';
     }
 
     function saveSettings() {
@@ -57,9 +66,9 @@ HUD.mods.chat = (function () {
     }
 
     function initSettings() {
-        var L = cfg.lines || { default: 8, min: 3, max: 20 };
+        var L = cfg.lines || { default: 6, min: 3, max: 14 };
         var F = cfg.font || { default: 12.5, min: 10, max: 18 };
-        settings = { lines: L.default, font: F.default };
+        settings = { lines: L.default || cfg.visibleInactive || 6, font: F.default };
         try {
             var raw = localStorage.getItem('rpg_hud_chat');
             if (raw) {
@@ -82,22 +91,63 @@ HUD.mods.chat = (function () {
         if (!settingsOpen) setTimeout(function () { input().focus(); }, 10);
     }
 
-    /* ---- fade ---- */
+    /* ------------------------------------------------- viewport helpers -- */
+    function visibleN() { return Math.max(1, settings.lines || cfg.visibleInactive || 6); }
+
+    // marcheaza mesajele mai vechi decat ultimele N (ascunse doar in inactive)
+    function markBeyondVisible() {
+        var kids = log().children;
+        var cut = kids.length - visibleN();
+        for (var i = 0; i < kids.length; i++) {
+            kids[i].classList.toggle('beyond-visible', i < cut);
+        }
+    }
+
+    function isAtBottom() {
+        var el = log();
+        return (el.scrollHeight - el.scrollTop - el.clientHeight) <= 24;
+    }
+
+    function scrollToBottom() {
+        var el = log();
+        el.scrollTop = el.scrollHeight;   // citirea lui scrollHeight forteaza reflow
+        atBottom = true;
+        unseen = 0;
+        updatePill();
+    }
+
+    // scroll la bottom robust (dupa ce clasa .active a recalculat layout-ul).
+    // Re-incercarile amanate se anuleaza daca playerul deruleaza intre timp.
+    function scrollBottomSoon() {
+        var my = ++scrollLock;
+        var go = function () { if (my === scrollLock && active) scrollToBottom(); };
+        scrollToBottom();
+        setTimeout(go, 0);
+        setTimeout(go, 50);
+        setTimeout(go, 140);
+    }
+
+    function updatePill() {
+        var p = pillEl();
+        var show = active && !atBottom && unseen > 0;
+        p.hidden = !show;
+        if (show) {
+            HUD.$('#chat-newmsgs-t').textContent = (unseen === 1)
+                ? '1 mesaj nou' : (unseen + ' mesaje noi');
+        }
+    }
+
+    /* ------------------------------------------------------------ fade --- */
     function clearFadeTimers() { fadeTimers.forEach(clearTimeout); fadeTimers = []; }
 
     function scheduleFade() {
         clearFadeTimers();
-        Array.prototype.slice.call(log().children).forEach(function (c) { c.classList.remove('fade', 'gone'); });
+        log().classList.remove('faded');
         if (active) return;
-        fadeTimers.push(setTimeout(function () {
-            Array.prototype.slice.call(log().children).forEach(function (c) { c.classList.add('fade'); });
-        }, cfg.lifetime));
-        fadeTimers.push(setTimeout(function () {
-            Array.prototype.slice.call(log().children).forEach(function (c) { c.classList.add('gone'); });
-        }, cfg.lifetime + cfg.fade));
+        fadeTimers.push(setTimeout(function () { log().classList.add('faded'); }, cfg.lifetime));
     }
 
-    /* ---- render mesaj ---- */
+    /* --------------------------------------------------- render mesaj --- */
     function addMessage(msg) {
         if (!msg) return;
         var chKey = msg.channel ? String(msg.channel).toUpperCase() : '';
@@ -119,7 +169,6 @@ HUD.mods.chat = (function () {
             html += '<span class="c-chan" style="color:' + ch.color + '">[' + esc(ch.label) + ']</span>';
             html += '<span class="c-text">' + esc(msg.text || '') + '</span>';
         } else {
-            // mesaj normal:  (sql id) Nume: text
             if (msg.id != null && msg.id !== '') html += '<span class="c-sid">(' + esc(msg.id) + ')</span>';
             if (msg.author) html += '<span class="c-auth">' + esc(msg.author) + ':</span>';
             html += '<span class="c-text">' + esc(msg.text || '') + '</span>';
@@ -128,21 +177,40 @@ HUD.mods.chat = (function () {
         el.innerHTML = html;
         var host = log();
         host.appendChild(el);
-        while (host.children.length > (cfg.maxMessages || 100)) host.removeChild(host.firstChild);
-        host.scrollTop = host.scrollHeight;
 
-        scheduleFade();   // mesaj nou => reseteaza timer-ul de fade
+        // HISTORY LIMIT: nu tine infinit in DOM
+        while (host.children.length > (cfg.maxMessages || 100)) host.removeChild(host.firstChild);
+
+        markBeyondVisible();
+
+        if (active) {
+            if (atBottom) {
+                scrollToBottom();
+            } else {
+                unseen++;
+                updatePill();
+            }
+        } else {
+            scheduleFade();   // mesaj nou => reseteaza timer-ul + re-afiseaza
+        }
     }
 
-    /* ---- open / close ---- */
+    /* ---------------------------------------------------- open / close -- */
     function open(payload) {
         active = true;
         HUD.$('#chat').classList.add('active');
         wrap().hidden = false;
         clearFadeTimers();
-        Array.prototype.slice.call(log().children).forEach(function (c) { c.classList.remove('fade', 'gone'); });
+        log().classList.remove('faded');
+
         input().value = (payload && payload.prefill) || '';
         histIdx = -1;
+
+        // playerul venea din inactive (mereu "la bottom") => viewport la ultimele mesaje
+        atBottom = true;
+        unseen = 0;
+        updatePill();
+        scrollBottomSoon();
         setTimeout(function () { input().focus(); }, 20);
     }
 
@@ -153,6 +221,8 @@ HUD.mods.chat = (function () {
         input().value = '';
         histIdx = -1;
         toggleSettings(false);
+        pillEl().hidden = true;
+        markBeyondVisible();
         scheduleFade();
     }
 
@@ -160,8 +230,26 @@ HUD.mods.chat = (function () {
         var text = input().value;
         if (text.trim()) { history.unshift(text); if (history.length > 50) history.pop(); }
         HUD.post('chatSubmit', { text: text });
-        hideUI();
+        // ramane ACTIV; input golit; mesajul revine prin evenimentul serverului
+        input().value = '';
+        histIdx = -1;
     }
+
+    /* ---- scroll: track bottom + reveal scrollbar ---- */
+    log().addEventListener('scroll', function () {
+        atBottom = isAtBottom();
+        if (!atBottom) scrollLock++;               // playerul citeste istoric -> stop auto-scroll amanat
+        else { unseen = 0; updatePill(); }
+        var el = log();
+        el.classList.add('scrolling');
+        clearTimeout(scrollTO);
+        scrollTO = setTimeout(function () { el.classList.remove('scrolling'); }, 900);
+    });
+
+    pillEl().addEventListener('click', function () {
+        scrollToBottom();
+        input().focus();
+    });
 
     /* ---- rotita de setari ---- */
     HUD.$('#chat-cog').addEventListener('click', function (e) {
@@ -203,7 +291,7 @@ HUD.mods.chat = (function () {
             if (action === 'open') open(value);
             else if (action === 'close') hideUI();
             else if (action === 'message') addMessage(value);
-            else if (action === 'clear') log().innerHTML = '';
+            else if (action === 'clear') { log().innerHTML = ''; markBeyondVisible(); }
         },
     };
 })();
