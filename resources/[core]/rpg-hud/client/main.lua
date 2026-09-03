@@ -20,7 +20,7 @@ local function pushConfig()
             fade            = Config.Chat.fadeDuration,
             maxMessages     = Config.Chat.maxMessages,
             visibleInactive = Config.Chat.visibleInactive,
-            viewportHeight  = Config.Chat.viewportHeight,
+            lineHeight      = Config.Chat.lineHeight,
             width           = Config.Chat.width,
             lines           = Config.Chat.lines,
             font            = Config.Chat.font,

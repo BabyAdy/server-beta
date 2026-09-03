@@ -12,9 +12,12 @@
     --border:  rgba(168, 132, 250, 0.14);
     --border-2: rgba(168, 132, 250, 0.34);
 
-    /* reglabile din rotita de setari a chat-ului (suprascrise de JS) */
-    --chat-font: 12.5px;
-    --chat-h: 26vh;
+    /* reglabile din rotita de setari a chat-ului (suprascrise de JS pe #chat).
+       Inaltimea viewport-ului activ se CALCULEAZA din ele, nu e fixa. */
+    --chat-font: 12.5px;          /* dimensiunea REALA a textului din mesaje */
+    --chat-lines: 6;             /* cate randuri vrea playerul sa vada */
+    --chat-line-height: 1.45;
+    --chat-pad-y: 20px;          /* padding vertical + border al viewport-ului */
 
     --text:   #ece9f5;
     --dim:    #9a93b0;
@@ -90,10 +93,15 @@ body.preview {
 /* inactive: fade dupa lifetime (istoricul NU se sterge) */
 #chat:not(.active) #chat-log.faded { opacity: 0; }
 
-/* ACTIVE: viewport cu INALTIME FIXA + scroll intern */
+/* ACTIVE: viewport cu inaltime = (linii × font × line-height) + padding.
+   Font-size mai mare  => viewport mai inalt (textul NU e "zoomat" intr-o cutie fixa).
+   Limitat la 45vh; peste asta, scroll. */
 #chat.active #chat-log {
-    height: var(--chat-vh, 320px);
-    max-height: 42vh;
+    height: calc(
+        var(--chat-lines) * (var(--chat-font) * var(--chat-line-height) + 1px)
+        + var(--chat-pad-y)
+    );
+    max-height: 45vh;
     overflow-y: auto;
     overflow-x: hidden;
     overscroll-behavior: contain;
@@ -145,11 +153,17 @@ body.preview {
 #chat-newmsgs:hover { border-color: var(--purple); color: #fff; }
 
 .cmsg {
+    /* flex child in #chat-log (coloana): NU lasa flexbox-ul sa comprime/taie mesajul.
+       Fiecare mesaj isi pastreaza inaltimea naturala; containerul scrolleaza. */
+    flex: 0 0 auto;
     font-size: var(--chat-font, 12.5px);
-    line-height: 1.5;
+    line-height: var(--chat-line-height, 1.45);
+    height: auto;
+    min-height: 0;
     text-shadow: 0 1px 3px rgba(0, 0, 0, 0.85);
     padding: 0 2px;
     overflow-wrap: anywhere;
+    word-break: break-word;
     transition: opacity .5s linear;
 }
 
@@ -167,10 +181,10 @@ body.preview {
 /* --- staff chat ( /a  ·  /hc ) --- */
 .c-sicon {
     display: inline-flex;
-    vertical-align: -2px;
+    vertical-align: -0.12em;
     margin-right: 4px;
 }
-.c-sicon svg { width: 12px; height: 12px; }
+.c-sicon svg { width: 1em; height: 1em; }   /* scaleaza cu marimea mesajului */
 .cmsg.ch-STAFF_ADMIN .c-sicon { color: #F5B427; }
 .cmsg.ch-STAFF_HELPER .c-sicon { color: #F5E427; }
 .c-badge {

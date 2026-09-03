@@ -14,7 +14,7 @@ HUD.mods.chat = (function () {
 
     var cfg = {
         lifetime: 5000, fade: 1000,
-        maxMessages: 100, visibleInactive: 6, viewportHeight: 320, width: 470,
+        maxMessages: 100, visibleInactive: 6, lineHeight: 1.45, width: 470,
         channels: {}, placeholder: '',
         lines: { default: 6, min: 3, max: 14 },
         font: { default: 12.5, min: 10, max: 18 },
@@ -50,15 +50,26 @@ HUD.mods.chat = (function () {
     /* --------------------------------------------------- setari jucator -- */
     function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
 
+    // JS-ul modifica DOAR variabile CSS. Inaltimea viewport-ului o calculeaza
+    // CSS-ul din --chat-lines * --chat-font * --chat-line-height + padding.
     function applySettings() {
         var chat = HUD.$('#chat');
-        chat.style.setProperty('--chat-font', settings.font + 'px');
-        chat.style.setProperty('--chat-vh', (cfg.viewportHeight || 320) + 'px');
+        var wasAtBottom = active && atBottom;
+
+        chat.style.setProperty('--chat-font', settings.font + 'px');   // font REAL
+        chat.style.setProperty('--chat-lines', settings.lines);        // nr. randuri vizibile
+        chat.style.setProperty('--chat-line-height', cfg.lineHeight || 1.45);
         chat.style.setProperty('--chat-w', (cfg.width || 470) + 'px');
+
         markBeyondVisible();
+
         var lv = HUD.$('#cs-lines-v'), fv = HUD.$('#cs-font-v');
         if (lv) lv.textContent = settings.lines;
         if (fv) fv.textContent = settings.font + 'px';
+
+        // dupa ce viewport-ul si-a schimbat inaltimea, pastreaza pozitia
+        if (wasAtBottom) scrollToBottom();
+        else { atBottom = isAtBottom(); updatePill(); }
     }
 
     function saveSettings() {

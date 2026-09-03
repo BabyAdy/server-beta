@@ -78,7 +78,7 @@ HUD.mods.speedo = (function () {
 HUD.demo = function () {
     HUD.$('#hud').hidden = false;
     var C = { chat: { placeholder: "Scrie un mesaj  ·  '/' pentru comenzi", lifetime: 999999, fade: 1000,
-        maxMessages: 100, visibleInactive: 6, viewportHeight: 320, width: 470,
+        maxMessages: 100, visibleInactive: 6, lineHeight: 1.45, width: 470,
         channels: { SYSTEM: { label: 'SISTEM', color: '#9aa0aa' }, SUCCESS: { label: 'OK', color: '#46d6a2' },
             STAFF: { label: 'STAFF', color: '#f0a85b' } } },
         speedo: { unit: 'KM/H', maxSpeed: 300 } };

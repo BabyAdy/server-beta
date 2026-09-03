@@ -10,8 +10,9 @@ Config.Chat = {
     -- ISTORIC / VIEWPORT
     maxMessages      = 100,            -- MAX_HISTORY_MESSAGES: mesaje pastrate in DOM
     visibleInactive  = 6,             -- MAX_VISIBLE_MESSAGES_INACTIVE: cate se vad in inactive
-    viewportHeight   = 320,           -- px la 1920x1080: INALTIMEA FIXA a viewport-ului in mod activ
+    lineHeight       = 1.45,          -- line-height mesaje; intra si in calculul inaltimii viewport-ului
     width            = 470,           -- px la 1920x1080: latimea chat-ului
+    -- inaltimea viewport-ului activ NU e fixa: = linii × font × lineHeight + padding (calc in CSS)
 
     messageLifetime  = 5000,           -- ms pana incepe fade-ul (doar in inactive)
     fadeDuration     = 1000,           -- ms durata fade-ului
