@@ -113,8 +113,6 @@ body.preview {
     border: 1px solid var(--border);
     border-radius: var(--radius);
     box-shadow: var(--shadow), var(--glow), inset 0 1px 0 rgba(255, 255, 255, 0.05);
-    -webkit-backdrop-filter: blur(26px) saturate(150%);
-    backdrop-filter: blur(26px) saturate(150%);
     overflow: hidden;
 }
 
@@ -477,8 +475,6 @@ body.preview {
     border-left: 3px solid var(--purple);
     border-radius: var(--radius-sm);
     background: rgba(14, 11, 20, 0.7);
-    -webkit-backdrop-filter: blur(16px);
-    backdrop-filter: blur(16px);
     box-shadow: var(--shadow);
     font-size: 13px;
     line-height: 1.4;

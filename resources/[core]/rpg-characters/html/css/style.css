@@ -43,8 +43,6 @@ body.preview { background: #0a0710; }
     flex-direction: column;
     background: var(--bg-panel);
     border-left: 1px solid var(--border);
-    -webkit-backdrop-filter: blur(22px) saturate(135%);
-    backdrop-filter: blur(22px) saturate(135%);
     box-shadow: -20px 0 40px -44px rgba(0, 0, 0, 0.22);
     animation: slideIn 0.35s var(--ease);
 }
@@ -296,8 +294,6 @@ select option { background: #161020; color: var(--text); }
     border: 1px solid var(--border);
     border-radius: 50%;
     background: var(--bg-panel);
-    -webkit-backdrop-filter: blur(14px);
-    backdrop-filter: blur(14px);
     color: var(--text-dim);
     cursor: pointer;
     transition: color 0.15s, border-color 0.15s;
@@ -310,8 +306,6 @@ select option { background: #161020; color: var(--text); }
     border: 1px solid var(--border);
     border-radius: 999px;
     background: var(--bg-panel);
-    -webkit-backdrop-filter: blur(14px);
-    backdrop-filter: blur(14px);
 }
 .zoom button {
     padding: 7px 15px;
@@ -350,8 +344,6 @@ select option { background: #161020; color: var(--text); }
     border-left: 3px solid var(--purple);
     border-radius: var(--radius-sm);
     background: rgba(14, 11, 20, 0.7);
-    -webkit-backdrop-filter: blur(16px);
-    backdrop-filter: blur(16px);
     font-size: 13px;
     box-shadow: 0 16px 40px -24px rgba(0, 0, 0, 0.3);
     animation: tIn 0.28s var(--ease);

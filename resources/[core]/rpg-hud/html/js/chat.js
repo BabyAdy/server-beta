@@ -56,10 +56,10 @@ HUD.mods.chat = (function () {
         var chat = HUD.$('#chat');
         var wasAtBottom = active && atBottom;
 
-        chat.style.setProperty('--chat-font', settings.font + 'px');   // font REAL
-        chat.style.setProperty('--chat-lines', settings.lines);        // nr. randuri vizibile
-        chat.style.setProperty('--chat-line-height', cfg.lineHeight || 1.45);
-        chat.style.setProperty('--chat-w', (cfg.width || 470) + 'px');
+        chat.style.setProperty('--chat-font', String(settings.font) + 'px');   // font REAL
+        chat.style.setProperty('--chat-lines', String(settings.lines));        // nr. randuri
+        chat.style.setProperty('--chat-line-height', String(cfg.lineHeight || 1.45));
+        chat.style.setProperty('--chat-w', String(cfg.width || 470) + 'px');
 
         markBeyondVisible();
 
