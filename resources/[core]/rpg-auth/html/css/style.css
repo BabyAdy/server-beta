@@ -18,7 +18,7 @@
     --purple-bright: #a78bfa;
     --purple-deep:   #6d28d9;
 
-    --bg-card:          rgba(16, 12, 26, 0.66);
+    --bg-card:          rgba(16, 12, 26, 0.38);
     --bg-input:         rgba(255, 255, 255, 0.04);
     --bg-input-focus:   rgba(139, 92, 246, 0.09);
     --border:           rgba(168, 132, 250, 0.16);
@@ -35,8 +35,8 @@
     --radius:    18px;
     --radius-sm: 12px;
 
-    --shadow: 0 40px 90px -25px rgba(0, 0, 0, 0.75);
-    --glow:   0 0 60px -12px rgba(139, 92, 246, 0.45);
+    --shadow: 0 30px 70px -30px rgba(0, 0, 0, 0.45);
+    --glow:   0 0 60px -12px rgba(139, 92, 246, 0.40);
 
     --ease: cubic-bezier(0.22, 0.7, 0.2, 1);
 }

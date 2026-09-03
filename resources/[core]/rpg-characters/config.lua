@@ -1,5 +1,10 @@
 Config = {}
 
+-- TEMPORAR: la login, daca jucatorul nu are personaj, NU deschide creator-ul —
+-- creeaza un personaj default (nud) si spawneaza-l direct pe harta.
+-- Pune pe `false` cand vrei sa reactivezi Character Creator-ul.
+Config.SkipCreator = true
+
 -- Locul (privat, in routing bucket separat) unde se editeaza personajul
 Config.Creator = {
     coords     = vec4(-1043.4, -2745.0, 21.4, 331.0),

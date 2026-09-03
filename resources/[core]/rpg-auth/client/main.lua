@@ -63,6 +63,9 @@ function OpenAuth(screen)
     if Auth.open or Auth.authed then return end
     Auth.open = true
 
+    -- ascunde ecranul de incarcare FiveM ("Awaiting scripts...")
+    ShutdownLoadingScreenNui()
+
     DoScreenFadeIn(0)
     lockPlayer(true)
     toggleCam(true)
@@ -143,6 +146,21 @@ end)
 
 CreateThread(function()
     while not NetworkIsSessionStarted() do Wait(200) end
-    Wait(300)
+
+    -- opreste ecranul de incarcare ("Awaiting scripts")
+    ShutdownLoadingScreenNui()
+    ShutdownLoadingScreen()
+
+    -- incarca coliziunea zonei de spawn ca ped-ul sa nu cada prin harta
+    local sc = Config.SpawnCoords
+    local ped = PlayerPedId()
+    SetEntityCoordsNoOffset(ped, sc.x, sc.y, sc.z, false, false, false)
+    local t = GetGameTimer()
+    while not HasCollisionLoadedAroundEntity(ped) and GetGameTimer() - t < 5000 do
+        RequestCollisionAtCoord(sc.x, sc.y, sc.z)
+        Wait(50)
+    end
+
+    Wait(200)
     if not Auth.authed then OpenAuth('login') end
 end)

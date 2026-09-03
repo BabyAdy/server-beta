@@ -63,6 +63,9 @@ function Inv.openUI()
     -- cere datele proaspete
     Inv.request('open', {})
     Inv.request('scanNearby', {})
+
+    -- carlig pentru rpg-hud (decide singur daca ascunde HUD-ul, dupa config)
+    TriggerEvent('hud:inventory', true)
 end
 
 function Inv.closeUI()
@@ -73,6 +76,7 @@ function Inv.closeUI()
     closeCam()
     FreezeEntityPosition(PlayerPedId(), false)
     Inv.request('close', {})
+    TriggerEvent('hud:inventory', false)
 end
 
 function Inv.toggle()

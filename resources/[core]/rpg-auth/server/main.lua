@@ -6,10 +6,43 @@
 --  cu un KDF real (bcrypt / argon2), ex. resursa `bcrypt` sau un modul node.
 -- ===========================================================================
 
-local sessions = {}   -- [src] = { id, username }
+local sessions = {}   -- [src] = { id, username, staff }
 local cooldown = {}    -- [src] = last request ms
 
 math.randomseed(os.time())
+
+-- ----- migratie schema (coloana staff + tabela beta_redemptions) --------
+CreateThread(function()
+    while GetResourceState('oxmysql') ~= 'started' do Wait(200) end
+    Wait(400)
+
+    local hasStaff = MySQL.scalar.await([[
+        SELECT COUNT(*) FROM information_schema.COLUMNS
+        WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'users' AND COLUMN_NAME = 'staff'
+    ]])
+    if (tonumber(hasStaff) or 0) == 0 then
+        MySQL.query.await("ALTER TABLE `users` ADD COLUMN `staff` VARCHAR(25) NOT NULL DEFAULT ''")
+        print('[rpg-auth] Coloana `users`.`staff` a fost adaugata.')
+    end
+
+    MySQL.query.await([[
+        CREATE TABLE IF NOT EXISTS `beta_redemptions` (
+            `id`          INT UNSIGNED NOT NULL AUTO_INCREMENT,
+            `code`        VARCHAR(48)  NOT NULL,
+            `account_id`  INT UNSIGNED NOT NULL,
+            `reward`      VARCHAR(48)  NOT NULL,
+            `redeemed_at` TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY (`id`),
+            UNIQUE KEY `uniq_code` (`code`)
+        ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci
+    ]])
+end)
+
+-- ----- helpers staff --------------------------------------------------
+local function staffOf(src)
+    local s = sessions[src]
+    return (s and s.staff and s.staff ~= '') and s.staff or nil
+end
 
 -- ----- helpers -------------------------------------------------------------
 local function genSalt(len)
@@ -118,7 +151,7 @@ local function handleLogin(src, id, p)
     end
 
     local row = MySQL.single.await([[
-        SELECT id, username, identifier, banned, ban_reason
+        SELECT id, username, identifier, banned, ban_reason, staff
         FROM users
         WHERE username = ? AND password = SHA2(CONCAT(salt, ?), 256)
         LIMIT 1
@@ -141,12 +174,13 @@ local function handleLogin(src, id, p)
         { GetPlayerEndpoint(src), license, row.id }
     )
 
-    sessions[src] = { id = row.id, username = row.username }
+    sessions[src] = { id = row.id, username = row.username, staff = row.staff or '' }
     local ply = Player(src)
     if ply and ply.state then
         ply.state:set('authed', true, true)
         ply.state:set('accountId', row.id, true)
         ply.state:set('accountName', row.username, true)
+        ply.state:set('staff', row.staff or '', true)
     end
 
     print(('[rpg-auth] Login: %s (acc #%d) — src %d'):format(row.username, row.id, src))
@@ -196,4 +230,81 @@ end)
 
 exports('isAuthed', function(src)
     return sessions[src] ~= nil
+end)
+
+-- ===========================================================================
+--  STAFF API
+-- ===========================================================================
+exports('getStaff',      function(src) return staffOf(src) or '' end)
+exports('getStaffLevel', function(src) return Staff.level(staffOf(src)) end)
+exports('getStaffLabel', function(src) return Staff.label(staffOf(src)) end)
+exports('getStaffColor', function(src) return Staff.color(staffOf(src)) end)
+exports('isStaff',       function(src) return Staff.level(staffOf(src)) > 0 end)
+exports('hasStaffLevel', function(src, minRank)
+    return Staff.level(staffOf(src)) >= Staff.level(minRank)
+end)
+
+exports('getStaffByAccountId', function(accountId)
+    accountId = tonumber(accountId)
+    for _, sess in pairs(sessions) do
+        if sess.id == accountId then
+            return (sess.staff and sess.staff ~= '') and sess.staff or nil
+        end
+    end
+    local v = MySQL.scalar.await('SELECT staff FROM users WHERE id = ?', { accountId })
+    return (v and v ~= '') and v or nil
+end)
+
+-- seteaza gradul (rank = '' -> retrage). Nu valideaza ierarhia apelantului;
+-- comenzile (rpg-hud) fac verificarea "poti acorda doar sub nivelul tau".
+exports('setStaff', function(accountId, rank)
+    accountId = tonumber(accountId)
+    if not accountId then return false end
+    rank = rank or ''
+    if rank ~= '' and not Staff.exists(rank) then return false end
+
+    MySQL.update.await('UPDATE users SET staff = ? WHERE id = ?', { rank, accountId })
+
+    for s, sess in pairs(sessions) do
+        if sess.id == accountId then
+            sess.staff = rank
+            local ply = Player(s)
+            if ply and ply.state then ply.state:set('staff', rank, true) end
+            TriggerClientEvent('core:staffUpdated', s, rank, Staff.label(rank), Staff.color(rank))
+            TriggerEvent('core:staffUpdated', s, rank)
+        end
+    end
+    return true
+end)
+
+exports('redeemBeta', function(src, code)
+    local sess = sessions[src]
+    if not sess then return { ok = false, error = 'Neautentificat.' } end
+
+    code = tostring(code or ''):lower():gsub('%s', '')
+    local reward = Config.BetaCodes and Config.BetaCodes[code]
+    if not reward then return { ok = false, error = 'Cod invalid.' } end
+
+    if MySQL.scalar.await('SELECT 1 FROM beta_redemptions WHERE code = ? LIMIT 1', { code }) then
+        return { ok = false, error = 'Codul a fost deja folosit.' }
+    end
+
+    local id = MySQL.insert.await(
+        'INSERT INTO beta_redemptions (code, account_id, reward) VALUES (?, ?, ?)',
+        { code, sess.id, reward })
+    if not id then return { ok = false, error = 'Eroare la înregistrarea codului.' } end
+
+    local rewardLabel = reward
+    if Staff.exists(reward) then
+        MySQL.update.await('UPDATE users SET staff = ? WHERE id = ?', { reward, sess.id })
+        sess.staff = reward
+        local ply = Player(src)
+        if ply and ply.state then ply.state:set('staff', reward, true) end
+        rewardLabel = Staff.label(reward)
+        TriggerClientEvent('core:staffUpdated', src, reward, Staff.label(reward), Staff.color(reward))
+        TriggerEvent('core:staffUpdated', src, reward)
+    end
+
+    print(('[rpg-auth] Beta "%s" folosit de cont #%d -> %s'):format(code, sess.id, reward))
+    return { ok = true, reward = reward, rewardLabel = rewardLabel }
 end)

@@ -12,6 +12,7 @@ CREATE TABLE IF NOT EXISTS `users` (
     `identifier` VARCHAR(60)     DEFAULT NULL,           -- license: al contului Cfx
     `banned`     TINYINT(1)      NOT NULL DEFAULT 0,
     `ban_reason` VARCHAR(255)    DEFAULT NULL,
+    `staff`      VARCHAR(25)     NOT NULL DEFAULT '',    -- slug grad staff (vezi shared/staff.lua); '' = civil
     `last_login` TIMESTAMP       NULL DEFAULT NULL,
     `last_ip`    VARCHAR(45)     DEFAULT NULL,
     `created_at` TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -19,4 +20,15 @@ CREATE TABLE IF NOT EXISTS `users` (
     UNIQUE KEY `uniq_username` (`username`),
     UNIQUE KEY `uniq_email` (`email`),
     KEY `idx_identifier` (`identifier`)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+
+-- coduri beta folosite (fiecare cod o singura data)
+CREATE TABLE IF NOT EXISTS `beta_redemptions` (
+    `id`          INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `code`        VARCHAR(48)  NOT NULL,
+    `account_id`  INT UNSIGNED NOT NULL,
+    `reward`      VARCHAR(48)  NOT NULL,
+    `redeemed_at` TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uniq_code` (`code`)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;

@@ -7,9 +7,9 @@
     --purple-bright: #a78bfa;
     --purple-deep:   #6d28d9;
 
-    --scrim:      rgba(6, 5, 10, 0.55);
-    --panel:      rgba(15, 12, 22, 0.62);
-    --panel-2:    rgba(20, 16, 30, 0.55);
+    --scrim:      transparent;
+    --panel:      rgba(15, 12, 22, 0.40);
+    --panel-2:    rgba(20, 16, 30, 0.30);
     --slot:       rgba(255, 255, 255, 0.035);
     --slot-hover: rgba(139, 92, 246, 0.10);
     --border:     rgba(168, 132, 250, 0.14);
@@ -51,9 +51,7 @@ body.preview { background: #0a0710; }
 
 .scrim {
     position: absolute; inset: 0;
-    background: var(--scrim);
-    -webkit-backdrop-filter: blur(3px);
-    backdrop-filter: blur(3px);
+    background: var(--scrim);   /* transparent: gameplay-ul ramane vizibil in spate */
     animation: fade .22s var(--ease);
 }
 @keyframes fade { from { opacity: 0; } }
@@ -449,7 +447,7 @@ body.preview { background: #0a0710; }
     position: absolute; inset: 0;
     display: none;
     place-items: center;
-    background: rgba(6, 5, 10, 0.55);
+    background: rgba(6, 5, 10, 0.32);
     z-index: 400;
 }
 .modal-scrim.on { display: grid; animation: fade .15s var(--ease); }

@@ -145,6 +145,8 @@ RegisterNetEvent('rpg-characters:spawn', function(data, pos)
     inCreator = false
     appearance = data
 
+    ShutdownLoadingScreenNui()   -- daca mai e activ ecranul de incarcare
+
     DoScreenFadeOut(400)
     Wait(450)
     SetNuiFocus(false, false)

@@ -38,8 +38,30 @@ AddEventHandler('core:playerLoggedIn', function(src, accountId, username)
         SetPlayerRoutingBucket(src, 0)
 
         local appearance = json.decode(row.appearance)
+        Player(src).state:set('charId', row.id, true)   -- SQL id, replicat la toti clientii
         TriggerClientEvent('rpg-characters:spawn', src, appearance, spawnPayload(row))
         TriggerEvent('core:characterLoaded', src, row.id, username)
+
+    elseif Config.SkipCreator then
+        -- TEMPORAR: cont fara personaj -> cream unul default (nud) si spawnam
+        -- direct pe harta, fara a deschide Character Creator-ul.
+        local appearance = Appearance.default('male')
+        local s = Config.SpawnAfterCreate
+        local pos = { x = s.x, y = s.y, z = s.z, h = s.w }
+
+        local id = MySQL.insert.await(
+            'INSERT INTO characters (account_id, username, appearance, position) VALUES (?, ?, ?, ?)',
+            { accountId, username, json.encode(appearance), json.encode(pos) }
+        )
+
+        chars[src] = { accountId = accountId, username = username, id = id }
+        SetPlayerRoutingBucket(src, 0)
+        Player(src).state:set('charId', id, true)
+        TriggerClientEvent('rpg-characters:spawn', src, appearance, pos)
+        TriggerEvent('core:characterLoaded', src, id, username)
+        print(('[rpg-characters] SkipCreator: personaj default #%s creat pentru cont #%s (%s)')
+            :format(tostring(id), tostring(accountId), tostring(username)))
+
     else
         chars[src] = { accountId = accountId, username = username, creating = true }
         SetPlayerRoutingBucket(src, bucketFor(src))
@@ -79,6 +101,7 @@ RegisterNetEvent('rpg-characters:create', function(payload)
     c.id = id
     c.creating = nil
     SetPlayerRoutingBucket(src, 0)
+    Player(src).state:set('charId', id, true)
 
     TriggerClientEvent('rpg-characters:createResult', src, true)
     TriggerClientEvent('rpg-characters:spawn', src, appearance, pos)
@@ -114,4 +137,22 @@ end)
 exports('hasCharacter', function(src)
     local c = chars[src]
     return c ~= nil and c.id ~= nil
+end)
+
+-- rezolva un SQL id de personaj -> { accountId, src (daca online), username }
+-- (folosit de /setstaff /removestaff din rpg-hud)
+exports('resolveCharacter', function(charId)
+    charId = tonumber(charId)
+    if not charId then return nil end
+
+    for src, c in pairs(chars) do
+        if c.id == charId then
+            return { accountId = c.accountId, src = src, username = c.username }
+        end
+    end
+
+    local row = MySQL.single.await(
+        'SELECT account_id, username FROM characters WHERE id = ? LIMIT 1', { charId })
+    if not row then return nil end
+    return { accountId = row.account_id, src = nil, username = row.username }
 end)

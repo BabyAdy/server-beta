@@ -72,8 +72,10 @@ RegisterNUICallback('nearbyPlayers', function(_, cb)
         if pid ~= PlayerId() then
             local tPed = GetPlayerPed(pid)
             if #(myCoords - GetEntityCoords(tPed)) <= (Config.GiveRadius + 0.5) then
+                local sid = GetPlayerServerId(pid)
                 out[#out + 1] = {
-                    serverId = GetPlayerServerId(pid),
+                    serverId = sid,                                  -- necesar intern pentru RPC
+                    sqlId = Player(sid).state.charId,                -- SQL id (afisat)
                     name = GetPlayerName(pid),
                 }
             end

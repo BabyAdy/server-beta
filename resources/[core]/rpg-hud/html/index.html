@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>RPG · HUD</title>
+    <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+    <!-- ================================ CHAT ================================ -->
+    <div id="chat" class="mod">
+        <div id="chat-log"></div>
+        <div id="chat-input-wrap" hidden>
+            <input id="chat-input" type="text" maxlength="256" spellcheck="false" autocomplete="off" />
+            <button id="chat-cog" type="button" title="Setări chat">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="3" />
+                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.09A1.65 1.65 0 0 0 10 3.09V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.09a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+            </button>
+
+            <div id="chat-settings" hidden>
+                <div class="cs-title">Setări chat</div>
+                <label class="cs-row">
+                    <span>Linii vizibile</span><b id="cs-lines-v">8</b>
+                    <input id="cs-lines" type="range" min="3" max="20" step="1" value="8" />
+                </label>
+                <label class="cs-row">
+                    <span>Mărime text</span><b id="cs-font-v">12.5px</b>
+                    <input id="cs-font" type="range" min="10" max="18" step="0.5" value="12.5" />
+                </label>
+                <button id="cs-reset" type="button">Resetează</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================================= HUD ================================ -->
+    <div id="hud" class="mod" hidden>
+        <!-- dreapta-sus: logo + jucator + bani -->
+        <div id="hud-tr">
+            <img id="brand-logo" src="assets/logo.svg" alt="" />
+            <div class="panel player">
+                <div class="row"><span class="k">Jucător</span><span id="p-name" class="v">—</span></div>
+                <div class="row sub">
+                    <span id="p-id" class="id">#—</span>
+                    <span class="sep"></span>
+                    <span class="k">Online</span><span id="p-online" class="v">0</span>
+                </div>
+            </div>
+            <div class="panel money">
+                <div class="row"><span class="k">Cash</span><span id="m-cash" class="v pos">$0</span></div>
+                <div class="row"><span class="k">Bancă</span><span id="m-bank" class="v">$0</span></div>
+            </div>
+        </div>
+
+        <!-- stanga-jos: langa minimap -->
+        <div id="hud-bl">
+            <div id="hud-activity" class="panel activity" hidden>
+                <div class="a-title" id="a-title"></div>
+                <div class="a-sub" id="a-sub"></div>
+                <div class="a-bar" hidden><i id="a-fill"></i></div>
+            </div>
+
+            <div class="panel status">
+                <div class="status-head">
+                    <div class="paycheck">
+                        <span class="k">Salariu</span>
+                        <span id="pc-time" class="v">--:--</span>
+                    </div>
+                    <div class="voice idle" id="voice" title="Voce">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="9" y="3" width="6" height="11" rx="3" />
+                            <path d="M5 11a7 7 0 0 0 14 0M12 18v3" stroke-linecap="round" />
+                        </svg>
+                    </div>
+                </div>
+
+                <div class="bar" data-b="health">
+                    <span class="lbl">Viață</span><span class="pct" id="b-health-p">0%</span>
+                    <i class="track"><b id="b-health"></b></i>
+                </div>
+                <div class="bar" data-b="food">
+                    <span class="lbl">Mâncare</span><span class="pct" id="b-food-p">0%</span>
+                    <i class="track"><b id="b-food"></b></i>
+                </div>
+                <div class="bar" data-b="water">
+                    <span class="lbl">Apă</span><span class="pct" id="b-water-p">0%</span>
+                    <i class="track"><b id="b-water"></b></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================= SPEEDOMETER ============================ -->
+    <div id="speedo" class="mod">
+        <div class="gear-wrap">
+            <span class="gear-lbl">TREAPTĂ</span>
+            <span id="sp-gear" class="gear">N</span>
+        </div>
+
+        <div class="dial">
+            <svg viewBox="0 0 200 200">
+                <path class="arc-bg" d="M37.2 152.8 A 82 82 0 1 1 162.8 152.8" />
+                <path class="arc-fill" id="sp-arc" d="M37.2 152.8 A 82 82 0 1 1 162.8 152.8" />
+            </svg>
+            <div class="readout">
+                <span id="sp-speed" class="num">000</span>
+                <span id="sp-unit" class="unit">KM/H</span>
+            </div>
+        </div>
+
+        <div class="vstatus">
+            <div class="vs-fuel">
+                <span class="vs-k">Combustibil</span>
+                <i class="vs-bar"><b id="sp-fuel"></b></i>
+            </div>
+            <div class="vs-icons">
+                <span class="vi" id="vi-engine" title="Motor">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 8h6l2-2h3v4h2v5h-2v3H9v-3H7l-3-3V8z" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </span>
+                <span class="vi" id="vi-belt" title="Centură">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3l12 18M8 8a4 4 0 0 0 8 0M12 12v9M8 21h8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </span>
+                <span class="vi" id="vi-lights" title="Faruri">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h3M14 6a6 6 0 0 1 0 12H9a5 5 0 0 1 0-10 0 6 0 0 1 5-2zM19 9h3M19 15h3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/bus.js"></script>
+    <script src="js/chat.js"></script>
+    <script src="js/hud.js"></script>
+    <script src="js/speedometer.js"></script>
+</body>
+</html>

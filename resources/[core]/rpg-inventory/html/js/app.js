@@ -172,7 +172,8 @@ window.INV = window.INV || {};
                 };
                 if (list.length === 1) { send(list[0].serverId); return; }
                 INV.modalList('Dă către...', list.map(function (p) {
-                    return { label: p.name + '  (#' + p.serverId + ')', value: p.serverId };
+                    var tag = (p.sqlId != null && p.sqlId !== '') ? '  (' + p.sqlId + ')' : '';
+                    return { label: p.name + tag, value: p.serverId };
                 })).then(function (val) { if (val) send(val); });
             });
         },

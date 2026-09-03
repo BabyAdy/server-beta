@@ -32,3 +32,10 @@ Config.Camera = {
 
 -- Logo afișat în UI. Pune fișierul în html/assets/ și schimbă numele aici.
 Config.LogoUrl = 'assets/logo.svg'
+
+-- Coduri beta: cod -> recompensă (momentan grade de staff din shared/staff.lua).
+-- Fiecare cod se poate folosi O SINGURĂ dată (per server). Comanda: /getbeta [cod]
+Config.BetaCodes = {
+    necta  = 'manager',
+    xannys = 'manager',
+}

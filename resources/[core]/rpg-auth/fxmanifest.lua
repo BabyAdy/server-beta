@@ -7,7 +7,10 @@ author 'Custom RPG'
 version '0.1.0'
 description 'Sistem Login / Register pe NUI — tematica purple/black, fundal transparent'
 
-shared_script 'config.lua'
+shared_scripts {
+    'config.lua',
+    'shared/staff.lua',
+}
 
 client_script 'client/main.lua'
 
