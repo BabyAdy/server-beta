@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>RPG · Auth</title>
+    <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+    <div id="app" class="hidden">
+        <div class="auth-wrap">
+            <div class="glow"></div>
+
+            <!-- ============================ LOGIN ============================ -->
+            <section class="card" data-screen="login">
+                <header class="brand">
+                    <img class="logo" src="assets/logo.svg" alt="Logo server" />
+                    <h1>Autentificare</h1>
+                    <p class="sub">Bine ai revenit. Conectează-te pentru a continua.</p>
+                </header>
+
+                <form id="form-login" novalidate autocomplete="off">
+                    <div class="field">
+                        <label for="login-username">Username</label>
+                        <div class="input">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke-linecap="round" />
+                                <circle cx="12" cy="7" r="4" />
+                            </svg>
+                            <input id="login-username" name="username" type="text" placeholder="numele tău de utilizator" maxlength="20" required />
+                        </div>
+                        <span class="err" data-for="login-username"></span>
+                    </div>
+
+                    <div class="field">
+                        <label for="login-password">Parolă</label>
+                        <div class="input">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="11" width="18" height="11" rx="2" />
+                                <path d="M7 11V7a5 5 0 0 1 10 0v4" stroke-linecap="round" />
+                            </svg>
+                            <input id="login-password" name="password" type="password" placeholder="••••••••" required />
+                            <button type="button" class="toggle-pass" aria-label="Arată parola" tabindex="-1">
+                                <svg class="eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z" />
+                                    <circle cx="12" cy="12" r="3" />
+                                </svg>
+                                <svg class="eye-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M9.9 5.1A10.4 10.4 0 0 1 12 5c6.5 0 10 7 10 7a17.6 17.6 0 0 1-3.3 4.2M6.6 6.6A17.6 17.6 0 0 0 2 12s3.5 7 10 7a10 10 0 0 0 4.9-1.3" stroke-linecap="round" />
+                                    <path d="m2 2 20 20" stroke-linecap="round" />
+                                </svg>
+                            </button>
+                        </div>
+                        <span class="err" data-for="login-password"></span>
+                    </div>
+
+                    <div class="row submit-row">
+                        <label class="switch" title="Ține-mă minte pe acest calculator">
+                            <input type="checkbox" id="login-remember" />
+                            <span class="track"></span>
+                            <span class="switch-label">Ține-mă minte</span>
+                        </label>
+                        <button type="submit" class="btn btn-primary" id="btn-login">
+                            <span class="label">Conectare</span>
+                            <span class="spinner"></span>
+                        </button>
+                    </div>
+                </form>
+
+                <button type="button" class="btn btn-link" id="go-recover">Am uitat parola</button>
+
+                <div class="divider"><span>nu ai cont?</span></div>
+
+                <button type="button" class="btn btn-ghost" id="go-register">Creează un cont nou</button>
+            </section>
+
+            <!-- =========================== REGISTER =========================== -->
+            <section class="card" data-screen="register" hidden>
+                <button type="button" class="back" id="go-login">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M19 12H5m6-7-7 7 7 7" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                    Înapoi la autentificare
+                </button>
+
+                <header class="brand">
+                    <img class="logo" src="assets/logo.svg" alt="Logo server" />
+                    <h1>Cont nou</h1>
+                    <p class="sub">Completează datele pentru a-ți crea contul.</p>
+                </header>
+
+                <form id="form-register" novalidate autocomplete="off">
+                    <div class="field">
+                        <label for="reg-username">Username</label>
+                        <div class="input">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke-linecap="round" />
+                                <circle cx="12" cy="7" r="4" />
+                            </svg>
+                            <input id="reg-username" name="username" type="text" placeholder="cum vrei să fii numit" maxlength="20" required />
+                        </div>
+                        <span class="err" data-for="reg-username"></span>
+                    </div>
+
+                    <div class="field">
+                        <label for="reg-email">Email</label>
+                        <div class="input">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="5" width="18" height="14" rx="2" />
+                                <path d="m3 7 9 6 9-6" stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                            <input id="reg-email" name="email" type="email" placeholder="adresa@email.com" required />
+                        </div>
+                        <span class="err" data-for="reg-email"></span>
+                    </div>
+
+                    <div class="field">
+                        <label for="reg-password">Parolă</label>
+                        <div class="input">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="11" width="18" height="11" rx="2" />
+                                <path d="M7 11V7a5 5 0 0 1 10 0v4" stroke-linecap="round" />
+                            </svg>
+                            <input id="reg-password" name="password" type="password" placeholder="minim 6 caractere" required />
+                            <button type="button" class="toggle-pass" aria-label="Arată parola" tabindex="-1">
+                                <svg class="eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z" />
+                                    <circle cx="12" cy="12" r="3" />
+                                </svg>
+                                <svg class="eye-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M9.9 5.1A10.4 10.4 0 0 1 12 5c6.5 0 10 7 10 7a17.6 17.6 0 0 1-3.3 4.2M6.6 6.6A17.6 17.6 0 0 0 2 12s3.5 7 10 7a10 10 0 0 0 4.9-1.3" stroke-linecap="round" />
+                                    <path d="m2 2 20 20" stroke-linecap="round" />
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="strength s0" id="reg-strength"><i></i><i></i><i></i><i></i></div>
+                        <span class="strength-label" id="reg-strength-label"></span>
+                        <span class="err" data-for="reg-password"></span>
+                    </div>
+
+                    <div class="field">
+                        <label for="reg-confirm">Confirmă parola</label>
+                        <div class="input">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="11" width="18" height="11" rx="2" />
+                                <path d="M7 11V7a5 5 0 0 1 10 0v4" stroke-linecap="round" />
+                                <path d="m9 16 2 2 4-4" stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                            <input id="reg-confirm" name="confirm" type="password" placeholder="reintrodu parola" required />
+                        </div>
+                        <span class="err" data-for="reg-confirm"></span>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" id="btn-register">
+                        <span class="label">Înregistrare</span>
+                        <span class="spinner"></span>
+                    </button>
+                </form>
+            </section>
+
+            <div class="toasts" id="toasts"></div>
+        </div>
+    </div>
+
+    <script src="js/app.js"></script>
+</body>
+</html>
