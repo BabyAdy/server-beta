@@ -1,8 +1,10 @@
 -- ===========================================================================
 --  rpg-world — NoClip  (F2 / comanda /noclip)
 --  Acces: staff cu grad >= Config.NoClip.minRank (vezi rpg-auth/shared/staff.lua)
---  Q/E = sus/jos (comenzi separate +/-, rebindabile) · W/S = inainte/inapoi
---  L Shift = cicleaza treapta de viteza · text de ajutor nativ (fara NUI)
+--  W/S = inainte/inapoi · A/D = stanga/dreapta · Q/E = jos/sus
+--  L Shift = cicleaza treapta de viteza
+--  UI: bara de taste (NUI, fara focus) jos pe ecran, mereu mov.
+--  Vizibilitate: TU te vezi translucid (fantoma); CEILALTI PLAYERI nu te vad deloc.
 -- ===========================================================================
 
 local active  = false
@@ -20,30 +22,23 @@ local function currentTier()
     return Config.NoClip.tiers[tierIdx] or Config.NoClip.tiers[1]
 end
 
+local function pushSpeedToUI()
+    SendNUIMessage({ action = 'speed', name = currentTier().name })
+end
+
 local function cycleTier()
     tierIdx = tierIdx + 1
     if tierIdx > #Config.NoClip.tiers then tierIdx = 1 end
-end
-
-local function drawHint()
-    local text = ('F2 - Toggle NoClip | Q/E - Up/Down | W/S - Front / Back | L Shift - Speed %s')
-        :format(currentTier().name)
-    SetTextFont(4)
-    SetTextScale(0.34, 0.34)
-    SetTextColour(230, 210, 255, 235)
-    SetTextOutline()
-    SetTextCentre(true)
-    SetTextEntry('STRING')
-    AddTextComponentString(text)
-    DrawText(0.5, 0.04)
+    pushSpeedToUI()
 end
 
 local function setNoclipState(ped, on)
     SetEntityCollision(ped, not on, not on)   -- on=false -> readuce fizica/coliziunea normala
     FreezeEntityPosition(ped, on)
     SetEntityInvincible(ped, on)
-    SetEntityVisible(ped, true, false)
     SetPlayerInvincible(PlayerId(), on)
+    -- vizibilitatea proprie (translucid) se face din handler-ul de statebag mai jos,
+    -- la fel ca la ceilalti clienti -> o singura sursa de adevar (statebag-ul 'noclip').
 end
 
 -- ---- toggle: /noclip + F2 -------------------------------------------
@@ -54,6 +49,10 @@ RegisterCommand('noclip', function()
     end
     active = not active
     setNoclipState(PlayerPedId(), active)
+    TriggerServerEvent('rpg-world:noclipToggle', active)   -- sincronizeaza vizibilitatea la ceilalti
+
+    SendNUIMessage({ action = active and 'show' or 'hide' })
+    if active then pushSpeedToUI() end
 end, false)
 RegisterKeyMapping('noclip', 'Toggle NoClip (staff)', 'keyboard', Config.NoClip.toggleKey)
 
@@ -95,20 +94,21 @@ CreateThread(function()
                 cycleTier()
             end
 
-            drawHint()
-
-            -- vector inainte, relativ la camera (yaw + pitch)
+            -- vector inainte / dreapta, relativ la camera (yaw + pitch pt. inainte; doar yaw pt. strafe)
             local camRot = GetGameplayCamRot(2)
             local rotZ = math.rad(camRot.z)
             local rotX = math.rad(camRot.x)
             local pitchFactor = math.abs(math.cos(rotX))
             local forward = vector3(-math.sin(rotZ) * pitchFactor, math.cos(rotZ) * pitchFactor, math.sin(rotX))
+            local right   = vector3(math.cos(rotZ), math.sin(rotZ), 0.0)
 
             local move = vector3(0.0, 0.0, 0.0)
-            if IsDisabledControlPressed(0, 32) then move = move + forward end                 -- W
-            if IsDisabledControlPressed(0, 33) then move = move - forward end                 -- S
-            if upHeld   then move = move + vector3(0.0, 0.0, 1.0) end                         -- E
-            if downHeld then move = move - vector3(0.0, 0.0, 1.0) end                         -- Q
+            if IsDisabledControlPressed(0, 32) then move = move + forward end   -- W
+            if IsDisabledControlPressed(0, 33) then move = move - forward end   -- S
+            if IsDisabledControlPressed(0, 35) then move = move + right end     -- D (dreapta)
+            if IsDisabledControlPressed(0, 34) then move = move - right end     -- A (stanga)
+            if upHeld   then move = move + vector3(0.0, 0.0, 1.0) end           -- E
+            if downHeld then move = move - vector3(0.0, 0.0, 1.0) end           -- Q
 
             if move.x ~= 0.0 or move.y ~= 0.0 or move.z ~= 0.0 then
                 local step = Config.NoClip.baseSpeed * currentTier().mult * GetFrameTime()
@@ -123,11 +123,64 @@ CreateThread(function()
     end
 end)
 
+-- ===========================================================================
+--  VIZIBILITATE — statebag replicat 'noclip' (setat de server, vezi server/main.lua)
+--  Eu (jucatorul in NoClip): raman translucid local (fantoma), nu ma ascund singur.
+--  Ceilalti playeri in NoClip: ii ascund complet (SetEntityVisible false) pe clientul MEU.
+-- ===========================================================================
+local hiddenPlayers = {}   -- [serverId] = true -> pe cine tin ascuns acum
+
+local function applyGhost(on)
+    local ped = PlayerPedId()
+    if on then
+        SetEntityAlpha(ped, 120, false)
+    else
+        ResetEntityAlpha(ped)
+    end
+end
+
+local function applyHiddenFor(serverId, hide)
+    local p = GetPlayerFromServerId(serverId)
+    if p == -1 then return end
+    local ped = GetPlayerPed(p)
+    if not ped or ped == 0 then return end
+    SetEntityVisible(ped, not hide, false)
+end
+
+AddStateBagChangeHandler('noclip', '', function(bagName, _, value)
+    local id = tonumber(bagName:match('^player:(%d+)$'))
+    if not id then return end
+
+    if id == GetPlayerServerId(PlayerId()) then
+        applyGhost(value == true)
+    else
+        if value == true then
+            hiddenPlayers[id] = true
+            applyHiddenFor(id, true)
+        else
+            hiddenPlayers[id] = nil
+            applyHiddenFor(id, false)
+        end
+    end
+end)
+
+-- reasertare periodica (streaming-ul poate re-crea ped-ul altui player) --
+CreateThread(function()
+    while true do
+        Wait(1000)
+        for id in pairs(hiddenPlayers) do
+            applyHiddenFor(id, true)
+        end
+    end
+end)
+
 -- ---- oprire resursa cu NoClip inca activ -> restaureaza playerul ------
 AddEventHandler('onResourceStop', function(res)
     if res ~= GetCurrentResourceName() then return end
     if active then
         active = false
         setNoclipState(PlayerPedId(), false)
+        applyGhost(false)
+        TriggerServerEvent('rpg-world:noclipToggle', false)
     end
 end)

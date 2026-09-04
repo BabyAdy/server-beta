@@ -192,3 +192,60 @@ AddEventHandler('playerDropped', function()
     lastCpAt[src] = nil
     starting[src] = nil
 end)
+
+-- ===========================================================================
+--  UNELTE DE SETUP  (staff >= trialadmin)  —  /savecoord /listcoords /clearcoords
+--  Scop: mergi in joc la locatia scolii + la fiecare din cele 15 checkpoint-uri,
+--  ruleaza /savecoord [label] in fiecare punct, apoi /listcoords ca sa iei tot
+--  continutul si sa mi-l dai -> il transform in Config.Location / Config.PracticalRoute.
+--  100% server-side (GetEntityCoords/GetEntityHeading merg si pe server pt. ped-ul
+--  unui player conectat) -- nu are nevoie de nimic pe client.
+-- ===========================================================================
+local COORDS_FILE = 'captured_coords.lua'
+
+local function canSetup(src)
+    if src <= 0 then return true end
+    local ok, allowed = pcall(function() return exports['rpg-auth']:hasStaffLevel(src, 'trialadmin') end)
+    return ok and allowed == true
+end
+
+local function readCoordsFile()
+    return LoadResourceFile(GetCurrentResourceName(), COORDS_FILE) or ''
+end
+
+RegisterCommand('savecoord', function(src, args)
+    if not canSetup(src) then return feedback(src, 'ERROR', 'Nu ai acces la această comandă.') end
+    if src <= 0 then return print('[rpg-drivingschool] /savecoord rulează doar pentru un player (are nevoie de poziția lui).') end
+
+    local label = tostring(args[1] or ''):gsub('%s+', '_')
+    if label == '' then return feedback(src, 'ERROR', 'Folosire: /savecoord [label]  (ex: school, cp1, cp2...)') end
+
+    local ped = GetPlayerPed(src)
+    local coords = GetEntityCoords(ped)
+    local heading = GetEntityHeading(ped)
+
+    local line = ('%s = vector3(%.2f, %.2f, %.2f)  -- heading %.1f\n')
+        :format(label, coords.x, coords.y, coords.z, heading)
+    SaveResourceFile(GetCurrentResourceName(), COORDS_FILE, readCoordsFile() .. line, -1)
+
+    feedback(src, 'SUCCESS',
+        ('Salvat "%s": %.2f, %.2f, %.2f (heading %.1f)'):format(label, coords.x, coords.y, coords.z, heading))
+    print('[rpg-drivingschool] savecoord: ' .. line)
+end, false)
+
+RegisterCommand('listcoords', function(src)
+    if not canSetup(src) then return feedback(src, 'ERROR', 'Nu ai acces la această comandă.') end
+    local content = readCoordsFile()
+    if content == '' then
+        feedback(src, 'INFO', 'Nu ai salvat încă niciun punct (/savecoord [label]).')
+        return
+    end
+    print('[rpg-drivingschool] ===== captured_coords.lua =====\n' .. content .. '================================')
+    feedback(src, 'SUCCESS', 'Am printat toate punctele salvate în consola serverului (copiază de acolo).')
+end, false)
+
+RegisterCommand('clearcoords', function(src)
+    if not canSetup(src) then return feedback(src, 'ERROR', 'Nu ai acces la această comandă.') end
+    SaveResourceFile(GetCurrentResourceName(), COORDS_FILE, '', -1)
+    feedback(src, 'SUCCESS', 'Lista de coordonate a fost golită.')
+end, false)
