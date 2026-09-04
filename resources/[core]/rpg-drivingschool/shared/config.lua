@@ -3,11 +3,10 @@
 -- ===========================================================================
 Config = {}
 
--- ---- LOCAȚIE (lângă spawn — vezi rpg-characters/config.lua: Config.SpawnAfterCreate
---      = vec4(-1035.7, -2732.0, 20.2, 300.0)). PLACEHOLDER, ajustăm după ce vezi harta. ----
+-- ---- LOCAȚIE (coordonate reale, capturate cu /savecoord) ----------------
 Config.Location = {
-    coords         = vector3(-1000.0, -2730.0, 20.0),
-    heading        = 230.0,
+    coords         = vector3(-899.97, -2493.01, 14.55),
+    heading        = 147.4,
     interactRadius = 2.2,     -- distanța la care apare promptul "[E] ..."
     markerRadius   = 15.0,    -- distanța la care se desenează marker-ul 3D pe sol
 
@@ -31,18 +30,29 @@ Config.PracticalVirtualWorld = 7301             -- routing bucket dedicat (difer
 Config.PracticalVehicle      = `blista`         -- mașina de test
 Config.CheckpointRadius      = 8.0              -- rază de validare per checkpoint
 
--- 15 checkpoint-uri: traseu PLACEHOLDER (cerc în jurul locației), ultimul = în fața școlii.
--- Îl înlocuim cu coordonate reale de pe hartă când confirmi locația finală.
-Config.PracticalRoute = (function()
-    local c = Config.Location.coords
-    local radius, n, pts = 120.0, 14, {}
-    for i = 1, n do
-        local ang = (i - 1) * (2 * math.pi / n)
-        pts[i] = vector3(c.x + math.cos(ang) * radius, c.y + math.sin(ang) * radius, c.z)
-    end
-    pts[n + 1] = c   -- al 15-lea checkpoint = în fața Driving School Center
-    return pts
-end)()
+-- unde apar jucătorul + mașina de test (in virtual world-ul dedicat), diferit de locația școlii
+Config.PracticalSpawn = { coords = vector3(-927.36, -2429.93, 13.85), heading = 195.6 }
+
+-- traseul (16 puncte, coordonate reale capturate cu /savecoord): cp1..cp15 + cp-final.
+-- la cp-final testul se ÎNCHEIE -> jucătorul e teleportat înapoi la Config.Location (virtual world 0).
+Config.PracticalRoute = {
+    vector3(-928.25, -2462.76, 13.83),   -- cp1
+    vector3(-889.64, -2441.09, 13.81),   -- cp2
+    vector3(-859.46, -2441.27, 13.74),   -- cp3
+    vector3(-825.43, -2469.36, 13.69),   -- cp4
+    vector3(-819.30, -2526.44, 13.74),   -- cp5
+    vector3(-859.27, -2593.86, 13.68),   -- cp6
+    vector3(-899.25, -2661.65, 13.64),   -- cp7
+    vector3(-934.43, -2715.85, 13.71),   -- cp8
+    vector3(-990.90, -2724.18, 13.71),   -- cp9
+    vector3(-998.80, -2699.89, 13.81),   -- cp10
+    vector3(-964.54, -2640.40, 13.83),   -- cp11
+    vector3(-936.46, -2590.07, 13.81),   -- cp12
+    vector3(-879.39, -2568.79, 13.83),   -- cp13
+    vector3(-857.39, -2505.06, 13.83),   -- cp14
+    vector3(-887.02, -2470.96, 13.81),   -- cp15
+    vector3(-944.73, -2438.58, 13.81),   -- cp-final (16/16) -> se termina testul aici
+}
 
 -- ---- TEST TEORETIC — 5 întrebări (index 1 = primul răspuns) ------------
 -- `correct` NU se trimite niciodată către client (vezi server/main.lua).

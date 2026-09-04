@@ -143,18 +143,24 @@ RegisterNetEvent('rpg-drivingschool:openPractical', function(netId, route)
     TaskWarpPedIntoVehicle(PlayerPedId(), veh, -1)
     SetVehicleEngineOn(veh, true, true, false)
 
-    showFlash('Test practic: urmează cele 15 checkpoint-uri!', 4000)
+    showFlash(('Test practic: urmează cele %d checkpoint-uri!'):format(#route), 4000)
 end)
 
-RegisterNetEvent('rpg-drivingschool:practicalResult', function(passed)
+RegisterNetEvent('rpg-drivingschool:practicalResult', function(passed, schoolCoords, schoolHeading)
     practical.active = false
     if passed then
+        if schoolCoords then
+            local ped = PlayerPedId()
+            -- reasezarea coordonatelor scoate ped-ul din masina daca mai era in ea (ca in rpg-licences)
+            SetEntityCoordsNoOffset(ped, schoolCoords.x, schoolCoords.y, schoolCoords.z, false, false, false)
+            SetEntityHeading(ped, schoolHeading or 0.0)
+        end
         showFlash('Felicitări ai promovat examenul practic~n~Ai obținut Driving Licence pentru 100%', 6000)
     end
 end)
 
--- checkpoint-ul curent: marker + blip cu rută, avans optimist local
--- (rezultatul FINAL vine mereu de la server -> vezi practicalResult)
+-- checkpoint-ul curent: marker (pulsant, vizibil de departe) + text 3D "X/N" + blip cu rută pe minimap.
+-- avans optimist local -- rezultatul FINAL vine mereu de la server (vezi practicalResult).
 CreateThread(function()
     local cpBlip = nil
     while true do
@@ -167,9 +173,15 @@ CreateThread(function()
                     SetBlipSprite(cpBlip, 1)
                     SetBlipColour(cpBlip, 5)
                     SetBlipRoute(cpBlip, true)
+                    SetBlipRouteColour(cpBlip, 5)
                 end
+
+                -- marker mare, mov, care "pulseaza" -> usor de vazut de la distanta
+                local pulse = 1.0 + math.sin(GetGameTimer() / 250.0) * 0.18
                 DrawMarker(1, cp.x, cp.y, cp.z - 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-                    3.0, 3.0, 1.5, 255, 220, 60, 160, false, false, 2, false, nil, nil, false)
+                    3.2 * pulse, 3.2 * pulse, 2.0, 168, 85, 247, 210, false, false, 2, true, nil, nil, false)
+
+                drawText3D(cp + vector3(0.0, 0.0, 1.2), ('Checkpoint %d/%d'):format(i, #practical.route))
 
                 local dist = #(GetEntityCoords(PlayerPedId()) - cp)
                 if dist < Config.CheckpointRadius then

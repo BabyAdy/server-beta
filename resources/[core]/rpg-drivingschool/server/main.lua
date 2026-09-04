@@ -36,19 +36,18 @@ local function finishPractical(src)
     pcall(function() exports['rpg-licences']:setExamBypass(src, false) end)
     pcall(function() exports['rpg-licences']:addLicenceHours(src, 'driving', Config.RewardHours) end)
 
-    if ex.vehicle and DoesEntityExist(ex.vehicle) then
-        SetEntityRoutingBucket(ex.vehicle, 0)   -- altfel ramane "invizibil" dupa ce jucatorul revine in bucket 0
-    end
-    SetPlayerRoutingBucket(src, 0)
+    SetPlayerRoutingBucket(src, 0)   -- jucatorul revine in virtual world 0
+
+    -- teleportat la Config.Location (scoala) -- vezi client (SetEntityCoordsNoOffset), scoate-l si din masina
+    TriggerClientEvent('rpg-drivingschool:practicalResult', src, true, Config.Location.coords, Config.Location.heading)
 
     if ex.vehicle and DoesEntityExist(ex.vehicle) then
         local veh = ex.vehicle
-        SetTimeout(20000, function()   -- lasa timp jucatorului sa coboare/parcheze inainte de curatare
+        SetTimeout(2000, function()   -- lasa timp teleportului clientului sa se aplice inainte sa stearga masina
             if DoesEntityExist(veh) then DeleteEntity(veh) end
         end)
     end
 
-    TriggerClientEvent('rpg-drivingschool:practicalResult', src, true)
     feedback(src, 'SUCCESS', 'Felicitări, ai promovat testul practic! Ai obținut Driving Licence.')
     print(('[rpg-drivingschool] src %d a promovat testul practic (+%d ore driving).'):format(src, Config.RewardHours))
 end
@@ -66,8 +65,8 @@ local function startPractical(src)
 
     SetPlayerRoutingBucket(src, Config.PracticalVirtualWorld)
 
-    local c = Config.Location.coords
-    local veh = CreateVehicleServerSetter(Config.PracticalVehicle, 'automobile', c.x, c.y, c.z, Config.Location.heading)
+    local c = Config.PracticalSpawn.coords
+    local veh = CreateVehicleServerSetter(Config.PracticalVehicle, 'automobile', c.x, c.y, c.z, Config.PracticalSpawn.heading)
     if not veh or veh == 0 then
         exams[src] = nil
         pcall(function() exports['rpg-licences']:setExamBypass(src, false) end)
