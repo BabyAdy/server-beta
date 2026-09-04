@@ -114,7 +114,8 @@ CreateThread(function()
                 local step = Config.NoClip.baseSpeed * currentTier().mult * GetFrameTime()
                 local coords = GetEntityCoords(ped)
                 local dest = coords + (move * step)
-                SetEntityCoordsNoOffset(ped, dest.x, dest.y, dest.z, true, true, true)
+                -- (false,false,false) e conventia deja folosita/verificata in rpg-auth si rpg-characters pt. teleport de ped
+                SetEntityCoordsNoOffset(ped, dest.x, dest.y, dest.z, false, false, false)
             end
 
             SetEntityHeading(ped, camRot.z)
