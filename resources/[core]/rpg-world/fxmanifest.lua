@@ -9,7 +9,8 @@ description 'Setari de lume (fara NPC/trafic ambiental) + NoClip pentru staff (F
 
 -- NoClip verifica gradul de staff prin LocalPlayer.state.staff (setat de rpg-auth) + Staff.level().
 -- Toggle-ul e re-validat si pe server (statebag replicat 'noclip' -> vizibilitate sincronizata pt. ceilalti).
-dependencies { 'rpg-auth' }
+-- rpg-hud e folosit optional pt. feedback in chat la /spawncar, /maxperf (apel fail-open).
+dependencies { 'rpg-auth', 'rpg-hud' }
 
 shared_scripts {
     '@rpg-auth/shared/staff.lua',   -- Staff.RANKS / Staff.level()
@@ -19,6 +20,7 @@ shared_scripts {
 client_scripts {
     'client/population.lua',
     'client/noclip.lua',
+    'client/vehicles.lua',
 }
 
 server_script 'server/main.lua'

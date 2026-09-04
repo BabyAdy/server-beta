@@ -78,8 +78,14 @@ local function startPractical(src)
     SetVehicleOnGroundProperly(veh)
     ex.vehicle = veh
 
+    -- IMPORTANT: bucket-ul de rutare NU muta jucatorul in spatiu -- ramanea la coordonatele
+    -- vechi (langa scoala), separat de masina, iar aceasta niciodata nu se "streamuia" la el
+    -- (prea departe) => TaskWarpPedIntoVehicle esua in tacere si checkpoint-urile nu se activau
+    -- niciodata (practical.active ramanea false). Trimitem si coordonatele de spawn -> clientul
+    -- il teleporteaza pe player FIZIC langa masina, inainte de a incerca sa-l urce in ea.
     local netId = NetworkGetNetworkIdFromEntity(veh)
-    TriggerClientEvent('rpg-drivingschool:openPractical', src, netId, Config.PracticalRoute)
+    TriggerClientEvent('rpg-drivingschool:openPractical', src, netId, Config.PracticalRoute,
+        Config.PracticalSpawn.coords, Config.PracticalSpawn.heading)
 end
 
 -- ===========================================================================

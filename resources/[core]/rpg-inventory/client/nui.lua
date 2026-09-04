@@ -37,32 +37,6 @@ RegisterNUICallback('close', function(_, cb)
     cb('ok')
 end)
 
--- rotire ped in preview
-RegisterNUICallback('rotate', function(data, cb)
-    local ped = PlayerPedId()
-    local delta = tonumber(data.delta) or 0.0
-    SetEntityHeading(ped, (GetEntityHeading(ped) + delta) % 360.0)
-    -- reasaza camera pe noua orientare
-    if Inv.cam then
-        DestroyCam(Inv.cam, false)
-        Inv.cam = nil
-    end
-    -- recreeaza cu acelasi helper
-    local coords = GetEntityCoords(ped)
-    local rad = math.rad(GetEntityHeading(ped))
-    local fwdX, fwdY = -math.sin(rad), math.cos(rad)
-    local rightX, rightY = math.cos(rad), math.sin(rad)
-    local p = Config.Preview
-    Inv.cam = CreateCamWithParams('DEFAULT_SCRIPTED_CAMERA',
-        coords.x + fwdX * p.forward + rightX * p.side,
-        coords.y + fwdY * p.forward + rightY * p.side,
-        coords.z + p.height, 0.0, 0.0, 0.0, p.fov, false, 0)
-    PointCamAtCoord(Inv.cam, coords.x + rightX * (p.side * 1.2), coords.y + rightY * (p.side * 1.2), coords.z + p.height)
-    SetCamActive(Inv.cam, true)
-    RenderScriptCams(true, false, 0, true, false)
-    cb('ok')
-end)
-
 -- lista jucatorilor din raza pentru "GIVE"
 RegisterNUICallback('nearbyPlayers', function(_, cb)
     local ped = PlayerPedId()

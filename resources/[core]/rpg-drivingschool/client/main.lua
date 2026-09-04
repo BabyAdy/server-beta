@@ -121,9 +121,18 @@ end)
 -- ===========================================================================
 --  PASUL 2 — TEST PRACTIC (checkpoint-uri, virtual world dedicat)
 -- ===========================================================================
-RegisterNetEvent('rpg-drivingschool:openPractical', function(netId, route)
+RegisterNetEvent('rpg-drivingschool:openPractical', function(netId, route, spawnCoords, spawnHeading)
     practical.route = route
     practical.index = 1
+
+    local ped = PlayerPedId()
+
+    -- teleportam jucatorul FIZIC la locul de spawn -- altfel ramane la vechea locatie
+    -- (langa scoala), separat de masina, care nu apuca sa se streamuiasca la el.
+    if spawnCoords then
+        SetEntityCoordsNoOffset(ped, spawnCoords.x, spawnCoords.y, spawnCoords.z, false, false, false)
+        SetEntityHeading(ped, spawnHeading or 0.0)
+    end
 
     local tries = 0
     local veh = NetworkGetEntityFromNetworkId(netId)
@@ -140,7 +149,10 @@ RegisterNetEvent('rpg-drivingschool:openPractical', function(netId, route)
     practical.vehicle = veh
     practical.active = true
 
-    TaskWarpPedIntoVehicle(PlayerPedId(), veh, -1)
+    -- siguranta: chiar langa masina (in caz ca a "cazut" putin diferit fata de spawnCoords)
+    local vc = GetEntityCoords(veh)
+    SetEntityCoordsNoOffset(ped, vc.x, vc.y, vc.z, false, false, false)
+    TaskWarpPedIntoVehicle(ped, veh, -1)
     SetVehicleEngineOn(veh, true, true, false)
 
     showFlash(('Test practic: urmează cele %d checkpoint-uri!'):format(#route), 4000)

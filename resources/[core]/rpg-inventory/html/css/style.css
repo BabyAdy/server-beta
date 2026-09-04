@@ -104,29 +104,11 @@ body.preview { background: #0a0710; }
 .char-view {
     position: relative;
     aspect-ratio: 3 / 4;
-    /* transparent in centru: ped-ul real se vede prin NUI */
+    /* fara camera/preview 3D -- doar panoul cu sloturile de echipament (paperdoll) */
     background:
         radial-gradient(120% 80% at 50% 30%, rgba(139,92,246,0.10), transparent 70%),
         var(--panel-2);
 }
-.char-rot {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 30px; height: 44px;
-    display: grid; place-items: center;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    background: rgba(10, 8, 16, 0.3);
-    color: var(--dim);
-    cursor: pointer;
-    transition: color .15s, border-color .15s;
-}
-.char-rot:hover { color: #fff; border-color: var(--border-2); }
-.char-rot svg { width: 16px; height: 16px; }
-.char-rot.l { left: 8px; }
-.char-rot.r { right: 8px; }
-
 .eq {
     position: absolute;
     left: var(--x); top: var(--y);

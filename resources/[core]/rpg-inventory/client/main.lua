@@ -1,6 +1,9 @@
 -- ===========================================================================
---  rpg-inventory — client: open/close, focus, blocare controale, camera preview.
---  Lumea din spate ramane vizibila (overlay semi-transparent in NUI).
+--  rpg-inventory — client: open/close, focus, blocare controale.
+--  Fara camera de preview / freeze pe personaj -- inventarul doar se deschide
+--  (camera + freeze produceau bug-uri cand erai intr-un vehicul: te putea
+--  scoate din el sau se putea buguii poziția). Lumea ramane vizibila normal
+--  in spatele NUI-ului (panoul de sloturi e semi-transparent).
 -- ===========================================================================
 
 Inv = {
@@ -8,46 +11,14 @@ Inv = {
     charLoaded = false,
     snapshot   = nil,
     nearby     = nil,
-    cam        = nil,
 }
-
--- ----- camera preview personaj -------------------------------------
-local function openCam()
-    local ped = PlayerPedId()
-    local coords = GetEntityCoords(ped)
-    local heading = GetEntityHeading(ped)
-    local rad = math.rad(heading)
-    local fwdX, fwdY = -math.sin(rad), math.cos(rad)
-    local rightX, rightY = math.cos(rad), math.sin(rad)
-    local p = Config.Preview
-
-    local px = coords.x + fwdX * p.forward + rightX * p.side
-    local py = coords.y + fwdY * p.forward + rightY * p.side
-    local pz = coords.z + p.height
-
-    Inv.cam = CreateCamWithParams('DEFAULT_SCRIPTED_CAMERA', px, py, pz, 0.0, 0.0, 0.0, p.fov, false, 0)
-    PointCamAtCoord(Inv.cam, coords.x + rightX * (p.side * 1.2), coords.y + rightY * (p.side * 1.2), coords.z + p.height)
-    SetCamActive(Inv.cam, true)
-    RenderScriptCams(true, true, 350, true, false)
-end
-
-local function closeCam()
-    if Inv.cam then
-        RenderScriptCams(false, true, 350, true, false)
-        DestroyCam(Inv.cam, false)
-        Inv.cam = nil
-    end
-end
 
 -- ----- deschidere / inchidere ------------------------------------
 function Inv.openUI()
     if Inv.open or not Inv.charLoaded then return end
     Inv.open = true
 
-    local ped = PlayerPedId()
-    FreezeEntityPosition(ped, true)
     SetNuiFocus(true, true)
-    openCam()
 
     SendNUIMessage({
         action = 'open',
@@ -73,8 +44,6 @@ function Inv.closeUI()
     Inv.open = false
     SetNuiFocus(false, false)
     SendNUIMessage({ action = 'close' })
-    closeCam()
-    FreezeEntityPosition(PlayerPedId(), false)
     Inv.request('close', {})
     TriggerEvent('hud:inventory', false)
 end
@@ -130,7 +99,5 @@ end)
 AddEventHandler('onResourceStop', function(res)
     if res == GetCurrentResourceName() and Inv.open then
         SetNuiFocus(false, false)
-        closeCam()
-        FreezeEntityPosition(PlayerPedId(), false)
     end
 end)

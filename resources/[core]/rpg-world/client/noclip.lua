@@ -9,6 +9,7 @@
 
 local active  = false
 local tierIdx = Config.NoClip.defaultTier or 3
+local target  = 0   -- entitatea "in noclip" chiar acum: ped-ul SAU vehiculul in care erai la activare
 
 local function staffRank()
     return (LocalPlayer.state and LocalPlayer.state.staff) or ''
@@ -32,10 +33,19 @@ local function cycleTier()
     pushSpeedToUI()
 end
 
-local function setNoclipState(ped, on)
-    SetEntityCollision(ped, not on, not on)   -- on=false -> readuce fizica/coliziunea normala
-    FreezeEntityPosition(ped, on)
-    SetEntityInvincible(ped, on)
+-- daca esti intr-un vehicul, noclip-uim VEHICULUL (nu mai esti scos din el);
+-- altfel, ped-ul ca pana acum.
+local function pickTarget(ped)
+    if IsPedInAnyVehicle(ped, false) then
+        return GetVehiclePedIsIn(ped, false)
+    end
+    return ped
+end
+
+local function setNoclipState(entity, on)
+    SetEntityCollision(entity, not on, not on)   -- on=false -> readuce fizica/coliziunea normala
+    FreezeEntityPosition(entity, on)
+    SetEntityInvincible(entity, on)
     SetPlayerInvincible(PlayerId(), on)
     -- vizibilitatea proprie (translucid) se face din handler-ul de statebag mai jos,
     -- la fel ca la ceilalti clienti -> o singura sursa de adevar (statebag-ul 'noclip').
@@ -48,7 +58,15 @@ RegisterCommand('noclip', function()
         return
     end
     active = not active
-    setNoclipState(PlayerPedId(), active)
+
+    if active then
+        target = pickTarget(PlayerPedId())
+        setNoclipState(target, true)
+    else
+        setNoclipState(target, false)
+        target = 0
+    end
+
     TriggerServerEvent('rpg-world:noclipToggle', active)   -- sincronizeaza vizibilitatea la ceilalti
 
     SendNUIMessage({ action = active and 'show' or 'hide' })
@@ -72,7 +90,6 @@ CreateThread(function()
             Wait(250)
         else
             Wait(0)
-            local ped = PlayerPedId()
 
             -- dezactiveaza controalele normale de miscare/actiune cat timp e activ NoClip
             DisableControlAction(0, 30, true)  -- move LR (analog)
@@ -99,26 +116,38 @@ CreateThread(function()
             local rotZ = math.rad(camRot.z)
             local rotX = math.rad(camRot.x)
             local pitchFactor = math.abs(math.cos(rotX))
-            local forward = vector3(-math.sin(rotZ) * pitchFactor, math.cos(rotZ) * pitchFactor, math.sin(rotX))
-            local right   = vector3(math.cos(rotZ), math.sin(rotZ), 0.0)
+            local camForward = vector3(-math.sin(rotZ) * pitchFactor, math.cos(rotZ) * pitchFactor, math.sin(rotX))
+            local camRight   = vector3(math.cos(rotZ), math.sin(rotZ), 0.0)
+
+            local wPressed = IsDisabledControlPressed(0, 32)
+            local sPressed = IsDisabledControlPressed(0, 33)
+            local backingUp = sPressed and not wPressed   -- doar S -> mers cu spatele, FARA rotire
 
             local move = vector3(0.0, 0.0, 0.0)
-            if IsDisabledControlPressed(0, 32) then move = move + forward end   -- W
-            if IsDisabledControlPressed(0, 33) then move = move - forward end   -- S
-            if IsDisabledControlPressed(0, 35) then move = move + right end     -- D (dreapta)
-            if IsDisabledControlPressed(0, 34) then move = move - right end     -- A (stanga)
+            if wPressed then
+                move = move + camForward
+            elseif sPressed then
+                -- mers cu spatele: foloseste headingul CURENT al entitatii (nu camera) -> nu se roteste
+                local hRad = math.rad(GetEntityHeading(target))
+                move = move - vector3(-math.sin(hRad), math.cos(hRad), 0.0)
+            end
+            if IsDisabledControlPressed(0, 35) then move = move + camRight end   -- D (dreapta)
+            if IsDisabledControlPressed(0, 34) then move = move - camRight end   -- A (stanga)
             if upHeld   then move = move + vector3(0.0, 0.0, 1.0) end           -- E
             if downHeld then move = move - vector3(0.0, 0.0, 1.0) end           -- Q
 
             if move.x ~= 0.0 or move.y ~= 0.0 or move.z ~= 0.0 then
                 local step = Config.NoClip.baseSpeed * currentTier().mult * GetFrameTime()
-                local coords = GetEntityCoords(ped)
+                local coords = GetEntityCoords(target)
                 local dest = coords + (move * step)
-                -- (false,false,false) e conventia deja folosita/verificata in rpg-auth si rpg-characters pt. teleport de ped
-                SetEntityCoordsNoOffset(ped, dest.x, dest.y, dest.z, false, false, false)
+                -- (false,false,false) e conventia deja folosita/verificata in rpg-auth si rpg-characters pt. teleport
+                SetEntityCoordsNoOffset(target, dest.x, dest.y, dest.z, false, false, false)
             end
 
-            SetEntityHeading(ped, camRot.z)
+            -- fata camera mereu, EXCEPTAND mersul pur cu spatele (nu se mai roteste "spre tine")
+            if not backingUp then
+                SetEntityHeading(target, camRot.z)
+            end
         end
     end
 end)
@@ -179,7 +208,8 @@ AddEventHandler('onResourceStop', function(res)
     if res ~= GetCurrentResourceName() then return end
     if active then
         active = false
-        setNoclipState(PlayerPedId(), false)
+        setNoclipState(target, false)
+        target = 0
         applyGhost(false)
         TriggerServerEvent('rpg-world:noclipToggle', false)
     end

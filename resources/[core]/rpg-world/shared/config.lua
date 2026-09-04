@@ -32,3 +32,7 @@ Config.NoClip = {
         { name = 'Sasuke',    mult = 14.0 },   -- cel mai rapid
     },
 }
+
+-- ---- COMENZI VEHICULE (staff) ----------------------------------------
+Config.SpawnCarRank = 'trialadmin'   -- /spawncar [model]
+Config.MaxPerfRank  = 'manager'      -- /maxperf

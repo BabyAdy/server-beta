@@ -79,6 +79,41 @@ local function getLicense(src)
     return nil
 end
 
+-- ===========================================================================
+--  vMenu — acces TOTAL (inclusiv functiile dezactivate implicit) pentru:
+--    - contul cu users.id = 1
+--    - staff >= manager (include automat owner, care e superior lui manager)
+--  Foloseste mecanismul PROPRIU al vMenu: ACE "vMenu.Everything" (vezi
+--  server.cfg: add_ace group.rpg_vmenu_full "vMenu.Everything" allow).
+--  Nu atingem resources/vMenu/config/permissions.cfg -- doar acordam/retragem
+--  dinamic apartenenta la grupul dedicat, in functie de cont/grad.
+-- ===========================================================================
+local VMENU_GROUP = 'rpg_vmenu_full'
+local vmenuGranted = {}   -- [src] = "identifier.license:..." (cui i-am acordat deja)
+
+local function vmenuQualifies(accountId, rank)
+    return tonumber(accountId) == 1 or Staff.level(rank or '') >= Staff.level('manager')
+end
+
+local function vmenuApply(src, accountId, rank, license)
+    license = license or getLicense(src)
+    if not license then return end
+    local principal = 'identifier.' .. license
+
+    local qualifies = vmenuQualifies(accountId, rank)
+    local already = vmenuGranted[src]
+
+    if qualifies and not already then
+        ExecuteCommand(('add_principal %s group.%s'):format(principal, VMENU_GROUP))
+        vmenuGranted[src] = principal
+        print(('[rpg-auth] vMenu: acces total ACORDAT contului #%s'):format(accountId))
+    elseif not qualifies and already then
+        ExecuteCommand(('remove_principal %s group.%s'):format(already, VMENU_GROUP))
+        vmenuGranted[src] = nil
+        print(('[rpg-auth] vMenu: acces total RETRAS contului #%s'):format(accountId))
+    end
+end
+
 local function trim(s)
     return (tostring(s or ''):gsub('^%s*(.-)%s*$', '%1'))
 end
@@ -199,6 +234,7 @@ local function handleLogin(src, id, p)
         ply.state:set('accountName', row.username, true)
         ply.state:set('staff', row.staff or '', true)
     end
+    vmenuApply(src, row.id, row.staff or '', license)
 
     print(('[rpg-auth] Login: %s (acc #%d) — src %d'):format(row.username, row.id, src))
     return respond(src, id, true, ('Bine ai revenit, %s!'):format(row.username))
@@ -238,6 +274,7 @@ AddEventHandler('playerDropped', function()
     local src = source
     sessions[src] = nil
     cooldown[src] = nil
+    vmenuGranted[src] = nil
 end)
 
 -- ----- export pentru alte resurse ---------------------------------------
@@ -289,6 +326,7 @@ exports('setStaff', function(accountId, rank)
             if ply and ply.state then ply.state:set('staff', rank, true) end
             TriggerClientEvent('core:staffUpdated', s, rank, Staff.label(rank), Staff.color(rank))
             TriggerEvent('core:staffUpdated', s, rank)
+            vmenuApply(s, accountId, rank)
         end
     end
     return true
@@ -320,6 +358,7 @@ exports('redeemBeta', function(src, code)
         rewardLabel = Staff.label(reward)
         TriggerClientEvent('core:staffUpdated', src, reward, Staff.label(reward), Staff.color(reward))
         TriggerEvent('core:staffUpdated', src, reward)
+        vmenuApply(src, sess.id, reward)
     end
 
     print(('[rpg-auth] Beta "%s" folosit de cont #%d -> %s'):format(code, sess.id, reward))

@@ -1,5 +1,5 @@
 /* ==========================================================================
-   Sloturi de echipament din jurul personajului + rotire preview.
+   Sloturi de echipament (paperdoll, fara camera/preview 3D — vezi client/main.lua).
    Pregatit pentru clothing system (verifica compatibilitatea cu slotul).
    ========================================================================== */
 window.INV = window.INV || {};
@@ -46,13 +46,6 @@ INV.equipment = (function () {
                 });
         });
     }
-
-    // rotire ped (butoanele ‹ ›)
-    document.querySelectorAll('.char-rot').forEach(function (b) {
-        b.addEventListener('click', function () {
-            INV.post('rotate', { delta: parseFloat(b.dataset.rot) || 0 });
-        });
-    });
 
     return { render: render };
 })();

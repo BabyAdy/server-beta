@@ -9,7 +9,7 @@ Config.OpenCommand = 'inventory'
 
 -- Singura definitie a tastei implicite in tot proiectul. '' = nelegata.
 -- (Jucatorul o poate rebinda oricum din Settings > Key Bindings > FiveM.)
-Config.DefaultKey = 'TAB'
+Config.DefaultKey = 'I'
 
 -- Taste slot rapid (1..5). Active DOAR cand inventarul e inchis.
 Config.FastSlotKeys = { '1', '2', '3', '4', '5' }
@@ -53,16 +53,6 @@ Config.EquipmentSlots = {
     { key = 'armor',   label = 'Vestă',      accept = { 'armor' },    component = 9 },
     { key = 'pants',   label = 'Pantaloni',  accept = { 'clothing' }, component = 4 },
     { key = 'shoes',   label = 'Încălț.',    accept = { 'clothing' }, component = 6 },
-}
-
--- ===========================================================================
---  PREVIEW PERSONAJ (camera scriptata; lumea ramane vizibila in spate)
--- ===========================================================================
-Config.Preview = {
-    forward = 1.55,   -- m in fata ped-ului
-    side    = 0.32,   -- m lateral (impinge ped-ul spre stanga ecranului)
-    height  = 0.20,   -- m pe verticala fata de centru
-    fov     = 45.0,
 }
 
 -- ===========================================================================

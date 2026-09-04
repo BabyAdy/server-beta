@@ -6,8 +6,9 @@ Config = {}
 Config.MinCreateRank    = 'manager'      -- /createhouse
 Config.MinBroadcastRank = 'trialadmin'   -- cine vede mesajul "Staff: ... has created house #id" in chat
 
-Config.LabelRadius = 25.0   -- distanța pana la care se văd marker-ul + eticheta casei
-Config.MarkerColor = { r = 168, g = 85, b = 247, a = 190 }   -- mov, ca restul temei
+Config.LabelRadius   = 25.0   -- distanța pana la care se văd marker-ul + eticheta casei
+Config.InteractRadius = 2.2   -- distanța la care apare promptul [E] Intră/Ieși
+Config.MarkerColor   = { r = 168, g = 85, b = 247, a = 190 }   -- mov, ca restul temei
 
 -- ===========================================================================
 --  TIPURI DE INTERIOR VALIDE pt. /createhouse [interior_type] [price]
