@@ -59,6 +59,7 @@ AddEventHandler('core:playerLoggedIn', function(src, accountId, username)
         Player(src).state:set('charId', id, true)
         TriggerClientEvent('rpg-characters:spawn', src, appearance, pos)
         TriggerEvent('core:characterLoaded', src, id, username)
+        TriggerEvent('core:characterCreated', src, id, username)   -- personaj NOU -> valori de start
         print(('[rpg-characters] SkipCreator: personaj default #%s creat pentru cont #%s (%s)')
             :format(tostring(id), tostring(accountId), tostring(username)))
 
@@ -106,6 +107,7 @@ RegisterNetEvent('rpg-characters:create', function(payload)
     TriggerClientEvent('rpg-characters:createResult', src, true)
     TriggerClientEvent('rpg-characters:spawn', src, appearance, pos)
     TriggerEvent('core:characterLoaded', src, id, c.username)
+    TriggerEvent('core:characterCreated', src, id, c.username)   -- personaj NOU -> valori de start
 
     print(('[rpg-characters] Personaj #%d creat pentru cont #%d (%s)'):format(id, c.accountId, c.username))
 end)

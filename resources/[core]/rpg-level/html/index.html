@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>RPG · Stats</title>
+    <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+    <div id="stats" class="hidden">
+        <div class="card">
+            <header class="hdr">
+                <div class="who">
+                    <span class="sqlid">SQL ID: <b id="s-id">—</b></span>
+                    <span class="uname" id="s-name">—</span>
+                </div>
+                <button class="x" id="s-close" type="button" aria-label="Închide">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M18 6 6 18M6 6l12 12" stroke-linecap="round" />
+                    </svg>
+                </button>
+            </header>
+
+            <section class="sec">
+                <div class="sec-title">Account</div>
+                <div class="acc-line">
+                    <span class="lv">Level: <b id="s-level">—</b></span>
+                    <span class="req" id="s-req">—</span>
+                </div>
+                <div class="prog" id="s-prog"><i id="s-progfill"></i></div>
+                <div class="line"><span class="k">Hours</span><b class="v" id="s-hours">0.00</b></div>
+            </section>
+
+            <section class="sec">
+                <div class="sec-title">Economy</div>
+                <div class="line"><span class="k">Money</span><b class="v pos" id="s-money">0$</b></div>
+                <div class="line"><span class="k">Bank</span><b class="v" id="s-bank">0$</b></div>
+            </section>
+        </div>
+    </div>
+
+    <!-- notificare Payday (toast, fără focus) -->
+    <div id="pnotif" class="hidden">
+        <div class="pn-card">
+            <div class="pn-title">You received salary</div>
+            <ul class="pn-list">
+                <li>+ <b id="pn-hours">0.00</b> hours played</li>
+                <li>+ <b id="pn-rp">1</b> respect points</li>
+                <li>+ <b id="pn-salary">$100</b> in the bank</li>
+                <li>+ <b id="pn-interest">$0</b> bank interest</li>
+            </ul>
+        </div>
+    </div>
+
+    <script src="js/app.js"></script>
+</body>
+</html>

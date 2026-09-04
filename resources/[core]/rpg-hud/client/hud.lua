@@ -70,8 +70,8 @@ AddEventHandler('rpg-hud:startFeeders', function()
         end
     end)
 
-    -- PAYCHECK: seed pentru countdown-ul din NUI (serverul poate suprascrie)
-    push('paycheck', { seconds = Config.Hud.paycheckInterval, running = true })
+    -- PAYCHECK / Salary Timer: valoarea reală vine de la rpg-level prin
+    -- `hud:updatePaycheck` (users.payday). HUD-ul afișează --:-- până la primul sync.
 end)
 
 -- ----- API events (framework) ---------------------------------

@@ -13,6 +13,16 @@ CREATE TABLE IF NOT EXISTS `users` (
     `banned`     TINYINT(1)      NOT NULL DEFAULT 0,
     `ban_reason` VARCHAR(255)    DEFAULT NULL,
     `staff`      VARCHAR(25)     NOT NULL DEFAULT '',    -- slug grad staff (vezi shared/staff.lua); '' = civil
+
+    -- progresie & economie (rpg-level). Default-urile = valorile de start la CREAREA caracterului.
+    `level`         INT             NOT NULL DEFAULT 1,
+    `respectpoints` INT             NOT NULL DEFAULT 0,
+    `money`         BIGINT          NOT NULL DEFAULT 500,   -- cash
+    `bank`          BIGINT          NOT NULL DEFAULT 1000,
+    `playtime`         BIGINT UNSIGNED NOT NULL DEFAULT 0,     -- TOTAL secunde de joc ACTIV (nu float; UI-ul face HH.MM)
+    `payday`           INT UNSIGNED    NOT NULL DEFAULT 3600,  -- secunde ramase pana la urmatorul payday (0..3600)
+    `payday_playtime`  INT UNSIGNED    NOT NULL DEFAULT 0,     -- secunde ACTIVE acumulate in ciclul de payday CURENT (se reseteaza la fiecare payday)
+
     `last_login` TIMESTAMP       NULL DEFAULT NULL,
     `last_ip`    VARCHAR(45)     DEFAULT NULL,
     `created_at` TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
