@@ -166,6 +166,9 @@ HUD.mods.chat = (function () {
         el.className = 'cmsg' + (chKey ? ' ch-' + chKey : ' ch-PLAIN');
 
         var html = '<span class="c-time">' + esc(msg.time || '') + '</span>';
+        /* msg.color (hex, ex. Staff.BROADCAST_COLOR "#ff5555") coloreaza textul
+           mesajului INDIFERENT de ramura — inainte se aplica doar la mesajele cu badge de staff. */
+        var textStyle = msg.color ? ' style="color:' + msg.color + '"' : '';
 
         if (msg.staff) {
             var icon = (msg.staff.kind === 'helper') ? ICON_HELPER : ICON_ADMIN;
@@ -174,15 +177,15 @@ HUD.mods.chat = (function () {
             html += '<span class="c-badge" style="color:' + rc + ';border-color:' + rc + '">' + esc(msg.staff.label || '') + '</span>';
             html += '<span class="c-auth">' + esc(msg.author || '') + '</span>';
             if (msg.staff.id != null) html += '<span class="c-sid">(' + esc(msg.staff.id) + ')</span>';
-            html += '<span class="c-text"' + (msg.color ? ' style="color:' + msg.color + '"' : '') + '>: ' + esc(msg.text || '') + '</span>';
+            html += '<span class="c-text"' + textStyle + '>: ' + esc(msg.text || '') + '</span>';
         } else if (chKey && cfg.channels && cfg.channels[chKey]) {
             var ch = cfg.channels[chKey];
             html += '<span class="c-chan" style="color:' + ch.color + '">[' + esc(ch.label) + ']</span>';
-            html += '<span class="c-text">' + esc(msg.text || '') + '</span>';
+            html += '<span class="c-text"' + textStyle + '>' + esc(msg.text || '') + '</span>';
         } else {
             if (msg.id != null && msg.id !== '') html += '<span class="c-sid">(' + esc(msg.id) + ')</span>';
             if (msg.author) html += '<span class="c-auth">' + esc(msg.author) + ':</span>';
-            html += '<span class="c-text">' + esc(msg.text || '') + '</span>';
+            html += '<span class="c-text"' + textStyle + '>' + esc(msg.text || '') + '</span>';
         }
 
         el.innerHTML = html;

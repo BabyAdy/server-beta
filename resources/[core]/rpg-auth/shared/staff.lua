@@ -25,6 +25,10 @@ Staff.MIN_ADMIN_CHAT   = 'trialadmin'   -- /a
 Staff.MIN_HELPER_CHAT  = 'trialhelper'  -- /hc
 Staff.MIN_MANAGE_STAFF = 'manager'      -- /setstaff, /removestaff
 
+-- culoare STANDARD pentru mesajele de chat vizibile DOAR staff-ului
+-- (ex. /give, /agl, /debugsec...) -> mereu rosu, ca sa nu se mai specifice de fiecare data.
+Staff.BROADCAST_COLOR = '#ff5555'
+
 function Staff.exists(slug)
     return slug ~= nil and slug ~= '' and Staff.RANKS[slug] ~= nil
 end

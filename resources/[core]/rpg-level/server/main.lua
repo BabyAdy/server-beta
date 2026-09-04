@@ -499,13 +499,13 @@ local function srcByAccountId(accountId)
     return nil
 end
 
--- trimite un mesaj în chat DOAR staff-ului online cu grad >= minRank
+-- trimite un mesaj în chat DOAR staff-ului online cu grad >= minRank (mereu roșu — Staff.BROADCAST_COLOR)
 local function staffBroadcast(minRank, text)
     for _, pid in ipairs(GetPlayers()) do
         local t = tonumber(pid)
         local ok, allowed = pcall(function() return exports['rpg-auth']:hasStaffLevel(t, minRank) end)
         if ok and allowed == true then
-            TriggerClientEvent('rpg-hud:chatMessage', t, { text = text, time = os.date('%H:%M') })
+            TriggerClientEvent('rpg-hud:chatMessage', t, { text = text, color = Staff.BROADCAST_COLOR, time = os.date('%H:%M') })
         end
     end
     print(('[rpg-level][staff] %s'):format(text))

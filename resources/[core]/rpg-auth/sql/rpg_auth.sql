@@ -15,6 +15,12 @@ CREATE TABLE IF NOT EXISTS `users` (
     `staff`      VARCHAR(25)     NOT NULL DEFAULT '',    -- slug grad staff (vezi shared/staff.lua); '' = civil
     `avatar`     VARCHAR(300)    DEFAULT NULL,           -- link imagine profil (ex. imgur); NUL = initiala numelui
 
+    -- licente (credit de ore, acordat de staff prin /agl -- vezi rpg-licences); 0 = fara licenta
+    `driving_licence_hours` INT UNSIGNED NOT NULL DEFAULT 0,
+    `weapon_licence_hours`  INT UNSIGNED NOT NULL DEFAULT 0,
+    `flying_licence_hours`  INT UNSIGNED NOT NULL DEFAULT 0,
+    `sailing_licence_hours` INT UNSIGNED NOT NULL DEFAULT 0,
+
     -- progresie & economie (rpg-level). Default-urile = valorile de start la CREAREA caracterului.
     `level`         INT             NOT NULL DEFAULT 1,
     `respectpoints` INT             NOT NULL DEFAULT 0,

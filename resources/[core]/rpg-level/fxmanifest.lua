@@ -13,7 +13,10 @@ dependencies {
     'rpg-hud',           -- timer-ul de Salary din HUD + chat feedback
 }
 
-shared_script 'shared/config.lua'
+shared_scripts {
+    '@rpg-auth/shared/staff.lua',   -- Staff.BROADCAST_COLOR (mesaje de staff -> rosu)
+    'shared/config.lua',
+}
 
 client_script 'client/main.lua'
 

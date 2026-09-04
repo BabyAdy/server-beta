@@ -1,0 +1,96 @@
+html, body {
+  background: transparent;
+  margin: 0;
+  color: #e2e8f0;
+  font-family: 'Inter', system-ui, sans-serif;
+}
+.hidden { display: none !important; }
+
+#quiz {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: transparent;
+}
+
+.card {
+  width: min(92vw, 560px);
+  background: rgba(17, 14, 26, 0.94);
+  border: 1px solid rgba(168, 85, 247, 0.35);
+  border-radius: 18px;
+  padding: 24px 26px 22px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.55);
+}
+
+.head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+.brand {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  color: #d8b4fe;
+  text-transform: uppercase;
+}
+.qcount {
+  font-size: 13px;
+  font-weight: 700;
+  color: #9ca3af;
+}
+.qcount #q-num { color: #e9d5ff; }
+
+.prog {
+  height: 8px;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.07);
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+.prog-fill {
+  height: 100%;
+  width: 0%;
+  border-radius: 9999px;
+  background: linear-gradient(90deg, #c084fc, #7c3aed);
+  transition: width 0.35s ease;
+}
+
+.qtext {
+  font-size: 18px;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.35;
+  margin-bottom: 20px;
+  min-height: 50px;
+}
+
+.answers {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ans-btn {
+  text-align: left;
+  background: rgba(147, 51, 234, 0.10);
+  border: 1px solid rgba(147, 51, 234, 0.28);
+  color: #e5e7eb;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.4;
+  padding: 12px 16px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+}
+.ans-btn:hover { background: rgba(147, 51, 234, 0.20); border-color: rgba(168, 85, 247, 0.5); }
+.ans-btn.picked {
+  background: rgba(147, 51, 234, 0.42);
+  border-color: rgba(168, 85, 247, 0.75);
+  transform: scale(0.99);
+}
+.ans-btn[disabled] { pointer-events: none; opacity: 0.75; }

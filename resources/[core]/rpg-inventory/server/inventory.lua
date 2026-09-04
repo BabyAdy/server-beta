@@ -413,8 +413,16 @@ function Inventory.equip(src, slot)
     if not d then return err('Item necunoscut.') end
 
     if d.category == 'weapon' then
+        local willEquip = not it.metadata.equipped
+        if willEquip then
+            -- rpg-licences: fara weapon_licence_hours > 0 nu poti ECHIPA o arma.
+            -- fail-open daca resursa lipseste/e oprita (nu blocam gameplay-ul din cauza unei dependinte).
+            local licOk = true
+            pcall(function() licOk = exports['rpg-licences']:hasWeaponLicence(src) end)
+            if not licOk then return err('Ai nevoie de licență de arme pentru a echipa asta.') end
+        end
         it.metadata = it.metadata or {}
-        it.metadata.equipped = not it.metadata.equipped and true or nil
+        it.metadata.equipped = willEquip and true or nil
         TriggerEvent(it.metadata.equipped and 'rpg-inventory:equipWeapon' or 'rpg-inventory:unequipWeapon',
             src, charId, it.itemId, view(it))
         markDirty(c); Inventory.pushSync(charId)

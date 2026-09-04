@@ -11,27 +11,35 @@ local cooldown = {}    -- [src] = last request ms
 
 math.randomseed(os.time())
 
--- ----- migratie schema (coloana staff + tabela beta_redemptions) --------
+-- ----- migratie schema (coloane pe users + tabela beta_redemptions) --------
 CreateThread(function()
     while GetResourceState('oxmysql') ~= 'started' do Wait(200) end
     Wait(400)
 
-    local hasStaff = MySQL.scalar.await([[
-        SELECT COUNT(*) FROM information_schema.COLUMNS
-        WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'users' AND COLUMN_NAME = 'staff'
-    ]])
-    if (tonumber(hasStaff) or 0) == 0 then
-        MySQL.query.await("ALTER TABLE `users` ADD COLUMN `staff` VARCHAR(25) NOT NULL DEFAULT ''")
-        print('[rpg-auth] Coloana `users`.`staff` a fost adaugata.')
-    end
+    -- coloane lipsa -> se adauga cu DEFAULT (randurile existente primesc default-ul,
+    -- valorile deja existente NU sunt atinse)
+    local want = {
+        staff  = "VARCHAR(25) NOT NULL DEFAULT ''",
+        avatar = "VARCHAR(300) DEFAULT NULL",
 
-    local hasAvatar = MySQL.scalar.await([[
-        SELECT COUNT(*) FROM information_schema.COLUMNS
-        WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'users' AND COLUMN_NAME = 'avatar'
-    ]])
-    if (tonumber(hasAvatar) or 0) == 0 then
-        MySQL.query.await("ALTER TABLE `users` ADD COLUMN `avatar` VARCHAR(300) DEFAULT NULL")
-        print('[rpg-auth] Coloana `users`.`avatar` a fost adaugata.')
+        -- licente (credit de ore, acordat de staff prin /agl -- vezi rpg-licences); 0 = fara licenta
+        driving_licence_hours = "INT UNSIGNED NOT NULL DEFAULT 0",
+        weapon_licence_hours  = "INT UNSIGNED NOT NULL DEFAULT 0",
+        flying_licence_hours  = "INT UNSIGNED NOT NULL DEFAULT 0",
+        sailing_licence_hours = "INT UNSIGNED NOT NULL DEFAULT 0",
+    }
+    local rows = MySQL.query.await([[
+        SELECT COLUMN_NAME AS name FROM information_schema.COLUMNS
+        WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'users'
+    ]]) or {}
+    local have = {}
+    for _, r in ipairs(rows) do have[r.name] = true end
+
+    for col, def in pairs(want) do
+        if not have[col] then
+            MySQL.query.await(('ALTER TABLE `users` ADD COLUMN `%s` %s'):format(col, def))
+            print(('[rpg-auth] Coloana `users`.`%s` a fost adaugata.'):format(col))
+        end
     end
 
     MySQL.query.await([[
