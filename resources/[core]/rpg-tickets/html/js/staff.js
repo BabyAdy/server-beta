@@ -32,7 +32,7 @@
     if (TK.self.staffColor) $('#s-rank').style.color = TK.self.staffColor;
     $('#s-sid').textContent = TK.self.sid != null ? ('SQL ID: ' + TK.self.sid)
                             : (TK.self.accountId != null ? ('SQL ID: ' + TK.self.accountId) : '');
-    $('#s-avatar').textContent = (TK.self.name || '?').charAt(0).toUpperCase();
+    TK.setAvatar($('#s-avatar'), TK.self.avatar, TK.self.name);
   }
 
   /* --------------------------- navigatie ---------------------------- */
@@ -50,10 +50,10 @@
     var d = document.createElement('div');
     d.className = 'tk-card';
     var mineTag = (t.claimedBy && TK.self && t.claimedBy === TK.self.license)
-      ? '<span class="text-[10px] text-emerald-400 ml-1">(al tău)</span>' : '';
+      ? '<span class="text-[10px] text-purple-300 ml-1">(al tău)</span>' : '';
     d.innerHTML =
       '<div class="flex items-center gap-4 min-w-0">' +
-        '<div class="w-10 h-10 rounded-lg bg-emerald-950/50 border border-emerald-800/40 flex items-center justify-center text-emerald-400"><i class="fa-solid fa-headset"></i></div>' +
+        '<div class="w-10 h-10 rounded-lg bg-purple-950/60 border border-purple-800/40 flex items-center justify-center text-purple-400"><i class="fa-solid fa-headset"></i></div>' +
         '<div class="min-w-0"><div class="flex items-center gap-2">' +
           '<h4 class="font-bold text-white truncate">#' + t.id + ' · ' + TK.esc(t.category) + '</h4>' +
           '<span class="pill ' + t.status + '">' + (t.status === 'active' ? 'În așteptare' : t.status === 'claimed' ? 'Preluat' : 'Închis') + '</span>' + mineTag +
@@ -63,7 +63,7 @@
         '</p></div>' +
       '</div>' +
       '<div class="flex items-center gap-2 shrink-0">' +
-        (t.status === 'active' ? '<button class="btn-emerald" data-act="claim"><i class="fa-solid fa-hand"></i> Preia</button>' : '') +
+        (t.status === 'active' ? '<button class="btn-purple" data-act="claim"><i class="fa-solid fa-hand"></i> Preia</button>' : '') +
         '<button class="btn-ghost" data-act="open"><i class="fa-solid fa-comments"></i></button>' +
         '<button class="btn-ghost" data-act="tp" title="TP la jucător"><i class="fa-solid fa-location-arrow"></i></button>' +
         '<button class="btn-ghost" data-act="bring" title="Adu jucătorul"><i class="fa-solid fa-people-arrows"></i></button>' +

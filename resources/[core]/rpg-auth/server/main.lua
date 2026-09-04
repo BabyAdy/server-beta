@@ -25,6 +25,15 @@ CreateThread(function()
         print('[rpg-auth] Coloana `users`.`staff` a fost adaugata.')
     end
 
+    local hasAvatar = MySQL.scalar.await([[
+        SELECT COUNT(*) FROM information_schema.COLUMNS
+        WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'users' AND COLUMN_NAME = 'avatar'
+    ]])
+    if (tonumber(hasAvatar) or 0) == 0 then
+        MySQL.query.await("ALTER TABLE `users` ADD COLUMN `avatar` VARCHAR(300) DEFAULT NULL")
+        print('[rpg-auth] Coloana `users`.`avatar` a fost adaugata.')
+    end
+
     MySQL.query.await([[
         CREATE TABLE IF NOT EXISTS `beta_redemptions` (
             `id`          INT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -151,7 +160,7 @@ local function handleLogin(src, id, p)
     end
 
     local row = MySQL.single.await([[
-        SELECT id, username, identifier, banned, ban_reason, staff
+        SELECT id, username, identifier, banned, ban_reason, staff, avatar
         FROM users
         WHERE username = ? AND password = SHA2(CONCAT(salt, ?), 256)
         LIMIT 1
@@ -174,7 +183,7 @@ local function handleLogin(src, id, p)
         { GetPlayerEndpoint(src), license, row.id }
     )
 
-    sessions[src] = { id = row.id, username = row.username, staff = row.staff or '' }
+    sessions[src] = { id = row.id, username = row.username, staff = row.staff or '', avatar = row.avatar }
     local ply = Player(src)
     if ply and ply.state then
         ply.state:set('authed', true, true)

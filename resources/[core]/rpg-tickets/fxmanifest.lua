@@ -39,4 +39,5 @@ files {
     'html/css/style.css',
     'html/js/player.js',
     'html/js/staff.js',
+    'html/assets/logo.svg',
 }

@@ -13,6 +13,7 @@ CREATE TABLE IF NOT EXISTS `users` (
     `banned`     TINYINT(1)      NOT NULL DEFAULT 0,
     `ban_reason` VARCHAR(255)    DEFAULT NULL,
     `staff`      VARCHAR(25)     NOT NULL DEFAULT '',    -- slug grad staff (vezi shared/staff.lua); '' = civil
+    `avatar`     VARCHAR(300)    DEFAULT NULL,           -- link imagine profil (ex. imgur); NUL = initiala numelui
 
     -- progresie & economie (rpg-level). Default-urile = valorile de start la CREAREA caracterului.
     `level`         INT             NOT NULL DEFAULT 1,

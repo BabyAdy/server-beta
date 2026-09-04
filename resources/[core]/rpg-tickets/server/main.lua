@@ -37,6 +37,7 @@ local function identity(src)
         src        = src,
         accountId  = a and a.id or nil,
         name       = (a and a.username) or GetPlayerName(src) or ('src' .. src),
+        avatar     = a and a.avatar or nil,          -- users.avatar (link imgur) sau nil
         license    = lic,
         staff      = staffRank,
         staffLevel = staffLevel,

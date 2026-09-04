@@ -68,6 +68,24 @@
     /* mai multi subscriberi per "kind" (player.js si staff.js se aboneaza ambii) */
     onPush: function (kind, fn) { (pushHandlers[kind] = pushHandlers[kind] || []).push(fn); },
 
+    /* avatar: link imgur -> <img> cu object-fit:cover (autoresize); fallback = initiala */
+    setAvatar: function (el, url, name) {
+      if (!el) return;
+      var initial = String(name || '?').charAt(0).toUpperCase();
+      el.textContent = '';
+      if (url && /^https?:\/\/\S+$/i.test(String(url))) {
+        var img = document.createElement('img');
+        img.className = 'av-img';
+        img.alt = '';
+        img.referrerPolicy = 'no-referrer';
+        img.onerror = function () { el.textContent = initial; };
+        img.src = String(url);
+        el.appendChild(img);
+      } else {
+        el.textContent = initial;
+      }
+    },
+
     toast: function (text, kind) {
       var el = document.getElementById('tk-toast');
       el.textContent = text;
@@ -177,8 +195,8 @@
       if (!r.ok) return;
       TK.self = r.data.self || {};
       $('#p-name').textContent = TK.self.name || '—';
-      $('#p-id').textContent = 'ID: ' + (TK.self.id != null ? TK.self.id : '—');
-      $('#p-avatar').textContent = (TK.self.name || '?').charAt(0).toUpperCase();
+      $('#p-id').textContent = 'ID: ' + (TK.self.accountId != null ? TK.self.accountId : (TK.self.id != null ? TK.self.id : '—'));
+      TK.setAvatar($('#p-avatar'), TK.self.avatar, TK.self.name);
 
       var sel = $('#p-category');
       var cats = r.data.categories || ['General Problem / Confusion', 'Player Report', 'Bug / Technical Issues', 'Item Pick-up / Losses', 'Other'];

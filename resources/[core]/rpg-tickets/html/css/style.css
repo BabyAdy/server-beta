@@ -21,57 +21,54 @@ html, body {
 .glass-panel { background: rgba(17, 14, 26, 0.92); }
 .purple-gradient { background: linear-gradient(135deg, #a855f7 0%, #6b21a8 100%); }
 
-/* nav (shared player + staff) */
+/* avatar (player + staff) — imagine imgur cu autoresize (cover), fallback = initiala */
+.avatar { overflow: hidden; }
+.av-img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+/* nav (player + staff, aceeasi tema purple) */
 .nav-btn { transition: all .18s ease; border: 1px solid transparent; }
 .nav-btn:hover:not(.active) { color: #e9d5ff; background: rgba(147, 51, 234, .14); }
 .nav-btn.active { color: #d8b4fe; background: rgba(147, 51, 234, .28); border-color: rgba(168, 85, 247, .4); box-shadow: 0 0 14px rgba(147, 51, 234, .3); }
-#staff-app .nav-btn:hover:not(.active) { color: #bbf7d0; background: rgba(16, 185, 129, .12); }
-#staff-app .nav-btn.active { color: #6ee7b7; background: rgba(16, 185, 129, .22); border-color: rgba(16, 185, 129, .4); box-shadow: 0 0 14px rgba(16, 185, 129, .25); }
 
 .badge { background: #2e1065; color: #c084fc; font-size: .7rem; padding: .1rem .5rem; border-radius: 9999px; border: 1px solid rgba(147, 51, 234, .3); }
-#staff-app .badge { background: #052e1a; color: #6ee7b7; border-color: rgba(16, 185, 129, .3); }
 
-/* pill status */
+/* pill status (semantic: rosu = in asteptare, verde = preluat, gri = inchis) */
 .pill { font-size: 10px; padding: 2px 8px; border-radius: 6px; border: 1px solid; text-transform: capitalize; }
 .pill.active   { color: #fca5a5; background: rgba(127, 29, 29, .35); border-color: rgba(220, 38, 38, .4); }
-.pill.claimed  { color: #6ee7b7; background: rgba(6, 78, 59, .4);  border-color: rgba(16, 185, 129, .4); }
+.pill.claimed  { color: #86efac; background: rgba(6, 78, 59, .35);  border-color: rgba(16, 185, 129, .35); }
 .pill.closed   { color: #9ca3af; background: rgba(31, 41, 55, .5);  border-color: rgba(75, 85, 99, .4); }
 
 /* chat bubbles */
 .bub { padding: 10px 14px; max-width: 72%; font-size: 13px; line-height: 1.4; word-break: break-word; }
 .bub-them { background: rgba(30, 24, 54, .8); border: 1px solid rgba(147, 51, 234, .25); border-radius: 0 12px 12px 12px; }
 .bub-me   { background: linear-gradient(135deg, #6b21a8 0%, #4c1d95 100%); border-radius: 12px 0 12px 12px; }
-#staff-app .bub-me { background: linear-gradient(135deg, #047857 0%, #065f46 100%); }
 .row-me { align-items: flex-end; }
 .row-them { align-items: flex-start; }
 
-/* ticket list card */
+/* ticket list card (aceeasi tema in ambele meniuri) */
 .tk-card { background: rgba(24, 18, 44, .6); border: 1px solid rgba(147, 51, 234, .22); border-radius: 14px; padding: 14px 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px; transition: border-color .15s; }
 .tk-card:hover { border-color: rgba(168, 85, 247, .5); }
-#staff-app .tk-card { background: rgba(255, 255, 255, .03); border-color: rgba(255, 255, 255, .06); }
-#staff-app .tk-card:hover { border-color: rgba(16, 185, 129, .45); }
 
 /* stat tiles */
-.stat-tile { background: rgba(255, 255, 255, .03); border: 1px solid rgba(255, 255, 255, .06); border-radius: 16px; padding: 18px; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.stat-tile { background: rgba(168, 85, 247, .06); border: 1px solid rgba(168, 85, 247, .16); border-radius: 16px; padding: 18px; display: flex; flex-direction: column; align-items: center; gap: 4px; }
 .st-v { font-size: 26px; font-weight: 800; color: #fff; line-height: 1; }
 .st-k { font-size: 11px; color: #9ca3af; text-transform: uppercase; letter-spacing: .06em; }
 
 /* progress */
 .prog { height: 10px; border-radius: 9999px; background: rgba(255, 255, 255, .06); overflow: hidden; }
-.prog-fill { height: 100%; width: 0%; border-radius: 9999px; background: linear-gradient(90deg, #a3e635, #10b981); transition: width .4s ease; }
+.prog-fill { height: 100%; width: 0%; border-radius: 9999px; background: linear-gradient(90deg, #c084fc, #7c3aed); transition: width .4s ease; }
 
 /* buttons */
-.btn-emerald { background: linear-gradient(135deg, #10b981, #059669); color: #fff; font-weight: 700; font-size: 12px; padding: 8px 14px; border-radius: 10px; display: inline-flex; align-items: center; gap: 6px; border: 1px solid rgba(16,185,129,.4); }
-.btn-emerald:hover { opacity: .9; }
-.btn-emerald:disabled { opacity: .35; cursor: not-allowed; }
-.btn-ghost { background: rgba(255,255,255,.05); color: #d1d5db; font-weight: 600; font-size: 12px; padding: 8px 12px; border-radius: 10px; display: inline-flex; align-items: center; gap: 6px; border: 1px solid rgba(255,255,255,.1); }
-.btn-ghost:hover { background: rgba(255,255,255,.1); }
+.btn-purple { background: linear-gradient(135deg, #a855f7, #6b21a8); color: #fff; font-weight: 700; font-size: 12px; padding: 8px 14px; border-radius: 10px; display: inline-flex; align-items: center; gap: 6px; border: 1px solid rgba(168,85,247,.4); }
+.btn-purple:hover { opacity: .9; }
+.btn-purple:disabled { opacity: .35; cursor: not-allowed; }
+.btn-ghost { background: rgba(255,255,255,.05); color: #d1d5db; font-weight: 600; font-size: 12px; padding: 8px 12px; border-radius: 10px; display: inline-flex; align-items: center; gap: 6px; border: 1px solid rgba(168,85,247,.18); }
+.btn-ghost:hover { background: rgba(168,85,247,.14); }
 .btn-danger { background: rgba(127, 29, 29, .5); color: #fca5a5; font-weight: 700; font-size: 12px; padding: 8px 12px; border-radius: 10px; display: inline-flex; align-items: center; gap: 6px; border: 1px solid rgba(220,38,38,.4); }
 .btn-danger:hover { background: rgba(153, 27, 27, .7); }
-.btn-purple { background: linear-gradient(135deg, #a855f7, #6b21a8); color: #fff; font-weight: 700; font-size: 12px; padding: 8px 14px; border-radius: 10px; display: inline-flex; align-items: center; gap: 6px; }
 
-.equip-btn { background: rgba(16,185,129,.1); border: 1px solid rgba(16,185,129,.3); color: #6ee7b7; font-weight: 600; font-size: 13px; padding: 10px 16px; border-radius: 12px; display: inline-flex; align-items: center; gap: 8px; }
-.equip-btn:hover { background: rgba(16,185,129,.2); }
+.equip-btn { background: rgba(168,85,247,.12); border: 1px solid rgba(168,85,247,.3); color: #d8b4fe; font-weight: 600; font-size: 13px; padding: 10px 16px; border-radius: 12px; display: inline-flex; align-items: center; gap: 8px; }
+.equip-btn:hover { background: rgba(168,85,247,.22); }
 .equip-btn.equip-off { background: rgba(255,255,255,.04); border-color: rgba(255,255,255,.1); color: #9ca3af; }
 
 /* toast */
