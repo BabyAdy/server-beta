@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>rpg-tickets</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body class="select-none">
+
+  <!-- ===================== PLAYER APP ===================== -->
+  <div id="player-app" class="app hidden items-center justify-center min-h-screen">
+    <div class="w-[1100px] h-[700px] glass-panel rounded-2xl flex overflow-hidden shadow-2xl relative border border-purple-900/40">
+
+      <div class="absolute top-0 left-0 purple-gradient text-white font-black px-8 py-3 rounded-br-2xl shadow-lg flex flex-col items-start z-20 border-b border-r border-purple-400/30">
+        <span class="text-xl leading-tight tracking-wider">Purple Havoc</span>
+        <span class="text-[11px] font-semibold tracking-widest text-purple-200/90">PLAYER SUPPORT</span>
+      </div>
+
+      <!-- sidebar -->
+      <div class="w-[260px] bg-[#120e21]/90 border-r border-purple-900/30 flex flex-col pt-20 pb-6 px-4 justify-between z-10">
+        <div>
+          <div class="flex items-center gap-3 bg-[#1a132f]/60 p-3 rounded-xl border border-purple-500/20 mb-6">
+            <div id="p-avatar" class="w-12 h-12 rounded-full bg-purple-900/50 border border-purple-500 flex items-center justify-center font-bold text-lg text-purple-300">?</div>
+            <div class="overflow-hidden">
+              <h2 id="p-name" class="text-sm font-bold text-white truncate">—</h2>
+              <span id="p-id" class="text-[11px] text-purple-400">ID: —</span>
+            </div>
+          </div>
+          <nav class="space-y-2">
+            <button data-target="p-create" class="nav-btn p-nav w-full flex items-center gap-3 px-4 py-3 rounded-xl font-semibold active">
+              <i class="fa-solid fa-plus-circle text-sm"></i> NEW TICKET
+            </button>
+            <button data-target="p-list" class="nav-btn p-nav w-full flex items-center justify-between px-4 py-3 rounded-xl font-semibold text-gray-400">
+              <span class="flex items-center gap-3"><i class="fa-solid fa-list-check text-sm"></i> MY TICKETS</span>
+              <span id="p-badge" class="badge">0</span>
+            </button>
+          </nav>
+        </div>
+        <div class="bg-[#18122c] p-3 rounded-xl border border-purple-900/30 text-center">
+          <p class="text-[11px] text-gray-400">Maintain civilized language when discussing with Staff members.</p>
+        </div>
+      </div>
+
+      <!-- main -->
+      <div class="flex-1 p-8 overflow-y-auto relative flex flex-col">
+
+        <!-- create -->
+        <section id="p-create" class="p-sec">
+          <div class="mb-6">
+            <h1 class="text-3xl font-black tracking-wider text-white">OPEN A TICKET</h1>
+            <p class="text-[11px] text-purple-400 font-semibold mt-1 uppercase tracking-widest">| Submit a request to the support team</p>
+          </div>
+          <form id="p-form" class="space-y-4">
+            <div>
+              <label class="block text-xs font-bold text-purple-300 uppercase tracking-wider mb-2">Category Problem</label>
+              <select id="p-category" class="w-full bg-[#120e21] border border-purple-900/50 rounded-xl px-4 py-3 text-sm text-gray-200 focus:outline-none focus:border-purple-500"></select>
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-purple-300 uppercase tracking-wider mb-2">Description of the Problem</label>
+              <textarea id="p-reason" rows="5" placeholder="Detail your issue here (mention IDs, locations, or video/photo evidence)..." class="w-full bg-[#120e21] border border-purple-900/50 rounded-xl p-4 text-sm text-gray-200 focus:outline-none focus:border-purple-500 resize-none"></textarea>
+            </div>
+            <div class="flex items-center gap-2 text-xs text-amber-400/80 bg-amber-950/20 p-3 rounded-lg border border-amber-800/30">
+              <i class="fa-solid fa-triangle-exclamation"></i>
+              <span>Do not create multiple tickets for the same issue. A Staff member will take over your request as soon as possible.</span>
+            </div>
+            <button type="submit" class="w-full purple-gradient hover:opacity-90 text-white font-bold py-3.5 rounded-xl shadow-lg border border-purple-400/30 flex items-center justify-center gap-2 transition-all">
+              <i class="fa-solid fa-paper-plane"></i> SEND TICKET
+            </button>
+          </form>
+        </section>
+
+        <!-- list -->
+        <section id="p-list" class="p-sec hidden">
+          <div class="mb-6">
+            <h1 class="text-3xl font-black tracking-wider text-white">MY TICKETS</h1>
+            <p class="text-[11px] text-purple-400 font-semibold mt-1 uppercase tracking-widest">| History and status of your requests</p>
+          </div>
+          <div id="p-tickets" class="space-y-3"></div>
+        </section>
+
+        <!-- chat -->
+        <section id="p-chat" class="p-sec hidden flex-1 flex flex-col">
+          <div class="flex items-center justify-between bg-[#120e21]/80 p-4 rounded-xl border border-purple-900/40 mb-4">
+            <div class="flex items-center gap-3">
+              <button id="p-back" class="text-gray-400 hover:text-purple-300"><i class="fa-solid fa-arrow-left text-lg"></i></button>
+              <div>
+                <div class="flex items-center gap-2">
+                  <h2 id="p-c-cat" class="font-bold text-white">—</h2>
+                  <span id="p-c-status" class="pill">—</span>
+                </div>
+                <p id="p-c-desc" class="text-xs text-gray-400"></p>
+              </div>
+            </div>
+            <button id="p-c-close" class="bg-red-950/60 hover:bg-red-900 border border-red-700/40 text-red-300 px-3 py-1.5 rounded-lg text-xs font-bold">Închide Ticketul</button>
+          </div>
+          <div id="p-c-msgs" class="flex-1 overflow-y-auto space-y-3 pr-2 border-b border-purple-900/20 pb-4"></div>
+          <div class="pt-3 flex gap-2">
+            <input id="p-c-input" type="text" placeholder="Reply to the staff..." class="flex-1 bg-[#120e21] border border-purple-900/50 rounded-xl px-4 py-3 text-sm text-gray-200 focus:outline-none focus:border-purple-500" />
+            <button id="p-c-send" class="purple-gradient text-white px-6 rounded-xl font-bold flex items-center hover:opacity-90"><i class="fa-solid fa-paper-plane"></i></button>
+          </div>
+        </section>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== STAFF APP ===================== -->
+  <div id="staff-app" class="app hidden items-center justify-center min-h-screen">
+    <div class="w-[1180px] h-[720px] glass-panel rounded-2xl flex overflow-hidden shadow-2xl relative border border-emerald-900/30">
+
+      <!-- sidebar -->
+      <div class="w-[280px] bg-[#0f1512]/95 border-r border-white/5 flex flex-col py-6 px-5 justify-between z-10">
+        <div>
+          <div class="mb-6">
+            <div class="text-lg font-black tracking-wider text-white leading-tight">FPLAYT</div>
+            <div class="text-[11px] font-semibold tracking-[0.2em] text-emerald-400/80">STAFF AREA</div>
+          </div>
+          <div class="flex flex-col items-center text-center bg-white/[0.03] p-4 rounded-2xl border border-white/5 mb-6">
+            <div id="s-avatar" class="w-16 h-16 rounded-full bg-emerald-900/40 border border-emerald-500/60 flex items-center justify-center font-bold text-2xl text-emerald-300 mb-2">?</div>
+            <h2 id="s-name" class="text-sm font-bold text-white truncate max-w-[200px]">—</h2>
+            <span id="s-rank" class="text-[11px] tracking-widest uppercase mt-0.5" style="color:#37ff00">—</span>
+            <span id="s-sid" class="text-[10px] text-gray-500 mt-1">—</span>
+          </div>
+          <nav class="space-y-1.5">
+            <button data-target="s-dash"    class="nav-btn s-nav w-full flex items-center gap-3 px-4 py-2.5 rounded-xl font-semibold text-sm active"><i class="fa-solid fa-gauge-high w-4"></i> DASHBOARD</button>
+            <button data-target="s-active"  class="nav-btn s-nav w-full flex items-center justify-between px-4 py-2.5 rounded-xl font-semibold text-sm text-gray-400">
+              <span class="flex items-center gap-3"><i class="fa-solid fa-inbox w-4"></i> TICKETE ACTIVE</span><span id="s-badge-active" class="badge">0</span>
+            </button>
+            <button data-target="s-mine"    class="nav-btn s-nav w-full flex items-center justify-between px-4 py-2.5 rounded-xl font-semibold text-sm text-gray-400">
+              <span class="flex items-center gap-3"><i class="fa-solid fa-user-check w-4"></i> TICKETELE MELE</span><span id="s-badge-mine" class="badge">0</span>
+            </button>
+            <button data-target="s-stats"   class="nav-btn s-nav w-full flex items-center gap-3 px-4 py-2.5 rounded-xl font-semibold text-sm text-gray-400"><i class="fa-solid fa-chart-simple w-4"></i> STATISTICI</button>
+            <button data-target="s-rewards" class="nav-btn s-nav w-full flex items-center gap-3 px-4 py-2.5 rounded-xl font-semibold text-sm text-gray-400"><i class="fa-solid fa-gift w-4"></i> REWARDS</button>
+          </nav>
+        </div>
+        <button id="s-exit" class="text-[11px] text-gray-500 hover:text-gray-300 flex items-center gap-2 px-2"><i class="fa-solid fa-right-from-bracket"></i> Închide (ESC)</button>
+      </div>
+
+      <!-- main -->
+      <div class="flex-1 p-8 overflow-y-auto relative flex flex-col bg-[#0b0f0d]/40">
+
+        <!-- dashboard -->
+        <section id="s-dash" class="s-sec">
+          <h1 class="text-3xl font-black tracking-wider text-white">DASHBOARD</h1>
+          <p class="text-[11px] text-emerald-400 font-semibold mt-1 uppercase tracking-widest mb-6">| Privire de ansamblu</p>
+          <div class="grid grid-cols-3 gap-4 mb-8">
+            <div class="stat-tile"><span class="st-v" id="d-active">0</span><span class="st-k">Tickete active</span></div>
+            <div class="stat-tile"><span class="st-v" id="d-claimed">0</span><span class="st-k">În lucru</span></div>
+            <div class="stat-tile"><span class="st-v" id="d-today">0</span><span class="st-k">Închise azi</span></div>
+          </div>
+          <h3 class="text-sm font-bold text-white uppercase tracking-wider mb-3">Echipare uniformă staff</h3>
+          <div class="flex flex-wrap gap-3">
+            <button class="equip-btn" data-piece="tshirt"><i class="fa-solid fa-shirt"></i> Tricou</button>
+            <button class="equip-btn" data-piece="hoodie"><i class="fa-solid fa-vest"></i> Hanorac</button>
+            <button class="equip-btn" data-piece="mask"><i class="fa-solid fa-mask"></i> Mască</button>
+            <button class="equip-btn equip-off" data-piece="tshirt" data-off="1"><i class="fa-solid fa-xmark"></i> Scoate tricou</button>
+            <button class="equip-btn equip-off" data-piece="mask" data-off="1"><i class="fa-solid fa-xmark"></i> Scoate masca</button>
+          </div>
+        </section>
+
+        <!-- active -->
+        <section id="s-active" class="s-sec hidden">
+          <div class="flex items-center justify-between mb-6">
+            <div>
+              <h1 class="text-3xl font-black tracking-wider text-white">TICKETE ACTIVE</h1>
+              <p class="text-[11px] text-emerald-400 font-semibold mt-1 uppercase tracking-widest">| Cereri deschise & în lucru</p>
+            </div>
+            <button id="s-refresh" class="text-xs text-gray-400 hover:text-white border border-white/10 rounded-lg px-3 py-2"><i class="fa-solid fa-rotate"></i> Refresh</button>
+          </div>
+          <div id="s-active-list" class="space-y-3"></div>
+        </section>
+
+        <!-- mine -->
+        <section id="s-mine" class="s-sec hidden">
+          <div class="mb-6">
+            <h1 class="text-3xl font-black tracking-wider text-white">TICKETELE MELE</h1>
+            <p class="text-[11px] text-emerald-400 font-semibold mt-1 uppercase tracking-widest">| Preluate de tine</p>
+          </div>
+          <div id="s-mine-list" class="space-y-3"></div>
+        </section>
+
+        <!-- chat -->
+        <section id="s-chat" class="s-sec hidden flex-1 flex flex-col">
+          <div class="flex items-center justify-between bg-white/[0.03] p-4 rounded-xl border border-white/5 mb-4">
+            <div class="flex items-center gap-3">
+              <button id="s-back" class="text-gray-400 hover:text-white"><i class="fa-solid fa-arrow-left text-lg"></i></button>
+              <div>
+                <div class="flex items-center gap-2">
+                  <h2 id="s-c-cat" class="font-bold text-white">—</h2>
+                  <span id="s-c-status" class="pill">—</span>
+                </div>
+                <p id="s-c-player" class="text-xs text-gray-400"></p>
+              </div>
+            </div>
+            <div class="flex items-center gap-2">
+              <button id="s-c-claim" class="btn-emerald"><i class="fa-solid fa-hand"></i> Preia</button>
+              <button id="s-c-tp"    class="btn-ghost"><i class="fa-solid fa-location-arrow"></i> TP</button>
+              <button id="s-c-bring" class="btn-ghost"><i class="fa-solid fa-people-arrows"></i> Bring</button>
+              <button id="s-c-close" class="btn-danger"><i class="fa-solid fa-lock"></i> Închide</button>
+            </div>
+          </div>
+          <div id="s-c-msgs" class="flex-1 overflow-y-auto space-y-3 pr-2 border-b border-white/5 pb-4"></div>
+          <div class="pt-3 flex gap-2">
+            <input id="s-c-input" type="text" placeholder="Răspunde jucătorului..." class="flex-1 bg-[#0c1210] border border-white/10 rounded-xl px-4 py-3 text-sm text-gray-200 focus:outline-none focus:border-emerald-500" />
+            <button id="s-c-send" class="btn-emerald px-6"><i class="fa-solid fa-paper-plane"></i></button>
+          </div>
+        </section>
+
+        <!-- stats -->
+        <section id="s-stats" class="s-sec hidden">
+          <h1 class="text-3xl font-black tracking-wider text-white">STATISTICI</h1>
+          <p class="text-[11px] text-emerald-400 font-semibold mt-1 uppercase tracking-widest mb-6">| Performanța ta & globală</p>
+          <h3 class="text-sm font-bold text-white uppercase tracking-wider mb-3">Tu</h3>
+          <div class="grid grid-cols-4 gap-4 mb-8">
+            <div class="stat-tile"><span class="st-v" id="st-total">0</span><span class="st-k">Rezolvate total</span></div>
+            <div class="stat-tile"><span class="st-v" id="st-month">0</span><span class="st-k">Luna curentă</span></div>
+            <div class="stat-tile"><span class="st-v" id="st-rating">5.0</span><span class="st-k">Rating</span></div>
+            <div class="stat-tile"><span class="st-v" id="st-resp">0s</span><span class="st-k">Timp mediu preluare</span></div>
+          </div>
+          <h3 class="text-sm font-bold text-white uppercase tracking-wider mb-3">Global</h3>
+          <div class="grid grid-cols-4 gap-4">
+            <div class="stat-tile"><span class="st-v" id="st-g-active">0</span><span class="st-k">Active acum</span></div>
+            <div class="stat-tile"><span class="st-v" id="st-g-month">0</span><span class="st-k">Închise luna asta</span></div>
+            <div class="stat-tile"><span class="st-v" id="st-g-claim">0s</span><span class="st-k">Mediu preluare</span></div>
+            <div class="stat-tile"><span class="st-v" id="st-g-close">0s</span><span class="st-k">Mediu rezolvare</span></div>
+          </div>
+        </section>
+
+        <!-- rewards -->
+        <section id="s-rewards" class="s-sec hidden">
+          <div class="flex items-center justify-between mb-1">
+            <h1 class="text-3xl font-black tracking-wider text-white">REWARDS</h1>
+            <div class="text-right">
+              <div class="text-[11px] text-gray-500 uppercase tracking-widest">Reset lunar</div>
+              <div id="r-reset" class="text-emerald-400 font-bold text-sm">—</div>
+            </div>
+          </div>
+          <p class="text-[11px] text-emerald-400 font-semibold mt-1 uppercase tracking-widest mb-6">| Atinge obiectivele și revendică-ți răsplata</p>
+
+          <div class="bg-white/[0.03] border border-white/5 rounded-2xl p-5 mb-4">
+            <div class="flex items-center justify-between text-sm mb-2">
+              <span class="text-gray-300"><i class="fa-solid fa-ticket text-emerald-400"></i> <b id="r-monthly">0</b> tickete rezolvate luna asta</span>
+              <span class="text-gray-500">Prag: <b id="r-milestone" class="text-gray-300">1000</b></span>
+            </div>
+            <div class="prog"><div id="r-progfill" class="prog-fill"></div></div>
+            <div class="text-[11px] text-gray-500 mt-2">Bonus la prag: <b id="r-milestone-fpt" class="text-emerald-400">0</b> FPT · 1 FPT / <b id="r-fptper">100</b> tickete</div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4 mb-4">
+            <div class="stat-tile items-start text-left">
+              <span class="st-v text-emerald-400" id="r-money">$0</span>
+              <span class="st-k">Bani acumulați (lunar)</span>
+              <span class="text-[11px] text-gray-500 mt-1">Revendicabil acum: <b id="r-claimable" class="text-emerald-300">$0</b></span>
+            </div>
+            <div class="stat-tile items-start text-left">
+              <span class="st-v text-white" id="r-fpt">0</span>
+              <span class="st-k">FPT-uri (total)</span>
+              <span class="text-[11px] text-gray-500 mt-1">Payout: <b id="r-perticket" class="text-gray-300">$0</b> / ticket</span>
+            </div>
+          </div>
+
+          <button id="r-claim" class="w-full btn-emerald py-3 text-sm font-bold"><i class="fa-solid fa-sack-dollar"></i> REVENDICĂ BANII ÎN BANCĂ</button>
+        </section>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- toast -->
+  <div id="tk-toast" class="hidden"></div>
+
+  <script src="js/player.js"></script>
+  <script src="js/staff.js"></script>
+</body>
+</html>

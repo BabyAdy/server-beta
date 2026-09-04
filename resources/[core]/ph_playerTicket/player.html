@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Player Support Area</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="flex items-center justify-center min-h-screen select-none">
+
+  <!-- Container Principal -->
+  <div class="w-[1100px] h-[700px] glass-panel rounded-2xl flex overflow-hidden shadow-2xl relative border border-purple-900/40">
+    
+    <!-- Top Badge -->
+    <div class="absolute top-0 left-0 purple-gradient text-white font-black px-8 py-3 rounded-br-2xl shadow-lg flex flex-col justify-center items-start z-20 border-b border-r border-purple-400/30">
+      <span class="text-xl leading-tight tracking-wider">Purple Havoc</span>
+      <span class="text-xs font-semibold tracking-widest text-purple-200 opacity-90">PLAYER SUPPORT</span>
+    </div>
+
+    <!-- Sidebar Navigatie -->
+    <div class="w-[260px] bg-[#120e21]/90 border-r border-purple-900/30 flex flex-col pt-20 pb-6 px-4 justify-between z-10">
+      <div>
+        <!-- Profile Mini-Card -->
+        <div class="flex items-center gap-3 bg-[#1a132f]/60 p-3 rounded-xl border border-purple-500/20 mb-6">
+          <div class="w-12 h-12 rounded-full bg-purple-900/50 border border-purple-500 flex items-center justify-center font-bold text-lg text-purple-300">
+            C
+          </div>
+          <div class="overflow-hidden">
+            <h2 class="text-sm font-bold text-white truncate">BabyAdy</h2>
+            <span class="text-[11px] text-purple-400">ID: 1</span>
+          </div>
+        </div>
+
+        <!-- Meniu Stânga -->
+        <nav class="space-y-2">
+          <button data-target="create-ticket" class="nav-btn w-full flex items-center justify-between px-4 py-3 rounded-xl font-semibold active">
+            <span class="flex items-center gap-3"><i class="fa-solid fa-plus-circle text-sm"></i> NEW TICKET</span>
+          </button>
+          
+          <button data-target="my-tickets" class="nav-btn w-full flex items-center justify-between px-4 py-3 rounded-xl font-semibold text-gray-400">
+            <span class="flex items-center gap-3"><i class="fa-solid fa-list-check text-sm"></i> MY TICKETS</span>
+            <span id="player-badge-count" class="badge">1</span>
+          </button>
+        </nav>
+      </div>
+
+      <!-- Footer Help Box -->
+      <div class="bg-[#18122c] p-3 rounded-xl border border-purple-900/30 text-center">
+        <p class="text-[11px] text-gray-400">Maintain civilized language when discussing with Staff members.</p>
+      </div>
+    </div>
+
+    <!-- Zonă Conținut Main -->
+    <div class="flex-1 p-8 overflow-y-auto relative flex flex-col justify-between">
+      
+      <!-- Secțiune 1: Formular Creare Ticket -->
+      <div id="create-ticket" class="content-section">
+        <div class="mb-6">
+          <h1 class="text-3xl font-black tracking-wider text-white">OPEN A TICKET</h1>
+          <p class="text-xs text-purple-400 font-semibold mt-1 uppercase tracking-widest">| Submit a request to the support team</p>
+        </div>
+
+        <form id="ticket-form" class="space-y-4">
+          <div>
+            <label class="block text-xs font-bold text-purple-300 uppercase tracking-wider mb-2">Category Problem</label>
+            <select id="ticket-category" class="w-full bg-[#120e21] border border-purple-900/50 rounded-xl px-4 py-3 text-sm text-gray-200 focus:outline-none focus:border-purple-500">
+              <option value="Problema Generală">General Problem / Confusion</option>
+              <option value="Raportare Jucator">Player Report</option>
+              <option value="Bug / Probleme Tehnice">Bug / Technical Issues</option>
+              <option value="Preluare Item / Pierdere">Item Pick-up / Losses</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-purple-300 uppercase tracking-wider mb-2">Description of the Problem</label>
+            <textarea id="ticket-reason" rows="5" placeholder="Detail your issue here (mention IDs, locations, or video/photo evidence)..." class="w-full bg-[#120e21] border border-purple-900/50 rounded-xl p-4 text-sm text-gray-200 focus:outline-none focus:border-purple-500 resize-none"></textarea>
+          </div>
+
+          <div class="flex items-center gap-2 text-xs text-amber-400/80 bg-amber-950/20 p-3 rounded-lg border border-amber-800/30">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            <span>Do not create multiple tickets for the same issue. A Staff member will take over your request as soon as possible.</span>
+          </div>
+
+          <button type="submit" class="w-full purple-gradient hover:opacity-90 text-white font-bold py-3.5 rounded-xl shadow-lg border border-purple-400/30 flex items-center justify-center gap-2 transition-all">
+            <i class="fa-solid fa-paper-plane"></i> SEND TICKET
+          </button>
+        </form>
+      </div>
+
+      <!-- Secțiune 2: Lista Ticketelor Jucătorului -->
+      <div id="my-tickets" class="content-section hidden">
+        <div class="mb-6">
+          <h1 class="text-3xl font-black tracking-wider text-white">MY TICKETS</h1>
+          <p class="text-xs text-purple-400 font-semibold mt-1 uppercase tracking-widest">| History and status of your requests</p>
+        </div>
+
+        <div id="player-tickets-list" class="space-y-3">
+          <!-- Populat prin JS -->
+        </div>
+      </div>
+
+      <!-- Secțiune 3: Chat Ticket (Când deschide un ticket existent) -->
+      <div id="player-chat-view" class="content-section hidden h-full flex flex-col justify-between">
+        <div>
+          <!-- Header Chat Player -->
+          <div class="flex items-center justify-between bg-[#120e21]/80 p-4 rounded-xl border border-purple-900/40 mb-4">
+            <div class="flex items-center gap-3">
+              <button id="btn-back-player-list" class="text-gray-400 hover:text-purple-300 transition-colors">
+                <i class="fa-solid fa-arrow-left text-lg"></i>
+              </button>
+              <div>
+                <div class="flex items-center gap-2">
+                  <h2 id="view-ticket-category" class="font-bold text-white">Player Report</h2>
+                  <span id="view-ticket-status" class="text-xs text-purple-300 bg-purple-900/40 px-2 py-0.5 rounded border border-purple-800/40">In pending</span>
+                </div>
+                <p id="view-ticket-desc" class="text-xs text-gray-400">parere no fear + pov</p>
+              </div>
+            </div>
+
+            <button id="btn-player-close" class="bg-red-950/60 hover:bg-red-900 border border-red-700/40 text-red-300 px-3 py-1.5 rounded-lg text-xs font-bold transition-all">
+              Închide Ticketul
+            </button>
+          </div>
+
+          <!-- Zona de Mesaje Chat -->
+          <div id="player-chat-messages" class="h-[400px] overflow-y-auto space-y-3 pr-2 border-b border-purple-900/20 pb-4">
+            <!-- Dinamic prin JS -->
+          </div>
+        </div>
+
+        <!-- Input Chat -->
+        <div class="pt-3">
+          <div class="flex gap-2">
+            <input id="player-chat-input" type="text" placeholder="Reply to the staff..." class="flex-1 bg-[#120e21] border border-purple-900/50 rounded-xl px-4 py-3 text-sm text-gray-200 focus:outline-none focus:border-purple-500">
+            <button id="btn-player-send" class="purple-gradient text-white px-6 rounded-xl font-bold flex items-center justify-center hover:opacity-90">
+              <i class="fa-solid fa-paper-plane"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
