@@ -12,6 +12,7 @@ CREATE TABLE IF NOT EXISTS `houses` (
     `y`             FLOAT           NOT NULL,
     `z`             FLOAT           NOT NULL,
     `heading`       FLOAT           NOT NULL DEFAULT 0,
+    `interior_vw`   INT UNSIGNED    NOT NULL DEFAULT 0,     -- virtual world (routing bucket) cat timp esti in casa; = id-ul casei
     `created_by`    INT UNSIGNED    DEFAULT NULL,           -- users.id al staff-ului care a creat casa
     `created_at`    TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (`id`),

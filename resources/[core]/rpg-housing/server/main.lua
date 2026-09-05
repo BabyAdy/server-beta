@@ -79,6 +79,7 @@ local function shapeHouse(row)
         interiorLabel = def and def.label or row.interior_type,
         coords        = vector3(row.x, row.y, row.z),
         heading       = tonumber(row.heading) or 0.0,
+        interiorVw    = tonumber(row.interior_vw) or tonumber(row.id) or 0,   -- VW cat timp esti in casa
     }
 end
 
@@ -93,6 +94,19 @@ local function ensureSchema()
             if s ~= '' then MySQL.query.await(s) end
         end
     end
+
+    -- migratie: coloana interior_vw pe tabele deja existente (fara pierdere de date)
+    local hasVw = MySQL.scalar.await([[
+        SELECT COUNT(*) FROM information_schema.COLUMNS
+        WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'houses' AND COLUMN_NAME = 'interior_vw'
+    ]])
+    if (tonumber(hasVw) or 0) == 0 then
+        MySQL.query.await("ALTER TABLE `houses` ADD COLUMN `interior_vw` INT UNSIGNED NOT NULL DEFAULT 0")
+        print('[rpg-housing] Coloana houses.interior_vw adaugata.')
+    end
+    -- fiecare casa care inca are 0 -> interior_vw = id-ul ei
+    MySQL.query.await("UPDATE `houses` SET `interior_vw` = `id` WHERE `interior_vw` = 0")
+
     if DBG then print('[rpg-housing] schema OK') end
 end
 
@@ -163,6 +177,9 @@ RegisterCommand('createhouse', function(src, args)
 
     if not id then return feedback(src, 'ERROR', 'Eroare la salvare. Încearcă din nou.') end
 
+    -- interior_vw = id-ul propriu al casei (nu se stia inainte de INSERT, e AUTO_INCREMENT)
+    MySQL.update.await('UPDATE houses SET interior_vw = ? WHERE id = ?', { id, id })
+
     local row = MySQL.single.await('SELECT * FROM houses WHERE id = ? LIMIT 1', { id })
     local shaped = shapeHouse(row)
     cache[id] = shaped
@@ -180,3 +197,30 @@ RegisterCommand('createhouse', function(src, args)
     print(('[rpg-housing] /createhouse: %s(#%s) -> casă #%d (%s) @ %.1f,%.1f,%.1f, $%d')
         :format(giverName, src, id, interiorType, coords.x, coords.y, coords.z, price))
 end, false)
+
+-- ===========================================================================
+--  INTRARE / IEȘIRE — serverul comuta routing bucket-ul (virtual world).
+--  In casa -> VW = house.interior_vw (= id-ul casei) => casele care folosesc
+--  acelasi interior MLO fizic NU se vad intre ele. Afara -> VW 0.
+--  Teleportul efectiv (SetEntityCoords) il face clientul, dupa confirmare.
+-- ===========================================================================
+RegisterNetEvent('rpg-housing:enter', function(houseId)
+    local src = source
+    local h = cache[tonumber(houseId)]
+    if not h then return end
+
+    -- anti-abuz usor: trebuie sa fii aproape de usa exterioara
+    local ped = GetPlayerPed(src)
+    if not ped or ped == 0 then return end
+    if #(GetEntityCoords(ped) - h.coords) > (Config.InteractRadius * 4.0) then return end
+
+    SetPlayerRoutingBucket(src, h.interiorVw)
+    TriggerClientEvent('rpg-housing:setInside', src, h.id, true)
+end)
+
+RegisterNetEvent('rpg-housing:exit', function(houseId)
+    local src = source
+    local h = cache[tonumber(houseId)]
+    SetPlayerRoutingBucket(src, 0)
+    TriggerClientEvent('rpg-housing:setInside', src, h and h.id or tonumber(houseId), false)
+end)

@@ -21,6 +21,29 @@ local function feedback(src, channel, text)
     end
 end
 
+local function cmdIssuer(src)
+    if src <= 0 then return 'Consolă', 'Consolă' end
+    local name = GetPlayerName(src) or ('src' .. src)
+    local ok, acc = pcall(function() return exports['rpg-auth']:getAccount(src) end)
+    if ok and acc and acc.username then name = acc.username end
+    local label = 'Staff'
+    local okl, l = pcall(function() return exports['rpg-auth']:getStaffLabel(src) end)
+    if okl and l and l ~= '' then label = l end
+    return name, label
+end
+
+-- mesaj DOAR pt. staff online cu grad >= minRank (mereu roșu — Staff.BROADCAST_COLOR)
+local function staffBroadcast(minRank, text)
+    for _, pid in ipairs(GetPlayers()) do
+        local t = tonumber(pid)
+        local ok, allowed = pcall(function() return exports['rpg-auth']:hasStaffLevel(t, minRank) end)
+        if ok and allowed == true then
+            TriggerClientEvent('rpg-hud:chatMessage', t, { text = text, color = Staff.BROADCAST_COLOR, time = os.date('%H:%M') })
+        end
+    end
+    print(('[rpg-world][staff] %s'):format(text))
+end
+
 RegisterNetEvent('rpg-world:noclipToggle', function(on)
     local src = source
     if not hasRank(src, Config.NoClip.minRank) then return end
@@ -91,4 +114,44 @@ RegisterCommand('maxperf', function(src)
 
     feedback(src, 'SUCCESS', 'Performanță maximă aplicată (motor, frâne, suspensie Race, turbo).')
     print(('[rpg-world] /maxperf: src %d -> vehicul #%d'):format(src, veh))
+end, false)
+
+-- ===========================================================================
+--  /setvw [sql id] [virtual id]  — staff >= Config.SetVwRank
+--  Muta jucatorul [sql id] in virtual world-ul (routing bucket) [virtual id].
+--  "sql id" = SQL id de PERSONAJ (ca la /setstaff), rezolvat prin rpg-characters.
+-- ===========================================================================
+RegisterCommand('setvw', function(src, args)
+    if not hasRank(src, Config.SetVwRank) then
+        return feedback(src, 'ERROR', 'Nu ai acces la această comandă.')
+    end
+
+    local charId = tonumber(args[1])
+    local vw     = tonumber(args[2])
+    if not charId or not vw or vw < 0 then
+        return feedback(src, 'ERROR', 'Folosire: /setvw [sql id] [virtual id]')
+    end
+    vw = math.floor(vw)
+    if vw > 65535 then
+        return feedback(src, 'ERROR', 'Virtual World invalid (0 - 65535).')
+    end
+
+    local target = exports['rpg-characters']:resolveCharacter(charId)
+    if not target or not target.src then
+        return feedback(src, 'ERROR', 'Jucătorul nu este online.')
+    end
+
+    SetPlayerRoutingBucket(target.src, vw)
+
+    local giverName, giverLabel = cmdIssuer(src)
+    feedback(src, 'SUCCESS', ('Ai mutat %s (#%s) în Virtual World %d.'):format(target.username or '?', charId, vw))
+    if target.src ~= src then
+        feedback(target.src, 'INFO', ('Ai fost mutat în Virtual World %d.'):format(vw))
+    end
+
+    staffBroadcast(Config.SetVwBroadcastRank,
+        ('Staff: %s %s set %s [%s] Virtual World %d!')
+            :format(giverLabel, giverName, target.username or '?', charId, vw))
+
+    print(('[rpg-world] /setvw: %s(#%s) -> personaj #%s in VW %d'):format(giverName, src, charId, vw))
 end, false)

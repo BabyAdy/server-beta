@@ -36,29 +36,36 @@ local function drawText3D(coords, text)
 end
 
 -- --------------------------------------------------- intrare / iesire (E) --
+-- Serverul comuta virtual world-ul (routing bucket) si confirma prin
+-- rpg-housing:setInside; teleportul efectiv il facem aici, dupa confirmare.
 RegisterCommand('rpghousing_interact', function()
-    local ped = PlayerPedId()
-
     if insideHouseId then
-        local h = houses[insideHouseId]
-        insideHouseId = nil
-        if not h then return end
-        SetEntityCoordsNoOffset(ped, h.coords.x, h.coords.y, h.coords.z, false, false, false)
-        SetEntityHeading(ped, h.heading or 0.0)
-        return
+        TriggerServerEvent('rpg-housing:exit', insideHouseId)
+    elseif nearHouseId then
+        TriggerServerEvent('rpg-housing:enter', nearHouseId)
     end
+end, false)
+RegisterKeyMapping('rpghousing_interact', 'Intră / Ieși din casă', 'keyboard', 'E')
 
-    if nearHouseId then
-        local h = houses[nearHouseId]
-        local def = h and Config.InteriorTypes[h.interiorType]
+RegisterNetEvent('rpg-housing:setInside', function(houseId, entering)
+    local ped = PlayerPedId()
+    local h = houses[houseId]
+
+    if entering then
+        insideHouseId = houseId
+        if not h then return end
+        local def = Config.InteriorTypes[h.interiorType]
         if not def then return end
         local ic = def.coords
         SetEntityCoordsNoOffset(ped, ic.x, ic.y, ic.z, false, false, false)
         SetEntityHeading(ped, ic.w or 0.0)
-        insideHouseId = nearHouseId
+    else
+        insideHouseId = nil
+        if not h then return end
+        SetEntityCoordsNoOffset(ped, h.coords.x, h.coords.y, h.coords.z, false, false, false)
+        SetEntityHeading(ped, h.heading or 0.0)
     end
-end, false)
-RegisterKeyMapping('rpghousing_interact', 'Intră / Ieși din casă', 'keyboard', 'E')
+end)
 
 -- ---------------------------------------------------------------------------
 --  bucla principala: marker (nativ, in lume) + pozitii pt. etichetele NUI

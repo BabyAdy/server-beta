@@ -36,3 +36,7 @@ Config.NoClip = {
 -- ---- COMENZI VEHICULE (staff) ----------------------------------------
 Config.SpawnCarRank = 'trialadmin'   -- /spawncar [model]
 Config.MaxPerfRank  = 'manager'      -- /maxperf
+
+-- ---- /setvw [sql id] [virtual id] ----------------------------------
+Config.SetVwRank          = 'trialadmin'   -- cine poate rula /setvw
+Config.SetVwBroadcastRank = 'trialadmin'   -- cine vede mesajul in chat
