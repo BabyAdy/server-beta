@@ -5,21 +5,15 @@
 --  baza (rpg-characters:reapplyClothingBase) si re-aplica ce a mai ramas.
 --
 --  Drawable/texture:
---    - item in Config.StaffClothingModels  -> varianta male/female (haine addon staff)
---    - altfel                        -> item.metadata.drawable / .texture
+--    - iteme staff  m_<cheie> / f_<cheie>  -> Config.StaffClothingModels[<cheie>].male/.female
+--    - restul                              -> item.metadata.drawable / .texture
 -- ===========================================================================
-
-local FEMALE_HASH = GetHashKey('mp_f_freemode_01')
 
 local slotDefByKey = {}
 for _, s in ipairs(Config.EquipmentSlots or {}) do slotDefByKey[s.key] = s end
 
 local charReady = false
 local applied   = {}   -- [slotKey] = { isProp, id, drawable, texture }
-
-local function isPedFemale()
-    return GetEntityModel(PlayerPedId()) == FEMALE_HASH
-end
 
 -- ce trebuie aplicat pentru un item dintr-un slot de echipament (sau nil)
 local function resolve(slotKey, item)
@@ -32,15 +26,19 @@ local function resolve(slotKey, item)
     local id     = isProp and def.prop or def.component
     if id == nil then return nil end
 
-    local drawable, texture = 0, 0
-    local w = Config.StaffClothingModels and Config.StaffClothingModels[item.itemId]
-    if w then
-        local v = (isPedFemale() and w.female) or w.male or w.female
-        if v then drawable, texture = v.drawable or 0, v.texture or 0 end
-    else
-        local md = item.metadata or {}
-        drawable = tonumber(md.drawable) or 0
-        texture  = tonumber(md.texture) or 0
+    local md = item.metadata or {}
+    local drawable = tonumber(md.drawable) or 0
+    local texture  = tonumber(md.texture) or 0
+
+    -- item staff separat pe gen: id = m_<cheie> | f_<cheie>
+    local g, baseId = item.itemId:match('^([mf])_(.+_staff_.+)$')
+    local models = Config.StaffClothingModels
+    if g and models and models[baseId] then
+        local v = models[baseId][g == 'f' and 'female' or 'male']
+        if v then
+            drawable = tonumber(v.drawable) or 0
+            texture  = tonumber(v.texture) or 0
+        end
     end
 
     return { isProp = isProp, id = id, drawable = drawable, texture = texture }

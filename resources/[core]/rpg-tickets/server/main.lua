@@ -551,12 +551,17 @@ function Actions.giveWardrobe(src, data)
     local slug = ''
     pcall(function() slug = exports['rpg-auth']:getStaff(src) or '' end)
     local set = wardrobeFor(slug)
-    local itemId = set and set[piece]
-    if not itemId then return false, { error = 'Gradul tau nu are haine definite.' } end
+    local baseId = set and set[piece]
+    if not baseId then return false, { error = 'Gradul tau nu are haine definite.' } end
 
     local ch
     pcall(function() ch = exports['rpg-characters']:getCharacter(src) end)
     if not ch or not ch.id then return false, { error = 'Personaj neincarcat.' } end
+
+    -- itemele staff sunt separate pe gen: m_<baseId> / f_<baseId>
+    local sex = 'male'
+    pcall(function() sex = exports['rpg-characters']:getSex(src) or 'male' end)
+    local itemId = ((sex == 'female') and 'f_' or 'm_') .. baseId
 
     local added = false
     pcall(function() added = exports['rpg-inventory']:Add(ch.id, itemId, 1) end)

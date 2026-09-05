@@ -74,17 +74,54 @@ Config.ClothingApply = {
 -- ===========================================================================
 Config.StaffClothingModels = {
     -- OWNER
-    mask_staff_owner     = { male = { drawable = 0, texture = 0 }, female = { drawable = 0, texture = 0 } },
-    shirt_staff_owner    = { male = { drawable = 3, texture = 0 }, female = { drawable = 3, texture = 0 } },
+    mask_staff_owner     = { male = { drawable = 0, texture = 0 }, female = { drawable = 4, texture = 0 } },
+    shirt_staff_owner    = { male = { drawable = 0, texture = 0 }, female = { drawable = 0, texture = 0 } },
     jacket_staff_owner   = { male = { drawable = 3, texture = 0 }, female = { drawable = 3, texture = 0 } },
 
     -- MANAGER
-    mask_staff_manager   = { male = { drawable = 0, texture = 0 }, female = { drawable = 0, texture = 0 } },
-    shirt_staff_manager  = { male = { drawable = 3, texture = 1 }, female = { drawable = 3, texture = 1 } },
+    mask_staff_manager   = { male = { drawable = 0, texture = 0 }, female = { drawable = 4, texture = 1 } },
+    shirt_staff_manager  = { male = { drawable = 3, texture = 1 }, female = { drawable = 0, texture = 0 } },
     jacket_staff_manager = { male = { drawable = 3, texture = 1 }, female = { drawable = 3, texture = 1 } },
 
-    -- DEVELOPER (nu e un grad rpg-auth; doar item, se poate da prin /giveitem)
-    jacket_staff_developer = { male = { drawable = 3, texture = 2 }, female = { drawable = 3, texture = 2 } },
+    -- Lead Admin
+    mask_staff_admin     = { male = { drawable = 3, texture = 2 }, female = { drawable = 4, texture = 2 } },
+    shirt_staff_admin5   = { male = { drawable = 3, texture = 2 }, female = { drawable = 0, texture = 0 } },
+    jacket_staff_admin5  = { male = { drawable = 3, texture = 2 }, female = { drawable = 3, texture = 2 } },
+    
+    -- Head Admin
+    mask_staff_admin     = { male = { drawable = 3, texture = 2 }, female = { drawable = 4, texture = 2 } },
+    shirt_staff_admin4   = { male = { drawable = 3, texture = 2 }, female = { drawable = 0, texture = 0 } },
+    jacket_staff_admin4  = { male = { drawable = 3, texture = 2 }, female = { drawable = 3, texture = 3 } },
+    
+    -- General Admin
+    mask_staff_admin     = { male = { drawable = 3, texture = 2 }, female = { drawable = 4, texture = 2 } },
+    shirt_staff_admin3   = { male = { drawable = 3, texture = 2 }, female = { drawable = 0, texture = 0 } },
+    jacket_staff_admin3  = { male = { drawable = 3, texture = 2 }, female = { drawable = 3, texture = 4 } },
+    
+    -- Junior Admin
+    mask_staff_admin     = { male = { drawable = 3, texture = 2 }, female = { drawable = 4, texture = 2 } },
+    shirt_staff_admin2   = { male = { drawable = 3, texture = 2 }, female = { drawable = 0, texture = 0 } },
+    jacket_staff_admin2  = { male = { drawable = 3, texture = 2 }, female = { drawable = 3, texture = 5 } },
+    
+    -- Trial Admin
+    mask_staff_admin     = { male = { drawable = 3, texture = 2 }, female = { drawable = 4, texture = 2 } },
+    shirt_staff_admin1   = { male = { drawable = 3, texture = 2 }, female = { drawable = 0, texture = 0 } },
+    jacket_staff_admin1  = { male = { drawable = 3, texture = 2 }, female = { drawable = 3, texture = 6 } },
+
+    -- Helper
+    mask_staff_helper    = { male = { drawable = 3, texture = 2 }, female = { drawable = 4, texture = 3 } },
+    shirt_staff_helper2  = { male = { drawable = 3, texture = 2 }, female = { drawable = 0, texture = 0 } },
+    jacket_staff_helper2 = { male = { drawable = 3, texture = 2 }, female = { drawable = 3, texture = 7 } },
+
+    -- Trial Helper
+    mask_staff_helper    = { male = { drawable = 3, texture = 2 }, female = { drawable = 4, texture = 3 } },
+    shirt_staff_helper1  = { male = { drawable = 3, texture = 2 }, female = { drawable = 0, texture = 0 } },
+    jacket_staff_helper1 = { male = { drawable = 3, texture = 2 }, female = { drawable = 3, texture = 8 } },
+
+    -- Anti-Cheat
+    mask_staff_ac        = { male = { drawable = 3, texture = 2 }, female = { drawable = 4, texture = 4 } },
+    shirt_staff_ac       = { male = { drawable = 3, texture = 2 }, female = { drawable = 0, texture = 0 } },
+    jacket_staff_ac      = { male = { drawable = 3, texture = 2 }, female = { drawable = 3, texture = 9 } },
 }
 
 -- ===========================================================================

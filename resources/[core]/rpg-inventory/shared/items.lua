@@ -148,20 +148,33 @@ Items.register{ id = 'jeans',        label = 'Blugi',          category = 'cloth
 Items.register{ id = 'sneakers',     label = 'Adidași',        category = 'clothing', weight = 0.70, maxStack = 1, value = 60,
                 equipSlot = 'shoes', equipable = true, metadataTemplate = { component = 6, drawable = 0, texture = 0 } }
 
--- ----- Îmbrăcăminte staff (drawable/texture setate ulterior de tine) --------
-Items.register{ id = 'jacket_staff_owner',     label = 'Geacă Staff Owner',     category = 'clothing', weight = 0.80, maxStack = 1, value = 0,
-                equipSlot = 'shirt', equipable = true, metadataTemplate = { component = 11, drawable = 0, texture = 0 } }
-Items.register{ id = 'shirt_staff_owner',      label = 'Tricou Staff Owner',    category = 'clothing', weight = 0.40, maxStack = 1, value = 0,
-                equipSlot = 'shirt', equipable = true, metadataTemplate = { component = 11, drawable = 0, texture = 0 } }
-Items.register{ id = 'mask_staff_owner',       label = 'Mască Staff Owner',     category = 'clothing', weight = 0.30, maxStack = 1, value = 0,
-                equipSlot = 'mask',  equipable = true, metadataTemplate = { component = 1, drawable = 0, texture = 0 } }
-
-Items.register{ id = 'shirt_staff_manager',    label = 'Tricou Staff Manager',  category = 'clothing', weight = 0.40, maxStack = 1, value = 0,
-                equipSlot = 'shirt', equipable = true, metadataTemplate = { component = 11, drawable = 0, texture = 0 } }
-Items.register{ id = 'mask_staff_manager',     label = 'Mască Staff Manager',   category = 'clothing', weight = 0.30, maxStack = 1, value = 0,
-                equipSlot = 'mask',  equipable = true, metadataTemplate = { component = 1, drawable = 0, texture = 0 } }
-
-Items.register{ id = 'jacket_staff_developer', label = 'Geacă Staff Developer', category = 'clothing', weight = 0.80, maxStack = 1, value = 0,
-                equipSlot = 'shirt', equipable = true, metadataTemplate = { component = 11, drawable = 0, texture = 0 } }
-Items.register{ id = 'jacket_staff_manager',   label = 'Geacă Staff Manager',   category = 'clothing', weight = 0.80, maxStack = 1, value = 0,
-                equipSlot = 'shirt', equipable = true, metadataTemplate = { component = 11, drawable = 0, texture = 0 } }
+-- ----- Îmbrăcăminte staff — M si F SEPARATE --------------------------------
+--  Pentru fiecare cheie din Config.StaffClothingModels se inregistreaza 2 iteme:
+--     m_<cheie>   si   f_<cheie>     (ex: m_mask_staff_owner / f_mask_staff_owner)
+--  Piesa din prefix -> slot:  mask_* -> 'mask' (comp 1),  shirt_*/jacket_* -> 'shirt' (comp 11).
+--  drawable/texture NU se pun aici — clothing.lua le citeste din
+--  Config.StaffClothingModels[<cheie>][male|female] dupa prefixul m_/f_.
+--  Iconă: una pe grad+piesă -> html/assets/icons/staff_<piesa>_<grad>.png
+--  (M si F folosesc aceeasi iconă). Ex: staff_mask_owner.png, staff_jacket_admin5.png.
+do
+    local PIECE = {
+        mask   = { slot = 'mask',  comp = 1,  weight = 0.30, ro = 'Mască' },
+        shirt  = { slot = 'shirt', comp = 11, weight = 0.40, ro = 'Tricou' },
+        jacket = { slot = 'shirt', comp = 11, weight = 0.80, ro = 'Geacă' },
+    }
+    for baseId in pairs(Config.StaffClothingModels or {}) do
+        local prefix = baseId:match('^(%a+)_staff_') or 'jacket'
+        local p = PIECE[prefix] or PIECE.jacket
+        local rest = (baseId:gsub('^%a+_staff_', ''))
+        local icon = ('staff_%s_%s.png'):format(prefix, rest)
+        for _, g in ipairs({ 'm', 'f' }) do
+            Items.register{
+                id        = g .. '_' .. baseId,
+                label     = ('%s Staff %s [%s]'):format(p.ro, rest, g:upper()),
+                category  = 'clothing', weight = p.weight, maxStack = 1, value = 0,
+                equipable = true, equipSlot = p.slot, icon = icon,
+                metadataTemplate = { component = p.comp, drawable = 0, texture = 0 },
+            }
+        end
+    end
+end

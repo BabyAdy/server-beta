@@ -42,4 +42,6 @@ files {
     'html/js/fastslots.js',
     'html/js/app.js',
     'html/assets/icons/placeholder.svg',
+    'html/assets/icons/*.png',
+    'html/assets/icons/*.svg',
 }

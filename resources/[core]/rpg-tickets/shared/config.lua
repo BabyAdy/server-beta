@@ -69,17 +69,24 @@ Config.Rewards = {
 }
 
 -- ---- HAINE STAFF (Dashboard) ------------------------------------------------
--- Butoanele "Mască / Tricou / Hanorac Staff" NU mai echipeaza direct: serverul
+-- Butoanele "Mască / Tricou / Hanorac Staff" NU echipeaza direct: serverul
 -- verifica gradul si BAGA itemul potrivit in inventarul jucatorului; el il
--- echipeaza singur (rpg-inventory aplica modelul addon, male/female).
+-- echipeaza singur (rpg-inventory aplica modelul, male/female).
 -- Aceleasi iteme se pot da si prin /giveitem.
 --
 -- Cheia = slug de grad (rpg-auth/shared/staff.lua). Daca gradul jucatorului nu
 -- e aici, se coboara la cel mai apropiat grad INFERIOR care are o intrare.
--- Drawable/texture pe gen se regleaza in rpg-inventory (Config.StaffWardrobe).
+-- Drawable/texture pe gen se regleaza in rpg-inventory (Config.StaffClothingModels).
 Config.StaffWardrobe = {
-    owner   = { mask = 'mask_staff_owner',   tshirt = 'shirt_staff_owner',   hoodie = 'jacket_staff_owner'   },
-    manager = { mask = 'mask_staff_manager', tshirt = 'shirt_staff_manager', hoodie = 'jacket_staff_manager' },
+    owner         = { mask = 'mask_staff_owner',   tshirt = 'shirt_staff_owner',   hoodie = 'jacket_staff_owner'   },
+    manager       = { mask = 'mask_staff_manager', tshirt = 'shirt_staff_manager', hoodie = 'jacket_staff_manager' },
+    leadadmin     = { mask = 'mask_staff_admin', tshirt = 'shirt_staff_admin5',  hoodie = 'jacket_staff_admin5'    },
+    headadmin     = { mask = 'mask_staff_admin', tshirt = 'shirt_staff_admin4',  hoodie = 'jacket_staff_admin4'    },
+    generaladmin  = { mask = 'mask_staff_admin', tshirt = 'shirt_staff_admin3',  hoodie = 'jacket_staff_admin3'    },
+    junioradmin   = { mask = 'mask_staff_admin', tshirt = 'shirt_staff_admin2',  hoodie = 'jacket_staff_admin2'    },
+    trialadmin    = { mask = 'mask_staff_admin', tshirt = 'shirt_staff_admin1',  hoodie = 'jacket_staff_admin1'    },
+    helper        = { mask = 'mask_staff_helper', tshirt = 'shirt_staff_helper2',  hoodie = 'jacket_staff_helper2' },
+    trialhelper   = { mask = 'mask_staff_helper', tshirt = 'shirt_staff_helper1',  hoodie = 'jacket_staff_helper1' },
 }
 
 -- ---- DIVERSE --------------------------------------------------------

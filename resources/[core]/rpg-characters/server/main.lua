@@ -34,10 +34,10 @@ AddEventHandler('core:playerLoggedIn', function(src, accountId, username)
     )
 
     if row then
-        chars[src] = { accountId = accountId, username = username, id = row.id }
+        local appearance = json.decode(row.appearance)
+        chars[src] = { accountId = accountId, username = username, id = row.id, sex = appearance.sex or 'male' }
         SetPlayerRoutingBucket(src, 0)
 
-        local appearance = json.decode(row.appearance)
         Player(src).state:set('charId', row.id, true)   -- SQL id, replicat la toti clientii
         TriggerClientEvent('rpg-characters:spawn', src, appearance, spawnPayload(row))
         TriggerEvent('core:characterLoaded', src, row.id, username)
@@ -54,7 +54,7 @@ AddEventHandler('core:playerLoggedIn', function(src, accountId, username)
             { accountId, username, json.encode(appearance), json.encode(pos) }
         )
 
-        chars[src] = { accountId = accountId, username = username, id = id }
+        chars[src] = { accountId = accountId, username = username, id = id, sex = appearance.sex or 'male' }
         SetPlayerRoutingBucket(src, 0)
         Player(src).state:set('charId', id, true)
         TriggerClientEvent('rpg-characters:spawn', src, appearance, pos)
@@ -101,6 +101,7 @@ RegisterNetEvent('rpg-characters:create', function(payload)
 
     c.id = id
     c.creating = nil
+    c.sex = appearance.sex or 'male'
     SetPlayerRoutingBucket(src, 0)
     Player(src).state:set('charId', id, true)
 
@@ -124,6 +125,7 @@ RegisterNetEvent('rpg-characters:saveAppearance', function(payload)
     if not c or not c.id then return end
     local appearance = Appearance.sanitize(payload)
     if not appearance then return end
+    c.sex = appearance.sex or c.sex or 'male'
     MySQL.update.await('UPDATE characters SET appearance = ? WHERE id = ?', { json.encode(appearance), c.id })
 end)
 
@@ -139,6 +141,12 @@ end)
 exports('hasCharacter', function(src)
     local c = chars[src]
     return c ~= nil and c.id ~= nil
+end)
+
+-- 'male' | 'female' pentru personajul incarcat (default 'male')
+exports('getSex', function(src)
+    local c = chars[src]
+    return (c and c.sex) or 'male'
 end)
 
 -- rezolva un SQL id de personaj -> { accountId, src (daca online), username }
