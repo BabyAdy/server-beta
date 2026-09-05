@@ -49,8 +49,21 @@ function Items.register(def)
     -- sablon de metadata aplicat la crearea unei instante noi (ex. clothing)
     def.metadataTemplate = def.metadataTemplate or def.metadata_template
 
+    -- itemuri care NU pot fi aruncate/dropate (ex. telefon) — pot fi doar mutate/date
+    def.noDrop = def.noDrop == true
+
     if not def.context then
-        def.context = CATEGORY_CONTEXT[def.category] or CATEGORY_CONTEXT.misc
+        local base = CATEGORY_CONTEXT[def.category] or CATEGORY_CONTEXT.misc
+        if def.noDrop then
+            -- construim o lista NOUA fara 'drop' (NU mutam tabelul partajat CATEGORY_CONTEXT)
+            local filtered = {}
+            for _, a in ipairs(base) do
+                if a ~= 'drop' then filtered[#filtered + 1] = a end
+            end
+            def.context = filtered
+        else
+            def.context = base
+        end
     end
 
     Items.defs[def.id] = def
@@ -103,13 +116,14 @@ end
 -- ===========================================================================
 --  SET DE BAZA (demo / test). Extinde din alte resurse cu RegisterItem.
 -- ===========================================================================
-Items.register{ id = 'water',        label = 'Sticlă cu apă', category = 'consumable', weight = 0.50, maxStack = 24, usable = true, value = 5 }
+Items.register{ id = 'water',        label = 'Sticlă cu apă', category = 'consumable', weight = 0.50, maxStack = 32, usable = true, value = 5 }
+Items.register{ id = 'pizza',        label = 'Felie de pizza',category = 'consumable', weight = 0.35, maxStack = 32, usable = true, value = 18 }
 Items.register{ id = 'bread',        label = 'Baton',         category = 'consumable', weight = 0.40, maxStack = 16, usable = true, value = 6 }
 Items.register{ id = 'bandage',      label = 'Bandaj',        category = 'consumable', weight = 0.20, maxStack = 20, usable = true, value = 15 }
 Items.register{ id = 'medkit',       label = 'Trusă medicală',category = 'consumable', weight = 1.20, maxStack = 5,  usable = true, value = 120 }
 
 Items.register{ id = 'phone',        label = 'Telefon',       category = 'misc', weight = 0.30, maxStack = 1, usable = true, value = 400,
-                metadataTemplate = { phoneNumber = nil } }
+                noDrop = true, metadataTemplate = { phoneNumber = nil } }
 Items.register{ id = 'lockpick',     label = 'Șperaclu',      category = 'misc', weight = 0.30, maxStack = 5, usable = true, value = 40,  durable = true, maxDurability = 12 }
 Items.register{ id = 'repairkit',    label = 'Set reparații', category = 'misc', weight = 2.00, maxStack = 3, usable = true, value = 150, durable = true, maxDurability = 6 }
 Items.register{ id = 'radio',        label = 'Stație radio',  category = 'misc', weight = 0.60, maxStack = 1, usable = true, value = 200 }
@@ -117,6 +131,10 @@ Items.register{ id = 'radio',        label = 'Stație radio',  category = 'misc'
 Items.register{ id = 'weapon_pistol',label = 'Pistol compact',category = 'weapon', weight = 1.10, maxStack = 1, value = 1200,
                 durable = true, maxDurability = 40, stats = { damage = 32, caliber = '9mm' } }
 Items.register{ id = 'ammo_pistol',  label = 'Cartușe 9mm',   category = 'misc',   weight = 0.02, maxStack = 250, value = 2 }
+
+Items.register{ id = 'weapon_pistol50', label = 'Pistol .50',  category = 'weapon', weight = 1.30, maxStack = 1, value = 2200,
+                durable = true, maxDurability = 40, stats = { damage = 51, caliber = '.50' } }
+Items.register{ id = 'pistol50_ammo',   label = 'Cartușe .50', category = 'misc',   weight = 0.03, maxStack = 500, value = 4 }
 
 Items.register{ id = 'armor_plate',  label = 'Vestă antiglonț', category = 'armor', weight = 3.50, maxStack = 1, value = 800,
                 equipSlot = 'armor', equipable = true, durable = true, maxDurability = 100 }
@@ -129,3 +147,21 @@ Items.register{ id = 'jeans',        label = 'Blugi',          category = 'cloth
                 equipSlot = 'pants', equipable = true, metadataTemplate = { component = 4, drawable = 0, texture = 0 } }
 Items.register{ id = 'sneakers',     label = 'Adidași',        category = 'clothing', weight = 0.70, maxStack = 1, value = 60,
                 equipSlot = 'shoes', equipable = true, metadataTemplate = { component = 6, drawable = 0, texture = 0 } }
+
+-- ----- Îmbrăcăminte staff (drawable/texture setate ulterior de tine) --------
+Items.register{ id = 'jacket_staff_owner',     label = 'Geacă Staff Owner',     category = 'clothing', weight = 0.80, maxStack = 1, value = 0,
+                equipSlot = 'shirt', equipable = true, metadataTemplate = { component = 11, drawable = 0, texture = 0 } }
+Items.register{ id = 'shirt_staff_owner',      label = 'Tricou Staff Owner',    category = 'clothing', weight = 0.40, maxStack = 1, value = 0,
+                equipSlot = 'shirt', equipable = true, metadataTemplate = { component = 11, drawable = 0, texture = 0 } }
+Items.register{ id = 'mask_staff_owner',       label = 'Mască Staff Owner',     category = 'clothing', weight = 0.30, maxStack = 1, value = 0,
+                equipSlot = 'mask',  equipable = true, metadataTemplate = { component = 1, drawable = 0, texture = 0 } }
+
+Items.register{ id = 'shirt_staff_manager',    label = 'Tricou Staff Manager',  category = 'clothing', weight = 0.40, maxStack = 1, value = 0,
+                equipSlot = 'shirt', equipable = true, metadataTemplate = { component = 11, drawable = 0, texture = 0 } }
+Items.register{ id = 'mask_staff_manager',     label = 'Mască Staff Manager',   category = 'clothing', weight = 0.30, maxStack = 1, value = 0,
+                equipSlot = 'mask',  equipable = true, metadataTemplate = { component = 1, drawable = 0, texture = 0 } }
+
+Items.register{ id = 'jacket_staff_developer', label = 'Geacă Staff Developer', category = 'clothing', weight = 0.80, maxStack = 1, value = 0,
+                equipSlot = 'shirt', equipable = true, metadataTemplate = { component = 11, drawable = 0, texture = 0 } }
+Items.register{ id = 'jacket_staff_manager',   label = 'Geacă Staff Manager',   category = 'clothing', weight = 0.80, maxStack = 1, value = 0,
+                equipSlot = 'shirt', equipable = true, metadataTemplate = { component = 11, drawable = 0, texture = 0 } }

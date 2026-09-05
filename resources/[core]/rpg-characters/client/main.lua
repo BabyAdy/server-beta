@@ -38,6 +38,12 @@ local function applyNude(ped)
     ClearAllPedProps(ped)
 end
 
+-- readuce componentele/props-urile de haine la baza personajului (fara haine).
+-- Folosit de rpg-inventory (client/clothing.lua) la dezechiparea unui item.
+exports('reapplyClothingBase', function()
+    applyNude(PlayerPedId())
+end)
+
 local function applyHeritage(ped)
     local hb = appearance.headBlend
     SetPedHeadBlendData(ped,

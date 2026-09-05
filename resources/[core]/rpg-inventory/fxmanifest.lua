@@ -8,6 +8,7 @@ version '0.1.0'
 description 'Inventory RPG modular custom (fara ESX / QBCore / Qbox) - NUI custom, server-authoritative'
 
 shared_scripts {
+    '@rpg-auth/shared/staff.lua',
     'shared/config.lua',
     'shared/items.lua',
 }
@@ -16,6 +17,7 @@ client_scripts {
     'client/main.lua',
     'client/nui.lua',
     'client/interactions.lua',
+    'client/clothing.lua',
 }
 
 server_scripts {

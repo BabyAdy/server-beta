@@ -66,34 +66,9 @@ RegisterNUICallback('close', function(_, cb)
     cb('ok')
 end)
 
--- ---- echipare haine staff (Dashboard) -----------------------------
-RegisterNUICallback('equip', function(data, cb)
-    if not isStaff() then return cb({ ok = false, error = 'no-perm' }) end
-    local piece = tostring(data and data.piece or '')
-    local set = Config.StaffClothing[piece]
-    if not set then return cb({ ok = false, error = 'unknown' }) end
-
-    local ped = PlayerPedId()
-    local female = GetEntityModel(ped) == `mp_f_freemode_01`
-    local s = female and set.female or set.male
-    if s then
-        SetPedComponentVariation(ped, s.comp, s.drawable, s.texture or 0, 0)
-    end
-    cb({ ok = true })
-end)
-
-RegisterNUICallback('unequip', function(data, cb)
-    -- revine la varianta 0 pe componenta ceruta (best-effort)
-    local piece = tostring(data and data.piece or '')
-    local set = Config.StaffClothing[piece]
-    if set then
-        local ped = PlayerPedId()
-        local female = GetEntityModel(ped) == `mp_f_freemode_01`
-        local s = female and set.female or set.male
-        if s then SetPedComponentVariation(ped, s.comp, 0, 0, 0) end
-    end
-    cb({ ok = true })
-end)
+-- Haine staff: butoanele din Dashboard cheama RPC-ul 'giveWardrobe' (server),
+-- care baga itemul potrivit gradului in inventar. Echiparea o face jucatorul
+-- din inventar (rpg-inventory aplica modelul addon male/female).
 
 -- ---- TP / BRING (declansate de server) ---------------------------
 RegisterNetEvent('rpg-tickets:tpTo', function(targetServerId)

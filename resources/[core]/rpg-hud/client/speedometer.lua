@@ -107,3 +107,17 @@ exports('setFuel',      function(v) sp.fuelReal = tonumber(v) or 0; last.fuel = 
 exports('setSeatbelt',  function(v) sp.belted = v == true; last.belt = nil end)
 exports('isSeatbeltOn', function() return sp.belted end)
 exports('isInVehicle',  function() return sp.inVeh end)
+
+-- info vehicul personal (kilometraj / lock / vechime) — apelat de rpg-vehicles.
+-- data = { odometer = <km>, locked = <bool>, days = <n> }  sau  nil/false pt. a ascunde.
+exports('setPersonalVehicle', function(data)
+    if type(data) == 'table' then
+        send('pvinfo', {
+            odometer = math.floor((tonumber(data.odometer) or 0) + 0.5),
+            locked   = data.locked == true,
+            days     = math.floor(tonumber(data.days) or 0),
+        })
+    else
+        send('pvinfo', false)
+    end
+end)

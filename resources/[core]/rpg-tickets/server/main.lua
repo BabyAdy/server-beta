@@ -525,6 +525,48 @@ local function staffLevelOfLicense(license)
     return Staff.level(slug or '')
 end
 
+-- ---- HAINE STAFF: da itemul potrivit gradului in inventar --------------
+local PIECE_LABEL = { mask = 'Mască', tshirt = 'Tricou', hoodie = 'Hanorac' }
+
+-- garderoba pentru un slug de grad; daca lipseste, coboara la cel mai apropiat
+-- grad INFERIOR care are o intrare in Config.StaffWardrobe.
+local function wardrobeFor(slug)
+    local set = Config.StaffWardrobe[slug or '']
+    if set then return set end
+    local myLvl = Staff.level(slug or '')
+    local bestLvl, best = -1, nil
+    for rankSlug, s in pairs(Config.StaffWardrobe) do
+        local lvl = Staff.level(rankSlug)
+        if lvl <= myLvl and lvl > bestLvl then bestLvl, best = lvl, s end
+    end
+    return best
+end
+
+function Actions.giveWardrobe(src, data)
+    if not hasRank(src, Config.StaffOpenRank) then return false, { error = 'Fara permisiune.' } end
+
+    local piece = tostring(data and data.piece or '')
+    if not PIECE_LABEL[piece] then return false, { error = 'Piesa necunoscuta.' } end
+
+    local slug = ''
+    pcall(function() slug = exports['rpg-auth']:getStaff(src) or '' end)
+    local set = wardrobeFor(slug)
+    local itemId = set and set[piece]
+    if not itemId then return false, { error = 'Gradul tau nu are haine definite.' } end
+
+    local ch
+    pcall(function() ch = exports['rpg-characters']:getCharacter(src) end)
+    if not ch or not ch.id then return false, { error = 'Personaj neincarcat.' } end
+
+    local added = false
+    pcall(function() added = exports['rpg-inventory']:Add(ch.id, itemId, 1) end)
+    if not added then return false, { error = 'Inventar plin sau item invalid.' } end
+
+    notify(src, 'SUCCESS', ('%s staff adăugat în inventar. Echipează din inventar (I).'):format(PIECE_LABEL[piece]))
+    if DBG then print(('[rpg-tickets] giveWardrobe: src %s (grad %s) -> %s'):format(src, slug, itemId)) end
+    return true, { item = itemId, piece = piece }
+end
+
 function Actions.closeTicket(src, data)
     local id = tonumber(data and data.ticketId)
     if not id then return false, { error = 'ID lipsa.' } end

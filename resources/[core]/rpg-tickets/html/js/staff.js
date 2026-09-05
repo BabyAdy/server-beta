@@ -225,9 +225,12 @@
 
     document.querySelectorAll('#staff-app .equip-btn').forEach(function (b) {
       b.addEventListener('click', function () {
-        var piece = b.dataset.piece;
-        TK.post(b.dataset.off ? 'unequip' : 'equip', { piece: piece });
-        TK.toast(b.dataset.off ? 'Scos.' : 'Echipat.', 'ok');
+        b.disabled = true;
+        TK.rpc('giveWardrobe', { piece: b.dataset.piece }).then(function (r) {
+          b.disabled = false;
+          if (!r.ok) return TK.toast(r.data.error || 'Eroare.', 'err');
+          TK.toast('Adăugat în inventar. Echipează din inventar (I).', 'ok');
+        });
       });
     });
 

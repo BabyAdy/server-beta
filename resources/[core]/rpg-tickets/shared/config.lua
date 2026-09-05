@@ -68,13 +68,18 @@ Config.Rewards = {
     minClaim = 1,           -- suma minima revendicabila
 }
 
--- ---- HAINE STAFF (Dashboard -> Echipare) --------------------------------
--- component ids GTA:V:  11 = tops(tricou/hanorac), 1 = masca.
--- Regleaza drawable/texture pentru modelul tau (mp_m_freemode_01 / mp_f_freemode_01).
-Config.StaffClothing = {
-    tshirt = { male = { comp = 11, drawable = 7,  texture = 0 }, female = { comp = 11, drawable = 7,  texture = 0 } },
-    hoodie = { male = { comp = 11, drawable = 11, texture = 0 }, female = { comp = 11, drawable = 11, texture = 0 } },
-    mask   = { male = { comp = 1,  drawable = 52, texture = 0 }, female = { comp = 1,  drawable = 52, texture = 0 } },
+-- ---- HAINE STAFF (Dashboard) ------------------------------------------------
+-- Butoanele "Mască / Tricou / Hanorac Staff" NU mai echipeaza direct: serverul
+-- verifica gradul si BAGA itemul potrivit in inventarul jucatorului; el il
+-- echipeaza singur (rpg-inventory aplica modelul addon, male/female).
+-- Aceleasi iteme se pot da si prin /giveitem.
+--
+-- Cheia = slug de grad (rpg-auth/shared/staff.lua). Daca gradul jucatorului nu
+-- e aici, se coboara la cel mai apropiat grad INFERIOR care are o intrare.
+-- Drawable/texture pe gen se regleaza in rpg-inventory (Config.StaffWardrobe).
+Config.StaffWardrobe = {
+    owner   = { mask = 'mask_staff_owner',   tshirt = 'shirt_staff_owner',   hoodie = 'jacket_staff_owner'   },
+    manager = { mask = 'mask_staff_manager', tshirt = 'shirt_staff_manager', hoodie = 'jacket_staff_manager' },
 }
 
 -- ---- DIVERSE --------------------------------------------------------

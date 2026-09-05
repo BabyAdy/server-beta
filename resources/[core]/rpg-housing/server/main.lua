@@ -208,6 +208,45 @@ RegisterCommand('createhouse', function(src, args)
 end, false)
 
 -- ===========================================================================
+--  /howner [sql id] [house id]  — staff >= Config.MinCreateRank
+--  Seteaza [sql id] ca proprietar (houses.owner = users.id) al casei [house id].
+--  "sql id" = SQL id de PERSONAJ (ca la /setstaff), rezolvat prin rpg-characters.
+-- ===========================================================================
+RegisterCommand('howner', function(src, args)
+    if not canStaffCmd(src, Config.MinCreateRank) then
+        return feedback(src, 'ERROR', 'Nu ai acces la această comandă.')
+    end
+
+    local charId  = tonumber(args[1])
+    local houseId = tonumber(args[2])
+    if not charId or not houseId then
+        return feedback(src, 'ERROR', 'Folosire: /howner [sql id] [house id]')
+    end
+
+    local h = cache[houseId]
+    if not h then return feedback(src, 'ERROR', ('Casa #%d nu există.'):format(houseId)) end
+
+    local target = exports['rpg-characters']:resolveCharacter(charId)
+    if not target then return feedback(src, 'ERROR', 'SQL id inexistent.') end
+
+    MySQL.update.await('UPDATE houses SET owner = ? WHERE id = ?', { target.accountId, houseId })
+    h.owner = target.accountId
+    h.ownerName = target.username or ('#' .. target.accountId)
+    TriggerClientEvent('rpg-housing:houseAdded', -1, h)   -- reface eticheta la toti clientii
+
+    local giverName, giverLabel = cmdIssuer(src)
+    feedback(src, 'SUCCESS', ('%s (#%s) e acum proprietarul casei #%d.'):format(h.ownerName, charId, houseId))
+    if target.src then
+        feedback(target.src, 'INFO', ('Ai devenit proprietarul casei #%d.'):format(houseId))
+    end
+    staffBroadcast(Config.MinBroadcastRank,
+        ('Staff: %s %s set %s[%s] owner of house #%d.'):format(giverLabel, giverName, h.ownerName, charId, houseId))
+
+    print(('[rpg-housing] /howner: %s(#%s) -> casa #%d owner = cont #%s')
+        :format(giverName, src, houseId, target.accountId))
+end, false)
+
+-- ===========================================================================
 --  INTRARE / IEȘIRE — serverul comuta routing bucket-ul (virtual world).
 --  In casa -> VW = house.interior_vw (= id-ul casei) => casele care folosesc
 --  acelasi interior MLO fizic NU se vad intre ele. Afara -> VW 0.

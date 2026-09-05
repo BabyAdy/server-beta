@@ -18,6 +18,7 @@ dependencies {
     'rpg-characters',
     'rpg-hud',
     'rpg-level',
+    'rpg-inventory',   -- haine staff -> exports['rpg-inventory']:Add
 }
 
 shared_scripts {

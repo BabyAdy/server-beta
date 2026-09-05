@@ -241,6 +241,11 @@ function Inventory.move(src, from, to, quantity)
     local d = defOf(srcItem.itemId)
     if not d then return err('Item necunoscut.') end
 
+    -- itemuri noDrop (ex. telefon): pot fi mutate/date, dar NU aruncate pe jos
+    if to.container == 'drop' and d.noDrop then
+        return err('Acest obiect nu poate fi aruncat.')
+    end
+
     -- cantitate
     local moveQty = quantity and V.quantity(quantity, srcItem.quantity) or srcItem.quantity
     if not moveQty then return err('Cantitate invalidă.') end
@@ -452,6 +457,14 @@ function Inventory.drop(src, slot, quantity)
     local charId = charOf(src); if not charId then return err('Fără personaj.') end
     local c = C.character(charId); if not c then return err('Inventar neîncărcat.') end
     local target = V.gridSlot(slot) and tonumber(slot) or slot
+
+    -- itemuri marcate noDrop (ex. telefon) nu pot fi aruncate pe jos
+    local it = bySlot(c, target)
+    if it then
+        local d = defOf(it.itemId)
+        if d and d.noDrop then return err('Acest obiect nu poate fi aruncat.') end
+    end
+
     return Inventory.move(src,
         { container = c.id, slot = target },
         { container = 'drop' }, quantity)
