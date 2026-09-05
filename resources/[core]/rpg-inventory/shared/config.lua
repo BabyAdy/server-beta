@@ -63,28 +63,28 @@ Config.ClothingApply = {
 }
 
 -- ===========================================================================
---  GARDEROBA STAFF — drawable/texture addon per gen, pe id de item.
---  Componenta vine din EquipmentSlots dupa equipSlot-ul itemului
+--  GARDEROBA STAFF — drawable/texture pe id de item (varianta male/female).
+--  Hainele de tors (tricou/hanorac) REPLACE drawable 3 pe componenta jbib,
+--  deci indexul e FIX = 3. Fisiere stream (replace pe ped-ul freemode):
+--    mp_f_freemode_01^jbib_003_u.ydd  +  mp_f_freemode_01^jbib_diff_003_<a|b|c>_uni.ytd
+--    mp_m_freemode_01^jbib_003_u.ydd  +  ...     (adauga cand ai si model M)
+--  a = textura 0 (owner), b = 1 (manager), c = 2 (developer).
+--  Componenta reala vine din Config.EquipmentSlots dupa equipSlot-ul itemului
 --  (mask_* -> comp 1, shirt_*/jacket_* -> comp 11).
---  Fisierele addon trebuie streamuite separat (resources/[clothing]/...):
---    mp_m_freemode_01^jbib_<idx>_u.ydd  +  ^jbib_diff_<idx>_<a|b|...>_uni.ytd
---    mp_f_freemode_01^jbib_<idx>_u.ydd  +  ...
---  <idx> de mai jos = indexul REAL din joc dupa streaming
---  (in joc: GetNumberOfPedDrawableVariations(ped, 11) - ale tale sunt ultimele).
 -- ===========================================================================
 Config.StaffClothingModels = {
     -- OWNER
-    mask_staff_owner     = { male = { drawable = 0,   texture = 0 }, female = { drawable = 0,   texture = 0 } },
-    shirt_staff_owner    = { male = { drawable = 0,   texture = 0 }, female = { drawable = 0,   texture = 0 } },
-    jacket_staff_owner   = { male = { drawable = 0,   texture = 0 }, female = { drawable = 999, texture = 0 } },
+    mask_staff_owner     = { male = { drawable = 0, texture = 0 }, female = { drawable = 0, texture = 0 } },
+    shirt_staff_owner    = { male = { drawable = 3, texture = 0 }, female = { drawable = 3, texture = 0 } },
+    jacket_staff_owner   = { male = { drawable = 3, texture = 0 }, female = { drawable = 3, texture = 0 } },
 
     -- MANAGER
-    mask_staff_manager   = { male = { drawable = 0,   texture = 0 }, female = { drawable = 0,   texture = 0 } },
-    shirt_staff_manager  = { male = { drawable = 0,   texture = 0 }, female = { drawable = 0,   texture = 0 } },
-    jacket_staff_manager = { male = { drawable = 0,   texture = 1 }, female = { drawable = 999, texture = 1 } },
+    mask_staff_manager   = { male = { drawable = 0, texture = 0 }, female = { drawable = 0, texture = 0 } },
+    shirt_staff_manager  = { male = { drawable = 3, texture = 1 }, female = { drawable = 3, texture = 1 } },
+    jacket_staff_manager = { male = { drawable = 3, texture = 1 }, female = { drawable = 3, texture = 1 } },
 
     -- DEVELOPER (nu e un grad rpg-auth; doar item, se poate da prin /giveitem)
-    jacket_staff_developer = { male = { drawable = 0, texture = 2 }, female = { drawable = 999, texture = 2 } },
+    jacket_staff_developer = { male = { drawable = 3, texture = 2 }, female = { drawable = 3, texture = 2 } },
 }
 
 -- ===========================================================================
