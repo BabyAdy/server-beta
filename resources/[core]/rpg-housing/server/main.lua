@@ -117,15 +117,8 @@ local function loadAll()
     if DBG then print(('[rpg-housing] %d case încărcate.'):format(#rows)) end
 end
 
-CreateThread(function()
-    while GetResourceState('oxmysql') ~= 'started' do Wait(200) end
-    Wait(400)
-    ensureSchema()
-    loadAll()
-end)
-
 -- ===========================================================================
---  SYNC -> client (la login) + broadcast la creare
+--  SYNC -> client (la login / la cerere) + broadcast la creare
 -- ===========================================================================
 local function allHousesList()
     local out = {}
@@ -133,8 +126,24 @@ local function allHousesList()
     return out
 end
 
+CreateThread(function()
+    while GetResourceState('oxmysql') ~= 'started' do Wait(200) end
+    Wait(400)
+    ensureSchema()
+    loadAll()
+    -- restart de resursa pe server -> re-trimite lista tuturor playerilor conectati
+    for _, pid in ipairs(GetPlayers()) do
+        TriggerClientEvent('rpg-housing:sync', tonumber(pid), allHousesList())
+    end
+end)
+
 AddEventHandler('core:characterLoaded', function(src)
     TriggerClientEvent('rpg-housing:sync', src, allHousesList())
+end)
+
+-- restart de resursa pe client -> clientul cere lista din nou
+RegisterNetEvent('rpg-housing:requestSync', function()
+    TriggerClientEvent('rpg-housing:sync', source, allHousesList())
 end)
 
 -- ===========================================================================

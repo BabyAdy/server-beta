@@ -50,9 +50,22 @@
     });
   }
 
+  var promptEl = document.getElementById('prompt');
+  var promptTextEl = document.getElementById('prompt-text');
+
+  function setPrompt(text) {
+    if (text) {
+      promptTextEl.textContent = text;
+      promptEl.classList.remove('hidden');
+    } else {
+      promptEl.classList.add('hidden');
+    }
+  }
+
   window.addEventListener('message', function (e) {
     var msg = e.data || {};
     if (msg.action === 'houses') render(msg.list);
+    else if (msg.action === 'prompt') setPrompt(msg.text);
   });
 
   /* preview in browser */
@@ -60,5 +73,6 @@
     render([
       { houseId: 3, x: 0.5, y: 0.55, owner: 'ADMBOT', price: 250000, interior: 'High End House 1 (3655 Wild Oats Drive)' },
     ]);
+    setPrompt('for enter home');
   }
 })();

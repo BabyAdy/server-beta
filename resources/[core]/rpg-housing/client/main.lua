@@ -1,16 +1,15 @@
 -- ===========================================================================
 --  rpg-housing — client
---  Marker 3D la fiecare intrare de casă + etichetă NUI "modernă" (nu text
---  nativ default) care urmărește punctul pe ecran cât timp ești aproape.
---  Intrare/ieșire: tasta E — la ușa exterioară intri în interior (bob74_ipl
---  încarcă deja toate interioarele la boot, deci nu mai trebuie activat nimic);
---  la ușa efectivă a interiorului (același punct din Config.InteriorTypes),
---  E te scoate înapoi exact la intrarea casei (unde a fost creată cu /createhouse).
+--  Marker 3D ("checkpoint") la fiecare intrare de casă + etichetă NUI care
+--  urmărește punctul pe ecran + prompt NUI jos-centru ("E for enter/exit home").
+--  Intrare/ieșire: tasta E. Serverul comută virtual world-ul (routing bucket);
+--  teleportul efectiv îl face clientul, după confirmare (rpg-housing:setInside).
 -- ===========================================================================
 
-local houses = {}          -- [id] = { id, owner, ownerName, price, interiorType, interiorLabel, coords, heading }
+local houses = {}          -- [id] = { id, owner, ownerName, price, interiorType, interiorLabel, coords, heading, interiorVw }
 local insideHouseId = nil  -- id-ul casei in interiorul careia esti acum (nil = afara)
 local nearHouseId = nil    -- id-ul celei mai apropiate case (usa exterioara), cat esti afara
+local lastPrompt = nil     -- ultimul text de prompt trimis catre NUI (ca sa nu spamam)
 
 RegisterNetEvent('rpg-housing:sync', function(list)
     houses = {}
@@ -21,23 +20,19 @@ RegisterNetEvent('rpg-housing:houseAdded', function(h)
     if h and h.id then houses[h.id] = h end
 end)
 
--- --------------------------------------------------------------- text3D --
-local function drawText3D(coords, text)
-    local onScreen, sx, sy = GetScreenCoordFromWorldCoord(coords.x, coords.y, coords.z)
-    if not onScreen then return end
-    SetTextScale(0.34, 0.34)
-    SetTextFont(4)
-    SetTextColour(255, 255, 255, 215)
-    SetTextOutline()
-    SetTextCentre(true)
-    SetTextEntry('STRING')
-    AddTextComponentString(text)
-    DrawText(sx, sy)
+-- la (re)pornirea resursei clientul are lista goala -> cere sync de la server
+CreateThread(function()
+    Wait(400)
+    TriggerServerEvent('rpg-housing:requestSync')
+end)
+
+local function setPrompt(text)
+    if text == lastPrompt then return end
+    lastPrompt = text
+    SendNUIMessage({ action = 'prompt', text = text })
 end
 
 -- --------------------------------------------------- intrare / iesire (E) --
--- Serverul comuta virtual world-ul (routing bucket) si confirma prin
--- rpg-housing:setInside; teleportul efectiv il facem aici, dupa confirmare.
 RegisterCommand('rpghousing_interact', function()
     if insideHouseId then
         TriggerServerEvent('rpg-housing:exit', insideHouseId)
@@ -65,30 +60,30 @@ RegisterNetEvent('rpg-housing:setInside', function(houseId, entering)
         SetEntityCoordsNoOffset(ped, h.coords.x, h.coords.y, h.coords.z, false, false, false)
         SetEntityHeading(ped, h.heading or 0.0)
     end
+    setPrompt(nil)   -- ascunde promptul in timpul tranzitiei
 end)
 
 -- ---------------------------------------------------------------------------
 --  bucla principala: marker (nativ, in lume) + pozitii pt. etichetele NUI
---  + prompt-urile [E] de intrare/iesire
+--  + prompt NUI ("E for enter/exit home")
 -- ---------------------------------------------------------------------------
 CreateThread(function()
     while true do
         local anyNearby = false
-        local ped = PlayerPedId()
-        local pcoords = GetEntityCoords(ped)
+        local pcoords = GetEntityCoords(PlayerPedId())
         local visible = {}
+        local wantPrompt = nil
         nearHouseId = nil
 
         if insideHouseId then
-            -- inauntru: verificam DOAR proximitatea de usa interiorului casei curente
+            -- inauntru: doar proximitatea de usa interiorului casei curente (range 2.2)
             local h = houses[insideHouseId]
             local def = h and Config.InteriorTypes[h.interiorType]
             if def then
                 local ic = def.coords
-                local dist = #(pcoords - vector3(ic.x, ic.y, ic.z))
-                if dist < Config.InteractRadius then
+                if #(pcoords - vector3(ic.x, ic.y, ic.z)) < Config.InteractRadius then
                     anyNearby = true
-                    drawText3D(vector3(ic.x, ic.y, ic.z + 1.0), '[E] Ieși din casă')
+                    wantPrompt = 'for exit home'
                 end
             end
         else
@@ -111,13 +106,14 @@ CreateThread(function()
 
                     if dist < Config.InteractRadius then
                         nearHouseId = id
-                        drawText3D(h.coords + vector3(0.0, 0.0, 1.9), '[E] Intră în casă')
+                        wantPrompt = 'for enter home'
                     end
                 end
             end
         end
 
         SendNUIMessage({ action = 'houses', list = visible })
+        setPrompt(wantPrompt)
         Wait(anyNearby and 0 or 500)
     end
 end)
@@ -125,4 +121,5 @@ end)
 AddEventHandler('onResourceStop', function(res)
     if res ~= GetCurrentResourceName() then return end
     SendNUIMessage({ action = 'houses', list = {} })
+    SendNUIMessage({ action = 'prompt', text = nil })
 end)

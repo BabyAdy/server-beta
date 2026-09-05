@@ -53,3 +53,47 @@ html, body {
 
 .hc-price { color: #c4b5fd; }
 .hc-price b { color: #a855f7; }
+
+/* ---- prompt jos-centru: "E for enter/exit home" ---- */
+.hidden { display: none !important; }
+
+#prompt {
+  position: fixed;
+  left: 50%;
+  bottom: 5vh;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 8px 16px 8px 10px;
+  border-radius: 12px;
+  background: rgba(17, 10, 28, 0.82);
+  border: 1px solid rgba(168, 85, 247, 0.45);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+#prompt .key {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  height: 24px;
+  padding: 0 7px;
+  border-radius: 7px;
+  background: linear-gradient(180deg, #a855f7 0%, #6b21a8 100%);
+  border: 1px solid rgba(233, 213, 255, 0.55);
+  box-shadow: 0 2px 0 rgba(59, 7, 100, 0.9), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 900;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.35);
+}
+
+#prompt .lbl {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  color: #e9d5ff;
+}
