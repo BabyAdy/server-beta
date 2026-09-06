@@ -517,14 +517,6 @@ body.preview {
 .vs-pct { font-size: 9.5px; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--text); min-width: 30px; text-align: right; }
 .vs-fuel.low .vs-pct { color: var(--danger); }
 
-/* info vehicul personal (kilometraj / stare / vechime) */
-.vpv { display: flex; flex-direction: column; gap: 3px; padding-top: 5px; border-top: 1px solid rgba(255,255,255,0.08); }
-.vpv-row { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
-.vpv-k { font-size: 8.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--faint); }
-.vpv-v { font-size: 9.5px; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--text); }
-.vpv-v.locked { color: var(--danger); }
-.vpv-v.unlocked { color: var(--ok, #46d6a2); }
-
 .vs-icons { display: flex; justify-content: space-between; padding: 0 4px; }
 .vi {
     width: 24px; height: 24px;

@@ -21,11 +21,6 @@ HUD.mods.speedo = (function () {
         $('#speedo').classList.toggle('show', inVeh && rootVis);
     }
 
-    function clearPv() {
-        var pv = $('#sp-pv');
-        if (pv) pv.hidden = true;
-    }
-
     function setSpeed(v) {
         ensureArc();
         v = Math.max(0, Math.min(999, v | 0));
@@ -44,8 +39,8 @@ HUD.mods.speedo = (function () {
         rootVisible: function (v) { rootVis = v; applyVis(); },
         on: function (action, value) {
             switch (action) {
-                case 'show': inVeh = true; ensureArc(); applyVis(); clearPv(); break;
-                case 'hide': inVeh = false; applyVis(); clearPv(); break;
+                case 'show': inVeh = true; ensureArc(); applyVis(); break;
+                case 'hide': inVeh = false; applyVis(); break;
                 case 'speed': setSpeed(value); break;
                 case 'gear': $('#sp-gear').textContent = value; break;
                 case 'rpm': $('#speedo').style.setProperty('--rpm', (value / 100).toFixed(2)); break;
@@ -60,20 +55,6 @@ HUD.mods.speedo = (function () {
                         fp.textContent = Math.round(pct) + '%';
                         fp.closest('.vs-fuel').classList.toggle('low', low);
                     }
-                    break;
-                }
-                case 'pvinfo': {
-                    var pv = $('#sp-pv');
-                    if (!pv) break;
-                    if (!value) { pv.hidden = true; break; }
-                    var km = Math.max(0, Math.round(value.odometer || 0));
-                    $('#sp-odo').textContent = km.toLocaleString('ro-RO') + ' km';
-                    var st = $('#sp-status');
-                    st.textContent = value.locked ? 'Închis' : 'Deschis';
-                    st.className = 'vpv-v ' + (value.locked ? 'locked' : 'unlocked');
-                    var d = Math.max(0, Math.floor(value.days || 0));
-                    $('#sp-age').textContent = d + (d === 1 ? ' zi' : ' zile');
-                    pv.hidden = false;
                     break;
                 }
                 case 'engine': {
