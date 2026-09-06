@@ -32,8 +32,9 @@ CREATE TABLE IF NOT EXISTS `personal_vehicle` (
     `garage_id`    INT UNSIGNED                  DEFAULT NULL,         -- ultimul garage in care a fost parcat
     `odometer`     DOUBLE                        NOT NULL DEFAULT 0,   -- kilometri cumulati
     `fuel`         FLOAT                         NOT NULL DEFAULT 100, -- 0..100
-    `status`       TINYINT(1)                    NOT NULL DEFAULT 0,   -- 0 = locked, 1 = unlocked
-    `stored`       TINYINT(1)                    NOT NULL DEFAULT 1,   -- 1 = in garage, 0 = scos/spawnat
+    -- TINYINT (NU TINYINT(1)): oxmysql converteste TINYINT(1) in boolean.
+    `status`       TINYINT                       NOT NULL DEFAULT 0,   -- 0 = locked, 1 = unlocked
+    `stored`       TINYINT                       NOT NULL DEFAULT 1,   -- 1 = in garage, 0 = scos/spawnat
     `plate`        VARCHAR(12)                   NOT NULL,
     `created_at`   TIMESTAMP                     NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (`id`),

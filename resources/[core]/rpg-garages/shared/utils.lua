@@ -40,7 +40,15 @@ end
 Utils.STATUS_LOCKED   = 0
 Utils.STATUS_UNLOCKED = 1
 function Utils.statusLabel(v)
-    return (tonumber(v) == Utils.STATUS_UNLOCKED) and 'Unlocked' or 'Locked'
+    return (Utils.toBit(v) == Utils.STATUS_UNLOCKED) and 'Unlocked' or 'Locked'
+end
+
+-- oxmysql poate returna coloanele TINYINT(1) ca boolean (true/false), iar
+-- tonumber(true) == nil. Normalizam ORICE valoare de bit citita din DB la 0/1.
+function Utils.toBit(v)
+    if v == true then return 1 end
+    if v == false or v == nil then return 0 end
+    return tonumber(v) or 0
 end
 
 -- ---- clamp numeric -------------------------------------------------

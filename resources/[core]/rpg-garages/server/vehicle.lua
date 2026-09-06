@@ -125,7 +125,7 @@ local function rowsToList(rows)
             display_name = r.display_name,
             odometer     = math.floor(tonumber(r.odometer) or 0),
             fuel         = math.floor(tonumber(r.fuel) or 0),
-            status       = tonumber(r.status) or 0,
+            status       = Utils.toBit(r.status),   -- oxmysql poate da boolean
             spawned      = Garages.spawned[tonumber(r.id)] ~= nil,
             -- path-ul imaginii se genereaza din model_name; NU e stocat in DB (spec §18)
             image        = tostring(model) .. '.png',
@@ -204,7 +204,7 @@ RegisterNetEvent('rpg-garages:spawnRequest', function(pvId, garageId)
 
     local row = MySQL.single.await('SELECT * FROM personal_vehicle WHERE id = ? LIMIT 1', { pvId })
     if not row then return rejectSpawn(src, 'Vehiculul nu există.') end
-    if tonumber(row.stored) ~= 1 then
+    if Utils.toBit(row.stored) ~= 1 then   -- oxmysql poate returna TINYINT(1) ca boolean
         return rejectSpawn(src, 'Vehiculul nu este disponibil.')
     end
 
@@ -238,7 +238,7 @@ RegisterNetEvent('rpg-garages:spawnRequest', function(pvId, garageId)
         x = sx, y = sy, z = sz, h = sh,
         tuning  = Tuning.load(pvId),
         fuel    = Utils.clampNum(row.fuel, 0.0, 100.0, Config.DefaultFuel),
-        status  = tonumber(row.status) or 0,
+        status  = Utils.toBit(row.status),
         plate   = row.plate,
     })
 end)

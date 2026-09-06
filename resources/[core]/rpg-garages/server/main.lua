@@ -120,6 +120,19 @@ local function ensureSchema()
         local s = stmt:gsub('%-%-[^\n]*', ''):gsub('^%s+', ''):gsub('%s+$', '')
         if s ~= '' then MySQL.query.await(s) end
     end
+
+    -- migratie: TINYINT(1) -> TINYINT (oxmysql returneaza TINYINT(1) ca boolean,
+    -- iar codul asteapta 0/1). Idempotent; nu pierde date.
+    local col = MySQL.single.await([[
+        SELECT COLUMN_TYPE FROM information_schema.COLUMNS
+        WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'personal_vehicle' AND COLUMN_NAME = 'stored'
+    ]])
+    if col and tostring(col.COLUMN_TYPE):lower():find('tinyint%(1%)') then
+        MySQL.query.await("ALTER TABLE `personal_vehicle` MODIFY `status` TINYINT NOT NULL DEFAULT 0")
+        MySQL.query.await("ALTER TABLE `personal_vehicle` MODIFY `stored` TINYINT NOT NULL DEFAULT 1")
+        print('[rpg-garages] migrat: personal_vehicle.status/stored TINYINT(1) -> TINYINT')
+    end
+
     if DBG then print('[rpg-garages] schema OK') end
 end
 
