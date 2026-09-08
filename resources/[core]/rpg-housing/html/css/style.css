@@ -97,3 +97,127 @@ html, body {
   letter-spacing: 0.01em;
   color: #e9d5ff;
 }
+
+/* ================= popup /buyhouse ================= */
+#buy {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 50;
+}
+
+.buy-box {
+  width: min(92vw, 400px);
+  padding: 22px 22px 20px;
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(24, 15, 38, 0.98) 0%, rgba(16, 10, 26, 0.98) 100%);
+  border: 1px solid rgba(168, 85, 247, 0.45);
+  box-shadow: 0 30px 70px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  animation: buyIn 0.2s cubic-bezier(0.22, 0.7, 0.2, 1);
+}
+@keyframes buyIn { from { opacity: 0; transform: scale(0.96) translateY(12px); } }
+
+.buy-kicker {
+  font-size: 10.5px;
+  font-weight: 900;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #c084fc;
+  margin-bottom: 12px;
+}
+
+.buy-text {
+  font-size: 13.5px;
+  font-weight: 600;
+  line-height: 1.6;
+  color: #d9c9f0;
+  margin: 0 0 10px;
+}
+.buy-text b { color: #fff; font-weight: 800; }
+.buy-text .amt { color: #a855f7; font-weight: 800; }
+
+.buy-q {
+  font-size: 13px;
+  font-weight: 700;
+  color: #f3e8ff;
+  margin: 0 0 16px;
+}
+
+.buy-row {
+  display: flex;
+  gap: 10px;
+}
+
+.bbtn {
+  flex: 1;
+  padding: 11px 12px;
+  border-radius: 11px;
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  border: 1px solid rgba(233, 213, 255, 0.28);
+  transition: filter 0.14s ease, transform 0.08s ease, background 0.14s ease;
+}
+.bbtn:active { transform: translateY(1px); }
+
+.bbtn-yes {
+  color: #fff;
+  background: linear-gradient(180deg, #a855f7 0%, #6b21a8 100%);
+  box-shadow: 0 3px 0 rgba(59, 7, 100, 0.85), inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+.bbtn-yes:hover { filter: brightness(1.12); }
+
+.bbtn-no {
+  color: #d9c9f0;
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(168, 85, 247, 0.3);
+}
+.bbtn-no:hover { background: rgba(168, 85, 247, 0.16); }
+
+/* metode de plata */
+.bbtn-pay {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: #f3e8ff;
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(168, 85, 247, 0.3);
+  text-transform: none;
+  letter-spacing: 0.02em;
+}
+.bbtn-pay:hover:not(:disabled) { background: rgba(168, 85, 247, 0.16); }
+.bbtn-pay:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.bbtn-pay .pay-amt {
+  margin-left: auto;
+  font-size: 11px;
+  font-weight: 700;
+  font-style: normal;
+  color: #b9a3d6;
+  font-variant-numeric: tabular-nums;
+}
+.bbtn-pay:disabled .pay-amt { color: #f0576f; }
+
+.dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  flex: 0 0 auto;
+  background: #6b6482;
+}
+.dot.ok { background: #46d6a2; box-shadow: 0 0 8px rgba(70, 214, 162, 0.8); }
+.dot.no { background: #f0576f; box-shadow: 0 0 8px rgba(240, 87, 111, 0.8); }
+
+.bbtn-cancel {
+  width: 100%;
+  margin-top: 12px;
+  color: #9a8bbf;
+  background: transparent;
+  border-color: transparent;
+}
+.bbtn-cancel:hover { color: #f3e8ff; }

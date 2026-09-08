@@ -11,6 +11,17 @@ Config.InteractRadius = 2.2   -- distanța la care apare promptul [E] Intră/Ie�
 Config.MarkerColor   = { r = 168, g = 85, b = 247, a = 190 }   -- mov, ca restul temei
 
 -- ===========================================================================
+--  /buyhouse — cumparare casa de langa jucator
+-- ===========================================================================
+Config.Buy = {
+    radius           = 3.0,      -- distanța max față de ușa casei pt. /buyhouse (verificat si server-side)
+    stateOwnerName   = 'State',  -- afișat în popup când owner = 0 (casă „a statului")
+    allowFromPlayers = true,     -- true = se pot cumpăra și casele deținute de alți jucători
+    payPreviousOwner = true,     -- fostul proprietar (jucător, nu State) primește prețul în bancă
+    maxPerPlayer     = 0,        -- 0 = nelimitat; >0 = câte case poate deține un jucător
+}
+
+-- ===========================================================================
 --  TIPURI DE INTERIOR VALIDE pt. /createhouse [interior_type] [price]
 --  Coordonatele sunt REALE — luate direct din comentariile fisierelor bob74_ipl
 --  (ex. resources/bob74_ipl/gta_online/house_hi_1.lua), NU inventate.

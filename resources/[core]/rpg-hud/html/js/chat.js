@@ -33,6 +33,7 @@ HUD.mods.chat = (function () {
 
     var ICON_ADMIN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l7 3v5c0 4.5-3 8.3-7 9.5C8 19.3 5 15.5 5 11V6l7-3z" stroke-linecap="round" stroke-linejoin="round"/></svg>';
     var ICON_HELPER = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3.5"/><path d="M5.6 5.6l3.6 3.6M14.8 14.8l3.6 3.6M18.4 5.6l-3.6 3.6M9.2 14.8l-3.6 3.6" stroke-linecap="round"/></svg>';
+    var ICON_ANNO = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10v4a1 1 0 0 0 1 1h2l5 4V5L7 9H5a1 1 0 0 0-1 1z"/><path d="M15 8.5a4 4 0 0 1 0 7"/><path d="M18 6a8 8 0 0 1 0 12"/></svg>';
 
     function esc(s) {
         return String(s).replace(/[&<>"]/g, function (c) {
@@ -170,13 +171,29 @@ HUD.mods.chat = (function () {
            mesajului INDIFERENT de ramura — inainte se aplica doar la mesajele cu badge de staff. */
         var textStyle = msg.color ? ' style="color:' + msg.color + '"' : '';
 
-        if (msg.staff) {
+        if (msg.announce) {
+            /* /o -> (icon) ANNOUNCEMENT (icon-staff) Username: text  — pe rosu, cu delimitari clare */
+            var arc = (msg.staff && msg.staff.color) || '#fff';
+            html += '<span class="c-anno-ic">' + ICON_ANNO + '</span>';
+            html += '<span class="c-anno-tag">ANNOUNCEMENT</span>';
+            if (msg.staff && msg.staff.icon) {
+                html += '<span class="c-sbadge" style="color:' + arc + '">' +
+                        '<svg viewBox="0 0 24 24">' + msg.staff.icon + '</svg></span>';
+            }
+            html += '<span class="c-anno-auth">' + esc(msg.author || '') + '</span>';
+            html += '<span class="c-text"' + textStyle + '>: ' + esc(msg.text || '') + '</span>';
+        } else if (msg.staff) {
             var icon = (msg.staff.kind === 'helper') ? ICON_HELPER : ICON_ADMIN;
             var rc = msg.staff.color || '#fff';
+            /* (icon-chat) — iconul de tip chat (shield /a, roata /hc) */
             html += '<span class="c-sicon">' + icon + '</span>';
-            html += '<span class="c-badge" style="color:' + rc + ';border-color:' + rc + '">' + esc(msg.staff.label || '') + '</span>';
+            /* (icon-staff) — forma per grad, colorata cu culoarea stabilita a gradului.
+               msg.staff.icon vine din rpg-auth/shared/staff.lua (Staff.ICON_SVG), NU din input de user. */
+            if (msg.staff.icon) {
+                html += '<span class="c-sbadge" style="color:' + rc + '">' +
+                        '<svg viewBox="0 0 24 24">' + msg.staff.icon + '</svg></span>';
+            }
             html += '<span class="c-auth">' + esc(msg.author || '') + '</span>';
-            if (msg.staff.id != null) html += '<span class="c-sid">(' + esc(msg.staff.id) + ')</span>';
             html += '<span class="c-text"' + textStyle + '>: ' + esc(msg.text || '') + '</span>';
         } else if (chKey && cfg.channels && cfg.channels[chKey]) {
             var ch = cfg.channels[chKey];

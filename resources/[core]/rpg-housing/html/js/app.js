@@ -3,6 +3,18 @@
   var host = document.getElementById('houses');
   var nodes = {};   // [houseId] = DOM node
 
+  var isBrowser = typeof window.GetParentResourceName !== 'function';
+  var RES = isBrowser ? 'rpg-housing' : window.GetParentResourceName();
+
+  function post(name, body) {
+    if (isBrowser) return;
+    fetch('https://' + RES + '/' + name, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json; charset=UTF-8' },
+      body: JSON.stringify(body || {})
+    }).catch(function () {});
+  }
+
   function esc(s) {
     return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) {
       return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
@@ -62,17 +74,71 @@
     }
   }
 
+  /* ===================== popup /buyhouse ===================== */
+  var buyEl = document.getElementById('buy');
+  var stepConfirm = document.getElementById('buy-confirm');
+  var stepMethod = document.getElementById('buy-method');
+  var buyPrice = 0;
+
+  function openBuy(d) {
+    buyPrice = Math.round(Number(d.price) || 0);
+    document.getElementById('buy-confirm-text').innerHTML =
+      'Ești pe cale să cumperi <b>House #' + esc(d.houseId) + '</b> deținută de <b>' +
+      esc(d.ownerLabel || 'State') + '</b> pentru suma de <b class="amt">' + fmtMoney(buyPrice) + '</b>.';
+
+    // pas 2 pregatit din datele deja primite (fara request la server pt. buline)
+    setPay('cash', Number(d.cash) || 0);
+    setPay('bank', Number(d.bank) || 0);
+
+    stepMethod.classList.add('hidden');
+    stepConfirm.classList.remove('hidden');
+    buyEl.classList.remove('hidden');
+  }
+
+  function setPay(which, amount) {
+    var enough = amount >= buyPrice;
+    var dot = document.getElementById('dot-' + which);
+    var btn = document.getElementById('pay-' + which);
+    var amt = document.getElementById('amt-' + which);
+    dot.className = 'dot ' + (enough ? 'ok' : 'no');
+    btn.disabled = !enough;
+    amt.textContent = fmtMoney(amount);
+  }
+
+  function closeBuy() { buyEl.classList.add('hidden'); }
+
+  document.getElementById('buy-no').addEventListener('click', function () { closeBuy(); post('buyCancel'); });
+  document.getElementById('buy-cancel').addEventListener('click', function () { closeBuy(); post('buyCancel'); });
+  document.getElementById('buy-yes').addEventListener('click', function () {
+    stepConfirm.classList.add('hidden');
+    stepMethod.classList.remove('hidden');
+  });
+  document.getElementById('pay-cash').addEventListener('click', function () {
+    if (this.disabled) return;
+    closeBuy(); post('buyPay', { method: 'cash' });
+  });
+  document.getElementById('pay-bank').addEventListener('click', function () {
+    if (this.disabled) return;
+    closeBuy(); post('buyPay', { method: 'bank' });
+  });
+  document.addEventListener('keyup', function (e) {
+    if (e.key === 'Escape' && !buyEl.classList.contains('hidden')) { closeBuy(); post('buyCancel'); }
+  });
+
   window.addEventListener('message', function (e) {
     var msg = e.data || {};
     if (msg.action === 'houses') render(msg.list);
     else if (msg.action === 'prompt') setPrompt(msg.text);
+    else if (msg.action === 'buyOpen') openBuy(msg.data || {});
+    else if (msg.action === 'buyClose') closeBuy();
   });
 
   /* preview in browser */
-  if (typeof window.GetParentResourceName !== 'function') {
+  if (isBrowser) {
     render([
       { houseId: 3, x: 0.5, y: 0.55, owner: 'ADMBOT', price: 250000, interior: 'High End House 1 (3655 Wild Oats Drive)' },
     ]);
     setPrompt('for enter home');
+    openBuy({ houseId: 12, ownerLabel: 'State', price: 250000, cash: 40000, bank: 900000 });
   }
 })();

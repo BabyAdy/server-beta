@@ -68,6 +68,14 @@ Config.LockKey = 'L'
 -- De unde se scot banii la cumparare din dealership: 'bank' sau 'cash'.
 Config.PayFrom = 'bank'
 
+-- Transfer vehicul intr-un alt garage decat cel "de baza" (personal_vehicle.garage_id).
+-- Lista de vehicule arata TOATE vehiculele jucatorului (de tipul garage-ului);
+-- daca un vehicul nu e la garage-ul curent, poate fi transferat aici contra sumei.
+Config.Transfer = {
+    price   = 100,      -- $ per transfer
+    payFrom = 'cash',   -- 'cash' sau 'bank'
+}
+
 -- ===========================================================================
 --  MAPARE MODEL -> vehicle_type
 --  Sursa principala de adevar e categoria din dealership (Config.Catalog).

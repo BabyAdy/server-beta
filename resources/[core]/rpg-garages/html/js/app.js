@@ -24,7 +24,8 @@
 
   var ICON = {
     fuel: '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22h10M5 22V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v17M5 12h8M15 8l3 3v7a1.5 1.5 0 0 0 3 0V9l-3-4"/></svg>',
-    odo:  '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19a9 9 0 1 1 16 0"/><path d="M12 15l4-5"/><circle cx="12" cy="15" r="1.4" fill="currentColor" stroke="none"/></svg>'
+    odo:  '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19a9 9 0 1 1 16 0"/><path d="M12 15l4-5"/><circle cx="12" cy="15" r="1.4" fill="currentColor" stroke="none"/></svg>',
+    pin:  '<svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6-7-11a7 7 0 0 1 14 0c0 5-7 11-7 11z"/><circle cx="12" cy="10" r="2.4"/></svg>'
   };
 
   /* --------------------------------------------------------- PROMPT ---- */
@@ -69,6 +70,23 @@
     el.className = 'v';
     var locked = v.status !== 1;
     var out = !!v.spawned;
+    var here = v.here !== false;   // implicit true daca serverul nu trimite campul
+    var price = (garageState && garageState.data && garageState.data.transferPrice) || 100;
+
+    // locatie: unde e "acasa" vehiculul (doar cand nu e la garage-ul curent)
+    var loc = '';
+    if (!out && !here) {
+      loc = '<div class="v-loc">' + ICON.pin +
+            (v.homeGarage ? ('Parked at Garage #' + v.homeGarage) : 'No home garage') + '</div>';
+    } else if (out) {
+      loc = '<div class="v-loc out">' + ICON.pin + 'Currently out</div>';
+    }
+
+    // butonul: In use (disabled) / Spawn / Transfer
+    var btnHtml;
+    if (out)       btnHtml = '<button class="v-act v-disabled" disabled>In use</button>';
+    else if (here) btnHtml = '<button class="v-act v-spawn">Spawn Vehicle</button>';
+    else           btnHtml = '<button class="v-act v-transfer">Transfer &bull; ' + nfmt(price) + '$</button>';
 
     el.innerHTML =
       '<div class="v-img">' +
@@ -83,16 +101,18 @@
             (locked ? 'Locked' : 'Unlocked') + '</span>' +
         '</div>' +
         '<div class="v-sub">' + esc(String(v.model_name || '').toUpperCase()) + ' &bull; #' + v.id + '</div>' +
+        loc +
         '<div class="v-stats">' +
           '<span class="v-stat">' + ICON.fuel + '<b>' + Math.round(v.fuel || 0) + '%</b></span>' +
           '<span class="v-stat">' + ICON.odo + '<b>' + nfmt(v.odometer) + ' KM</b></span>' +
         '</div>' +
-        '<button class="v-spawn"' + (out ? ' disabled' : '') + '>' +
-          (out ? 'Already out' : 'Spawn Vehicle') + '</button>' +
+        btnHtml +
       '</div>';
 
-    var btn = el.querySelector('.v-spawn');
-    if (!out) btn.addEventListener('click', function () { requestSpawn(btn, v.id); });
+    var btn = el.querySelector('.v-act');
+    if (out) { /* disabled */ }
+    else if (here) btn.addEventListener('click', function () { requestSpawn(btn, v.id); });
+    else           btn.addEventListener('click', function () { requestTransfer(btn, v.id); });
     return el;
   }
 
@@ -137,14 +157,24 @@
     list.forEach(function (v) { host.appendChild(vehicleCard(v)); });
   }
 
-  /* ---- spawn flow: loading state -> asteapta rezultat de la Lua/server ---- */
+  /* ---- flow spawn / transfer: loading -> asteapta rezultat de la Lua/server ---- */
+  function lockActs(activeBtn, label) {
+    spawningBtn = activeBtn;
+    activeBtn.classList.add('loading');
+    activeBtn.textContent = label;
+    $$('.v-act').forEach(function (b) { b.disabled = true; });
+  }
+
   function requestSpawn(btn, pvId) {
     if (btn.disabled) return;
-    spawningBtn = btn;
-    btn.classList.add('loading');
-    btn.textContent = 'Spawning...';
-    $$('.v-spawn').forEach(function (b) { b.disabled = true; });
+    lockActs(btn, 'Spawning...');
     post('spawn', { pvId: pvId });
+  }
+
+  function requestTransfer(btn, pvId) {
+    if (btn.disabled) return;
+    lockActs(btn, 'Transferring...');
+    post('transfer', { pvId: pvId });
   }
 
   function onSpawnResult(ok, text) {
@@ -152,6 +182,16 @@
     if (garageState) paintGarage();       // reface cardurile (stari corecte)
     spawningBtn = null;
     toast('err', text || 'Failed to spawn vehicle.');
+  }
+
+  function onTransferResult(ok, text) {
+    // succes -> Lua re-cere lista (openGarage repictaza cardul ca SPAWN).
+    // esec   -> reface cardurile la starea curenta + toast.
+    if (!ok) {
+      if (garageState) paintGarage();
+      toast('err', text || 'Transfer failed.');
+    }
+    spawningBtn = null;
   }
 
   /* --------------------------------------------------------- DEALER ---- */
@@ -215,19 +255,27 @@
     var m = e.data || {};
     switch (m.action) {
       case 'prompt': setPrompt(m.kind); break;
-      case 'openGarage':
-        garageState = { data: m.data || {}, search: '', sort: 'id-asc' };
-        $('#m-search-input').value = '';
-        $('#m-sort').value = 'id-asc';
+      case 'openGarage': {
+        var prev = garageState;
+        var same = !!(prev && prev.data && prev.data.garageId === (m.data && m.data.garageId));
+        garageState = {
+          data: m.data || {},
+          search: same ? prev.search : '',
+          sort:   same ? prev.sort : 'id-asc'
+        };
+        $('#m-search-input').value = garageState.search;
+        $('#m-sort').value = garageState.sort;
         $('#m-tools').classList.remove('hidden');
         paintGarage();
         showModal();
-        setTimeout(function () { $('#m-search-input').focus(); }, 40);
+        if (!same) setTimeout(function () { $('#m-search-input').focus(); }, 40);
         break;
+      }
       case 'openDealer': renderDealer(m.data || {}); break;
       case 'close': hideModal(); break;
       case 'toast': toast(m.kind, m.text); break;
       case 'spawnResult': onSpawnResult(m.ok === true, m.text); break;
+      case 'transferResult': onTransferResult(m.ok === true, m.text); break;
     }
   });
 

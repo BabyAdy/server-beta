@@ -15,6 +15,39 @@
     <span class="lbl" id="prompt-text">for enter home</span>
   </div>
 
+  <!-- ===================== popup /buyhouse ===================== -->
+  <div id="buy" class="hidden">
+    <div class="buy-box">
+      <!-- pas 1: confirmare -->
+      <section id="buy-confirm">
+        <div class="buy-kicker">Achiziție locuință</div>
+        <p class="buy-text" id="buy-confirm-text"></p>
+        <p class="buy-q">Dorești să continui tranzacția?</p>
+        <div class="buy-row">
+          <button class="bbtn bbtn-yes" id="buy-yes">Yes</button>
+          <button class="bbtn bbtn-no"  id="buy-no">No</button>
+        </div>
+      </section>
+
+      <!-- pas 2: metoda de plata -->
+      <section id="buy-method" class="hidden">
+        <div class="buy-kicker">Metodă de plată</div>
+        <p class="buy-text">De unde dorești să îți fie retrase fondurile pentru achiziție?</p>
+        <div class="buy-row">
+          <button class="bbtn bbtn-pay" id="pay-cash">
+            <span class="dot" id="dot-cash"></span><span>Cash</span>
+            <em class="pay-amt" id="amt-cash"></em>
+          </button>
+          <button class="bbtn bbtn-pay" id="pay-bank">
+            <span class="dot" id="dot-bank"></span><span>Bank</span>
+            <em class="pay-amt" id="amt-bank"></em>
+          </button>
+        </div>
+        <button class="bbtn bbtn-cancel" id="buy-cancel">Anulează</button>
+      </section>
+    </div>
+  </div>
+
   <script src="js/app.js"></script>
 </body>
 </html>

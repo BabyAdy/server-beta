@@ -166,7 +166,9 @@ local function staffChat(src, kind, text)
         text    = text,
         time    = os.date('%H:%M'),
         color   = (kind == 'admin') and Config.Chat.adminChatColor or Config.Chat.helperChatColor,
-        staff   = { label = info.label, color = info.color, id = info.id, kind = kind },
+        -- `icon` = SVG (interior) al formei gradului; `color` = culoarea stabilita a gradului.
+        -- Inlocuieste vechiul badge text [Grad]. `label`/`id` raman in payload (compat) dar nu se mai afiseaza.
+        staff   = { label = info.label, color = info.color, id = info.id, kind = kind, icon = Staff.iconSvg(info.rank) },
     }
 
     for _, pid in ipairs(GetPlayers()) do
@@ -184,6 +186,37 @@ end, false)
 
 RegisterCommand('hc', function(src, args, raw)
     staffChat(src, 'helper', raw:match('^%S+%s+(.*)$') or '')
+end, false)
+
+-- ===========================================================================
+--  /o [text]  — ANUNT GLOBAL (toti jucatorii). Admin (Staff.MIN_GLOBAL_CHAT).
+--  Render:  (icon) ANNOUNCEMENT (icon-staff) Username: text   — pe rosu.
+-- ===========================================================================
+local function globalAnnounce(src, text)
+    text = tostring(text or ''):gsub('^%s+', ''):gsub('%s+$', '')
+    if text == '' then
+        if src > 0 then notify(src, 'ERROR', 'Folosire: /o [text]') end
+        return
+    end
+    if src > 0 and not exports['rpg-auth']:hasStaffLevel(src, Staff.MIN_GLOBAL_CHAT) then
+        return notify(src, 'ERROR', 'Nu ai acces la această comandă.')
+    end
+
+    local info = staffInfo(src)
+    TriggerClientEvent('rpg-hud:chatMessage', -1, {
+        channel  = 'ANNOUNCEMENT',
+        announce = true,
+        author   = info.name,
+        text     = text,
+        time     = os.date('%H:%M'),
+        color    = Config.Chat.globalColor or '#ff4d4d',
+        staff    = { color = info.color, icon = Staff.iconSvg(info.rank), kind = info.kind },
+    })
+    print(('[global] [%s] %s: %s'):format(info.label, info.name, text))
+end
+
+RegisterCommand('o', function(src, args, raw)
+    globalAnnounce(src, raw:match('^%S+%s+(.*)$') or '')
 end, false)
 
 RegisterCommand('setstaff', function(src, args)

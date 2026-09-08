@@ -115,10 +115,12 @@ end
 -- ---------------------------------------------------------------------------
 local TITLES = { Vehicle = 'Vehicles', Heli = 'Helicopters & Planes', Boat = 'Boats' }
 
-local function rowsToList(rows)
+-- garageId = garage-ul la care se uita jucatorul acum (pt. campul `here`)
+local function rowsToList(rows, garageId)
     local out = {}
     for _, r in ipairs(rows) do
         local model = r.model_name
+        local home  = r.garage_id ~= nil and tonumber(r.garage_id) or nil
         out[#out + 1] = {
             id           = tonumber(r.id),
             model_name   = model,
@@ -126,7 +128,12 @@ local function rowsToList(rows)
             odometer     = math.floor(tonumber(r.odometer) or 0),
             fuel         = math.floor(tonumber(r.fuel) or 0),
             status       = Utils.toBit(r.status),   -- oxmysql poate da boolean
+            stored       = Utils.toBit(r.stored),
             spawned      = Garages.spawned[tonumber(r.id)] ~= nil,
+            -- `here` = poate fi scos direct din acest garage (fara transfer):
+            --   garage-ul de baza e cel curent, SAU vehiculul nu are inca garage de baza (NULL).
+            here         = (home == nil) or (home == tonumber(garageId)),
+            homeGarage   = home,
             -- path-ul imaginii se genereaza din model_name; NU e stocat in DB (spec §18)
             image        = tostring(model) .. '.png',
         }
@@ -146,25 +153,29 @@ function Garages.listForGarage(src, garageId)
             return nil, 'Nu ai acces la acest garage de facțiune.'
         end
         rows = MySQL.query.await([[
-            SELECT id, model_name, display_name, odometer, fuel, status
+            SELECT id, model_name, display_name, odometer, fuel, status, stored, garage_id
             FROM personal_vehicle
             WHERE faction = ? AND vehicle_type = ? AND stored = 1
         ]], { g.faction, g.type }) or {}
     else
         local uid = Garages.accId(src)
         if not uid then return nil, 'Cont neîncărcat.' end
+        -- TOATE vehiculele jucatorului de acest tip (inclusiv cele parcate la
+        -- alt garage sau scoase acum). Filtrarea "here / transfer / in use" o
+        -- face UI-ul pe baza campurilor `here` / `spawned`.
         rows = MySQL.query.await([[
-            SELECT id, model_name, display_name, odometer, fuel, status
+            SELECT id, model_name, display_name, odometer, fuel, status, stored, garage_id
             FROM personal_vehicle
-            WHERE owner_id = ? AND faction = '' AND vehicle_type = ? AND stored = 1
+            WHERE owner_id = ? AND faction = '' AND vehicle_type = ?
         ]], { uid, g.type }) or {}
     end
 
     return {
-        garageId   = g.id,
-        garageType = g.type,
-        title      = TITLES[g.type] or 'Vehicles',
-        vehicles   = rowsToList(rows),
+        garageId      = g.id,
+        garageType    = g.type,
+        title         = TITLES[g.type] or 'Vehicles',
+        transferPrice = Config.Transfer.price,
+        vehicles      = rowsToList(rows, g.id),
     }
 end
 
@@ -224,6 +235,15 @@ RegisterNetEvent('rpg-garages:spawnRequest', function(pvId, garageId)
         return rejectSpawn(src, ('Acest garage (%s) nu scoate %s.'):format(g.type, row.vehicle_type))
     end
 
+    -- vehiculul trebuie sa fie la ACEST garage (sau fara garage de baza / NULL).
+    -- Pentru alt garage -> intai transfer contra cost (rpg-garages:transferRequest).
+    if g.faction == '' then
+        local home = row.garage_id ~= nil and tonumber(row.garage_id) or nil
+        if home ~= nil and home ~= g.id then
+            return rejectSpawn(src, ('Vehiculul e la Garage #%d. Transferă-l aici (%d$).'):format(home, Config.Transfer.price))
+        end
+    end
+
     -- rezerva slotul ACUM (anti double-spawn), marcheaza scos in DB
     Garages.spawned[pvId] = {
         ownerSrc = src, ownerId = tonumber(row.owner_id), model = row.model_name,
@@ -262,6 +282,67 @@ RegisterNetEvent('rpg-garages:spawnFailed', function(pvId)
     Garages.spawned[pvId] = nil
     MySQL.update.await('UPDATE personal_vehicle SET stored = 1 WHERE id = ?', { pvId })
     Garages.feedback(src, 'ERROR', 'Spawn eșuat. Vehiculul a rămas în garage.')
+end)
+
+-- ---------------------------------------------------------------------------
+--  TRANSFER — muta garage-ul de baza al unui vehicul la garage-ul curent,
+--  contra Config.Transfer.price. Doar vehicule personale, parcate (stored = 1),
+--  nu deja la acest garage. TOT validat server-side.
+-- ---------------------------------------------------------------------------
+local function transferBalance(src)
+    if Config.Transfer.payFrom == 'bank' then return tonumber(exports['rpg-level']:getBank(src)) or 0 end
+    return tonumber(exports['rpg-level']:getMoney(src)) or 0
+end
+local function transferCharge(src, amount)
+    if Config.Transfer.payFrom == 'bank' then return exports['rpg-level']:addBank(src, -amount) end
+    return exports['rpg-level']:addMoney(src, -amount)
+end
+-- respinge transferul: notifica si NUI-ul (butonul "Transferring..." -> revine)
+local function rejectTransfer(src, msg)
+    Garages.feedback(src, 'ERROR', msg)
+    TriggerClientEvent('rpg-garages:transferResult', src, false, nil, msg)
+end
+
+RegisterNetEvent('rpg-garages:transferRequest', function(pvId, garageId)
+    local src = source
+    pvId = tonumber(pvId)
+    local near, g = Garages.nearGarage(src, garageId)
+    if not pvId or not g then return rejectTransfer(src, 'Cerere invalidă.') end
+    if not near then return rejectTransfer(src, 'Ești prea departe de garage.') end
+    if g.faction ~= '' then return rejectTransfer(src, 'Transfer indisponibil la un garage de facțiune.') end
+
+    local row = MySQL.single.await(
+        'SELECT owner_id, faction, vehicle_type, stored, garage_id FROM personal_vehicle WHERE id = ? LIMIT 1', { pvId })
+    if not row then return rejectTransfer(src, 'Vehiculul nu există.') end
+
+    if row.faction ~= '' or tonumber(row.owner_id) ~= Garages.accId(src) then
+        return rejectTransfer(src, 'Nu este vehiculul tău.')
+    end
+    if row.vehicle_type ~= g.type then
+        return rejectTransfer(src, ('Garage incompatibil (%s ≠ %s).'):format(g.type, row.vehicle_type))
+    end
+    if Garages.spawned[pvId] or Utils.toBit(row.stored) ~= 1 then
+        return rejectTransfer(src, 'Vehiculul este scos acum. Parchează-l întâi.')
+    end
+    local home = row.garage_id ~= nil and tonumber(row.garage_id) or nil
+    if home == g.id then
+        return rejectTransfer(src, 'Vehiculul este deja la acest garage.')
+    end
+
+    local price = Config.Transfer.price
+    if transferBalance(src) < price then
+        return rejectTransfer(src, ('Îți trebuie %d$ (%s) pentru transfer.')
+            :format(price, Config.Transfer.payFrom == 'bank' and 'bancă' or 'cash'))
+    end
+    if not transferCharge(src, price) then
+        return rejectTransfer(src, 'Tranzacție eșuată.')
+    end
+
+    MySQL.update.await('UPDATE personal_vehicle SET garage_id = ? WHERE id = ? AND owner_id = ?',
+        { g.id, pvId, tonumber(row.owner_id) })
+
+    Garages.feedback(src, 'SUCCESS', ('Vehicul transferat la Garage #%d pentru %d$.'):format(g.id, price))
+    TriggerClientEvent('rpg-garages:transferResult', src, true, g.id)
 end)
 
 -- ---------------------------------------------------------------------------

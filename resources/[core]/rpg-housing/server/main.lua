@@ -247,6 +247,153 @@ RegisterCommand('howner', function(src, args)
 end, false)
 
 -- ===========================================================================
+--  /buyhouse — cumparare casa de langa jucator (popup NUI: confirm -> metoda)
+--  Fluxul:
+--    client /buyhouse          -> rpg-housing:requestBuy   (server: valideaza + trimite date)
+--    server rpg-housing:openBuy -> client (popup 1 "Yes/No")
+--    NUI [Yes] -> popup 2 (Cash/Bank cu bulina verde/rosu, calculata din datele deja trimise)
+--    NUI [Cash]/[Bank] -> client rpg-housing:confirmBuy -> server: RE-valideaza tot + tranzactie
+-- ===========================================================================
+
+-- users.id -> src online (nil daca offline)
+local function srcOfAccount(accountId)
+    accountId = tonumber(accountId)
+    if not accountId then return nil end
+    for _, pid in ipairs(GetPlayers()) do
+        local t = tonumber(pid)
+        local a = accOf(t)
+        if a and tonumber(a.id) == accountId then return t end
+    end
+    return nil
+end
+
+local function moneyOf(src)
+    local cash = tonumber(exports['rpg-level']:getMoney(src)) or 0
+    local bank = tonumber(exports['rpg-level']:getBank(src)) or 0
+    return cash, bank
+end
+
+local function housesOwnedBy(accountId)
+    local n = 0
+    for _, h in pairs(cache) do
+        if tonumber(h.owner) == tonumber(accountId) then n = n + 1 end
+    end
+    return n
+end
+
+-- casa cea mai apropiata de player, in raza Config.Buy.radius (usa exterioara)
+local function nearestBuyableHouse(src)
+    local ped = GetPlayerPed(src)
+    if not ped or ped == 0 then return nil end
+    local pc = GetEntityCoords(ped)
+    local best, bestD
+    for _, h in pairs(cache) do
+        local d = #(pc - h.coords)
+        if d <= Config.Buy.radius and (not bestD or d < bestD) then
+            best, bestD = h, d
+        end
+    end
+    return best
+end
+
+-- valideaza dreptul de a cumpara casa `h` de catre `src`; intoarce (ok, errText)
+local function canBuy(src, h)
+    if not h then return false, 'Nu ești lângă nicio casă.' end
+    local acc = accOf(src)
+    if not acc then return false, 'Cont neîncărcat.' end
+    local buyerId = tonumber(acc.id)
+
+    if tonumber(h.owner) == buyerId then
+        return false, 'Deții deja această casă.'
+    end
+    if tonumber(h.owner) ~= 0 and not Config.Buy.allowFromPlayers then
+        return false, 'Această casă are deja un proprietar.'
+    end
+    if (Config.Buy.maxPerPlayer or 0) > 0 and housesOwnedBy(buyerId) >= Config.Buy.maxPerPlayer then
+        return false, ('Ai deja %d case (maximul permis).'):format(Config.Buy.maxPerPlayer)
+    end
+    return true, nil, buyerId
+end
+
+RegisterNetEvent('rpg-housing:requestBuy', function()
+    local src = source
+    local h = nearestBuyableHouse(src)
+    local ok, err = canBuy(src, h)
+    if not ok then return feedback(src, 'ERROR', err) end
+
+    local cash, bank = moneyOf(src)
+    local ownerLabel = (tonumber(h.owner) == 0) and Config.Buy.stateOwnerName or (h.ownerName or ('#' .. h.owner))
+
+    TriggerClientEvent('rpg-housing:openBuy', src, {
+        houseId    = h.id,
+        ownerLabel = ownerLabel,
+        price      = h.price,
+        cash       = cash,
+        bank       = bank,
+    })
+end)
+
+RegisterNetEvent('rpg-housing:confirmBuy', function(houseId, method)
+    local src = source
+    houseId = tonumber(houseId)
+    method  = (method == 'bank') and 'bank' or (method == 'cash') and 'cash' or nil
+    if not houseId or not method then return end
+
+    local h = cache[houseId]
+    if not h then return feedback(src, 'ERROR', 'Casa nu mai există.') end
+
+    -- RE-verificare proximitate (client neîncrezător)
+    local ped = GetPlayerPed(src)
+    if not ped or ped == 0 or #(GetEntityCoords(ped) - h.coords) > Config.Buy.radius then
+        return feedback(src, 'ERROR', 'Ești prea departe de casă.')
+    end
+
+    local ok, err, buyerId = canBuy(src, h)
+    if not ok then return feedback(src, 'ERROR', err) end
+
+    local price = math.floor(tonumber(h.price) or 0)
+    local prevOwner = tonumber(h.owner) or 0
+
+    -- fonduri (verificare + scădere, fără yield între ele -> efectiv atomic pe tick)
+    local cash, bank = moneyOf(src)
+    if method == 'cash' and cash < price then
+        return feedback(src, 'ERROR', ('Nu ai %s$ cash.'):format(fmtMoney(price)))
+    end
+    if method == 'bank' and bank < price then
+        return feedback(src, 'ERROR', ('Nu ai %s$ în bancă.'):format(fmtMoney(price)))
+    end
+
+    local charged
+    if method == 'cash' then charged = exports['rpg-level']:addMoney(src, -price)
+    else charged = exports['rpg-level']:addBank(src, -price) end
+    if not charged then return feedback(src, 'ERROR', 'Tranzacție eșuată.') end
+
+    -- plata fostului proprietar (jucător, nu State)
+    if prevOwner ~= 0 and Config.Buy.payPreviousOwner and price > 0 then
+        local pSrc = srcOfAccount(prevOwner)
+        if pSrc then
+            exports['rpg-level']:addBank(pSrc, price)
+            feedback(pSrc, 'INFO', ('Casa #%d a fost vândută. Ai primit %s$ în bancă.'):format(houseId, fmtMoney(price)))
+        else
+            MySQL.update.await('UPDATE users SET bank = bank + ? WHERE id = ?', { price, prevOwner })
+        end
+    end
+
+    -- transfer proprietate
+    MySQL.update.await('UPDATE houses SET owner = ? WHERE id = ?', { buyerId, houseId })
+    local buyerAcc = accOf(src)
+    h.owner = buyerId
+    h.ownerName = (buyerAcc and buyerAcc.username) or ('#' .. buyerId)
+    TriggerClientEvent('rpg-housing:houseAdded', -1, h)   -- reface eticheta la toti
+
+    feedback(src, 'SUCCESS', ('Ai cumpărat casa #%d pentru %s$ (%s).')
+        :format(houseId, fmtMoney(price), method == 'cash' and 'cash' or 'bancă'))
+
+    print(('[rpg-housing] /buyhouse: cont #%s a cumparat casa #%d cu %d$ (%s), fost owner #%d')
+        :format(buyerId, houseId, price, method, prevOwner))
+end)
+
+-- ===========================================================================
 --  INTRARE / IEȘIRE — serverul comuta routing bucket-ul (virtual world).
 --  In casa -> VW = house.interior_vw (= id-ul casei) => casele care folosesc
 --  acelasi interior MLO fizic NU se vad intre ele. Afara -> VW 0.

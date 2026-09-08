@@ -42,6 +42,58 @@ RegisterCommand('rpghousing_interact', function()
 end, false)
 RegisterKeyMapping('rpghousing_interact', 'Intră / Ieși din casă', 'keyboard', 'E')
 
+-- --------------------------------------------------- /buyhouse (popup NUI) --
+local buyOpen  = false
+local pendingBuy = nil   -- { houseId } cat timp popup-ul e deschis
+
+local function closeBuy()
+    if not buyOpen then return end
+    buyOpen = false
+    pendingBuy = nil
+    SetNuiFocus(false, false)
+    SendNUIMessage({ action = 'buyClose' })
+end
+
+RegisterCommand('buyhouse', function()
+    if buyOpen or insideHouseId then return end
+    -- serverul afla singur casa cea mai apropiata (anti-cheat); trimitem doar intentia
+    TriggerServerEvent('rpg-housing:requestBuy')
+end, false)
+
+RegisterNetEvent('rpg-housing:openBuy', function(data)
+    if not data or not data.houseId then return end
+    buyOpen = true
+    pendingBuy = { houseId = data.houseId }
+    SetNuiFocus(true, true)
+    SendNUIMessage({ action = 'buyOpen', data = data })
+end)
+
+RegisterNUICallback('buyCancel', function(_, cb)
+    closeBuy()
+    cb('ok')
+end)
+
+RegisterNUICallback('buyPay', function(data, cb)
+    local method = data and tostring(data.method or '')
+    if pendingBuy and (method == 'cash' or method == 'bank') then
+        TriggerServerEvent('rpg-housing:confirmBuy', pendingBuy.houseId, method)
+    end
+    closeBuy()
+    cb('ok')
+end)
+
+-- ESC inchide popup-ul de cumparare
+CreateThread(function()
+    while true do
+        if buyOpen then
+            if IsControlJustReleased(0, 322) then closeBuy() end
+            Wait(0)
+        else
+            Wait(300)
+        end
+    end
+end)
+
 RegisterNetEvent('rpg-housing:setInside', function(houseId, entering)
     local ped = PlayerPedId()
     local h = houses[houseId]
@@ -120,6 +172,7 @@ end)
 
 AddEventHandler('onResourceStop', function(res)
     if res ~= GetCurrentResourceName() then return end
+    if buyOpen then SetNuiFocus(false, false) end
     SendNUIMessage({ action = 'houses', list = {} })
     SendNUIMessage({ action = 'prompt', text = nil })
 end)

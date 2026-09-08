@@ -13,6 +13,7 @@ dependencies {
     'rpg-auth',
     'rpg-characters',
     'rpg-hud',
+    'rpg-level',   -- economie: /buyhouse (getMoney/getBank/addMoney/addBank)
 }
 
 shared_scripts {

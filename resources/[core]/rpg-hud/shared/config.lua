@@ -27,6 +27,7 @@ Config.Chat = {
     -- culorile chat-urilor de staff (mesajul in sine)
     adminChatColor   = '#F5B427',      -- /a
     helperChatColor  = '#F5E427',      -- /hc
+    globalColor      = '#ff4d4d',      -- /o  (anunt global) — rosu
 
     -- setari reglabile de jucator din rotita de setari (persistente in NUI)
     lines = { default = 6,    min = 3,  max = 14 },   -- mesaje vizibile in inactive
@@ -40,7 +41,7 @@ Config.Chat = {
         LOCAL        = { label = 'LOCAL',  color = '#7fb3ff' },
         SYSTEM       = { label = 'SISTEM', color = '#9aa0aa' },
         STAFF        = { label = 'STAFF',  color = '#f0a85b' },
-        ANNOUNCEMENT = { label = 'ANUNȚ',  color = '#f5c451' },
+        ANNOUNCEMENT = { label = 'ANNOUNCEMENT', color = '#ff4d4d' },   -- /o (anunt global, rosu)
         ERROR        = { label = 'EROARE', color = '#f0576f' },
         SUCCESS      = { label = 'OK',     color = '#46d6a2' },
         INFO         = { label = 'INFO',   color = '#a78bfa' },

@@ -174,8 +174,45 @@ body.preview {
 .cmsg.ch-ERROR .c-text { color: var(--danger); }
 .cmsg.ch-SUCCESS .c-text { color: var(--ok); }
 .cmsg.ch-STAFF .c-text { color: #f0a85b; }
-.cmsg.ch-ANNOUNCEMENT { background: rgba(245, 196, 81, 0.06); }
-.cmsg.ch-ANNOUNCEMENT .c-text { color: #f5c451; }
+/* --- /o : anunt global (rosu, cu delimitari clare) --- */
+.cmsg.ch-ANNOUNCEMENT {
+    background: rgba(255, 77, 77, 0.09);
+    border-left: 3px solid #ff4d4d;
+    border-radius: 3px;
+    padding: 1px 6px 1px 7px;
+    margin: 2px 0;
+}
+.cmsg.ch-ANNOUNCEMENT .c-text { color: #ff6a6a; font-weight: 600; }
+
+/* megafon */
+.c-anno-ic {
+    display: inline-flex;
+    vertical-align: -0.14em;
+    margin-right: 6px;
+    color: #ff4d4d;
+}
+.c-anno-ic svg { width: 1.05em; height: 1.05em; }
+
+/* eticheta ANNOUNCEMENT — pill, ca sa se delimiteze de restul */
+.c-anno-tag {
+    display: inline-block;
+    font-size: 0.82em;
+    font-weight: 900;
+    letter-spacing: 0.14em;
+    color: #ffdada;
+    background: rgba(255, 77, 77, 0.22);
+    border: 1px solid rgba(255, 77, 77, 0.7);
+    border-radius: 4px;
+    padding: 0 6px;
+    margin-right: 7px;
+}
+
+/* username — alb, contrast pe fundal rosu */
+.c-anno-auth {
+    color: #ffffff;
+    font-weight: 800;
+    margin-right: 1px;
+}
 
 /* --- staff chat ( /a  ·  /hc ) --- */
 .c-sicon {
@@ -186,6 +223,16 @@ body.preview {
 .c-sicon svg { width: 1em; height: 1em; }   /* scaleaza cu marimea mesajului */
 .cmsg.ch-STAFF_ADMIN .c-sicon { color: #F5B427; }
 .cmsg.ch-STAFF_HELPER .c-sicon { color: #F5E427; }
+
+/* (icon-staff) — forma per grad, colorata inline cu culoarea gradului */
+.c-sbadge {
+    display: inline-flex;
+    vertical-align: -0.16em;
+    margin-right: 5px;
+    filter: drop-shadow(0 0 3px currentColor);
+}
+.c-sbadge svg { width: 1.12em; height: 1.12em; display: block; }
+
 .c-badge {
     display: inline-block;
     font-size: 0.84em;

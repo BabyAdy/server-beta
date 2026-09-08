@@ -101,9 +101,9 @@ HUD.demo = function () {
     }
     chat.on('message', { time: '21:39', channel: 'SYSTEM', text: 'Ai primit $500 (salariu).' });
     chat.on('message', { time: '21:39', channel: 'STAFF_ADMIN', author: 'Vlad', text: 'preiau ticketul #42', color: '#F5B427',
-        staff: { label: 'Head Admin', color: '#ff6a00', id: 88, kind: 'admin' } });
+        staff: { color: '#ff6a00', kind: 'admin', icon: '<path fill="currentColor" d="M8 3h8l4 9-4 9H8l-4-9 4-9z"/>' } });
     chat.on('message', { time: '21:39', channel: 'STAFF_HELPER', author: 'Ana', text: 'raspund eu pe /report', color: '#F5E427',
-        staff: { label: 'Helper', color: '#37ff00', id: 205, kind: 'helper' } });
+        staff: { color: '#37ff00', kind: 'helper', icon: '<circle cx="12" cy="12" r="9" fill="currentColor"/>' } });
 
     var h = HUD.mods.hud;
     h.on('player', { username: 'Andrei Popescu', id: 137 });

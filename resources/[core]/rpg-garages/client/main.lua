@@ -84,6 +84,25 @@ RegisterNUICallback('buy', function(data, cb)
     cb('ok')
 end)
 
+-- transfer vehicul la garage-ul curent (contra cost). NUI ramane deschis;
+-- la succes serverul re-trimite lista (cardul devine SPAWN).
+RegisterNUICallback('transfer', function(data, cb)
+    local pvId = tonumber(data and data.pvId)
+    if pvId and GG.near then
+        TriggerServerEvent('rpg-garages:transferRequest', pvId, GG.near)
+    else
+        SendNUIMessage({ action = 'transferResult', ok = false })
+    end
+    cb('ok')
+end)
+
+RegisterNetEvent('rpg-garages:transferResult', function(ok, garageId, text)
+    SendNUIMessage({ action = 'transferResult', ok = ok == true, text = text })
+    if ok == true and GG.uiOpen and GG.near then
+        TriggerServerEvent('rpg-garages:requestList', GG.near)   -- reface lista
+    end
+end)
+
 -- ESC inchide UI-ul
 CreateThread(function()
     while true do
