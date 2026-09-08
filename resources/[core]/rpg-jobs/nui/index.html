@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>rpg-jobs</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- prompt [Y] -->
+  <div id="prompt" class="hidden">
+    <span class="key">Y</span><span class="lbl" id="prompt-lbl">Talk to Electrician</span>
+  </div>
+
+  <!-- shift HUD -->
+  <div id="hud" class="hidden">
+    <div class="hud-title">ELECTRICIAN · SHIFT</div>
+    <div class="hud-count"><b id="hud-i">0</b> / <span id="hud-t">5</span> panels</div>
+    <div class="hud-bar"><i id="hud-fill"></i></div>
+  </div>
+
+  <!-- toasts -->
+  <div id="toasts"></div>
+
+  <!-- ================= NPC MENU ================= -->
+  <div id="menu-overlay" class="overlay hidden">
+    <div id="menu" class="card">
+      <div class="card-head">
+        <div class="kicker">Job Center</div>
+        <h1 id="m-job">ELECTRICIAN</h1>
+      </div>
+
+      <div class="m-rows">
+        <div class="m-row"><span>Current Job</span><b id="m-current">Unemployed</b></div>
+        <div class="m-row need-job"><span>Skill</span><b><span id="m-skill">1</span> <em id="m-mult">(+0%)</em></b></div>
+        <div class="m-row need-job"><span>Completed Shifts</span><b id="m-shifts">0</b></div>
+        <div class="m-row need-job"><span>Next Skill</span><b id="m-next">Max</b></div>
+        <div class="m-row need-job"><span>Estimated Salary</span><b id="m-salary">$1,000 – $2,000</b></div>
+        <div class="m-prog need-job"><i id="m-bar"></i></div>
+        <div class="m-hint" id="m-hint"></div>
+      </div>
+
+      <div class="m-btns">
+        <button class="btn" data-a="getJob"    id="b-get">Get Job</button>
+        <button class="btn" data-a="quitJob"   id="b-quit">Quit Job</button>
+        <button class="btn primary" data-a="startWork" id="b-start">Start Work</button>
+        <button class="btn ghost"  data-a="close">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= MINIGAMES ================= -->
+  <div id="mg-overlay" class="overlay hidden">
+    <div id="mg" class="card">
+      <div class="mg-timer"><i id="mg-timer-fill"></i></div>
+
+      <!-- circuit -->
+      <section id="mg-circuit" class="hidden">
+        <div class="kicker">Repair · Minigame</div>
+        <h2>CONNECT THE CIRCUIT</h2>
+        <p class="mg-sub">Rotate every piece to match the highlighted target. Then confirm.</p>
+        <div id="circuit-grid"></div>
+        <button class="btn primary" id="circuit-confirm" disabled>Confirm</button>
+      </section>
+
+      <!-- voltage -->
+      <section id="mg-voltage" class="hidden">
+        <div class="kicker">Repair · Minigame</div>
+        <h2>STABILIZE THE VOLTAGE</h2>
+        <p class="mg-sub">Stop the marker inside the green zone. [SPACE] or click.</p>
+        <div id="volt-track"><div id="volt-zone"></div><div id="volt-cursor"></div></div>
+        <button class="btn primary" id="volt-stop">Stop</button>
+      </section>
+    </div>
+  </div>
+
+  <!-- ================= SHIFT COMPLETE ================= -->
+  <div id="done-overlay" class="overlay hidden">
+    <div id="done" class="card">
+      <div class="kicker">Shift Complete</div>
+      <h2>NICE WORK</h2>
+      <div class="reward" id="d-reward">+$0</div>
+      <div class="d-sub" id="d-sub"></div>
+      <div class="d-levelup hidden" id="d-levelup"></div>
+      <button class="btn primary" id="d-close">Continue</button>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

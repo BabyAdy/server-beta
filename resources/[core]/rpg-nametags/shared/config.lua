@@ -19,7 +19,7 @@ Config.MinScale = 0.62
 Config.MaxScale = 1.12
 
 -- Comportament
-Config.ShowSelf    = false   -- afiseaza si propriul nametag?
+Config.ShowSelf    = true    -- afiseaza si propriul nametag? (pune false daca vrei doar la ceilalti)
 Config.Occlusion   = false   -- true = ascunde daca nu ai linie de vedere (poate palpai in trafic)
 Config.HideWhenDead = true   -- ascunde nametag-ul jucatorilor morti/incapacitati
 

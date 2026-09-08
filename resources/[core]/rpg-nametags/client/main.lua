@@ -1,6 +1,6 @@
 -- ===========================================================================
 --  rpg-nametags — client
---  Nametag 3D custom, randat prin NUI (div pozitionat din World3dToScreen2d),
+--  Nametag 3D custom, randat prin NUI (div pozitionat din GetScreenCoordFromWorldCoord),
 --  la fel ca etichetele din rpg-housing.
 --
 --  DE CE NU SARE la intrarea in masina:
@@ -51,7 +51,8 @@ CreateThread(function()
                         local dist = #(myPos - anchor)
 
                         if dist <= Config.MaxDistance then
-                            local onScreen, sx, sy = World3dToScreen2d(anchor.x, anchor.y, anchor.z)
+                            -- ACELASI native ca rpg-housing (World3dToScreen2d nu exista aici)
+                            local onScreen, sx, sy = GetScreenCoordFromWorldCoord(anchor.x, anchor.y, anchor.z)
                             local visible = onScreen
                             if visible and Config.Occlusion then
                                 visible = HasEntityClearLosToEntity(myPed, ped, 17)
