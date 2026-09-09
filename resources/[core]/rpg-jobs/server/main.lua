@@ -16,9 +16,11 @@ CreateThread(function()
     -- validare config (previne greseli de setup)
     for _, job in pairs(Config.Jobs) do
         assert(job.id and job.name and job.label, '[rpg-jobs] job invalid in Config.Jobs')
-        assert(#job.workLocations >= job.shift.requiredTasks,
-            ('[rpg-jobs] job "%s": prea putine workLocations (%d) pentru requiredTasks (%d)')
-                :format(job.name, #job.workLocations, job.shift.requiredTasks))
+        assert(type(job.workLocations) == 'table' and #job.workLocations >= 3,
+            ('[rpg-jobs] job "%s": minim 3 checkpoint-uri in workLocations (ai %d)')
+                :format(job.name, job.workLocations and #job.workLocations or 0))
+        assert(type(job.minigames) == 'table' and #job.minigames >= 1,
+            ('[rpg-jobs] job "%s": lista minigames goala'):format(job.name))
     end
 
     -- playeri deja conectati (restart de resursa)
@@ -105,8 +107,22 @@ RegisterNetEvent('rpg-jobs:submitMinigame', function(token, result)
     Security.submitMinigame(source, token, result)
 end)
 
+RegisterNetEvent('rpg-jobs:codeGuess', function(token, guess)
+    Security.codeGuess(source, token, guess)
+end)
+
+-- /stopwork, alias vechi /canceljob, Quit Job din meniu -> oprire sesiune (banii per-panou raman)
+RegisterNetEvent('rpg-jobs:stopWork', function()
+    Security.stopShift(source, 'stopwork')
+end)
+
 RegisterNetEvent('rpg-jobs:cancelWork', function()
-    Security.abortShift(source, 'player_cancel')
+    Security.stopShift(source, 'player_cancel')
+end)
+
+-- moartea playerului in timpul lucrului -> oprire sesiune (banii per-panou raman)
+RegisterNetEvent('rpg-jobs:playerDied', function()
+    Security.stopShift(source, 'death')
 end)
 
 -- rezerva pentru alte resurse (viitor)

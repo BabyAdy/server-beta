@@ -56,6 +56,11 @@ Config.Hud = {
     healthPollMs    = 500,
     voicePollMs     = 200,
 
+    -- Ascunde HUD-ul DEFAULT din GTA V (afisajul de bani + popup-ul de schimbare).
+    -- Avem HUD propriu pentru cash/bank, deci cel nativ e redundant.
+    hideNativeHud        = true,
+    hideNativeComponents = { 3, 4, 13 },   -- 3=HUD_CASH, 4=HUD_MP_CASH, 13=HUD_CASH_CHANGE
+
     -- NEEDS (Survival) — mock pana la sistemul real
     mockNeeds      = true,
     startNeeds     = { food = 100.0, water = 100.0 },

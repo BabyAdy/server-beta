@@ -26,12 +26,13 @@ RegisterNetEvent('rpg-inventory:request', function(action, reqId, payload)
     TriggerClientEvent('rpg-inventory:result', src, reqId, res)
 end)
 
--- scaderea durabilitatii la tras (apelat de weapon system-ul viitor)
+-- scaderea durabilitatii + a munitiei la tras (apelat de weapon system-ul viitor)
 RegisterNetEvent('rpg-inventory:weaponShot', function(slot, rounds)
     local src = source
     local okc, ch = pcall(function() return exports['rpg-characters']:getCharacter(src) end)
     if okc and ch then
         Inventory.damageDurability(ch.id, slot, rounds or 1)
+        Inventory.consumeAmmo(ch.id, slot, rounds or 1)
     end
 end)
 
@@ -67,6 +68,8 @@ exports('GetCapacity',  function(charId) return Inventory.capacity(charId) end) 
 exports('GetUsedSlots', function(charId) return Inventory.usedSlots(charId) end)
 exports('GetFreeSlots', function(charId) return Inventory.freeSlots(charId) end)
 exports('DamageDurability', function(charId, slot, amount) return Inventory.damageDurability(charId, slot, amount) end)
+exports('ConsumeAmmo',      function(charId, slot, amount) return Inventory.consumeAmmo(charId, slot, amount) end)
+exports('ReloadWeapon',     function(src, ammoSlot, weaponSlot) return Inventory.reloadWeapon(src, ammoSlot, weaponSlot) end)
 
 exports('RegisterItem', function(def)
     Items.register(def)

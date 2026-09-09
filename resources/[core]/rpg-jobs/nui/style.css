@@ -23,7 +23,7 @@ body { font-family: 'Inter', system-ui, sans-serif; color: var(--text); -webkit-
 .kicker { font-size: 10px; font-weight: 800; letter-spacing: 0.22em; text-transform: uppercase; color: var(--amber); }
 
 /* -------------------------------------------------- PROMPT ---- */
-#prompt {
+#prompt, #wprompt {
   position: fixed; left: 50%; bottom: 8vh; transform: translateX(-50%);
   display: flex; align-items: center; gap: 12px;
   padding: 10px 18px 10px 10px;
@@ -31,14 +31,15 @@ body { font-family: 'Inter', system-ui, sans-serif; color: var(--text); -webkit-
   border-radius: 13px; box-shadow: 0 16px 40px rgba(0,0,0,0.5);
   animation: pIn .2s var(--ease);
 }
+#wprompt { bottom: 12vh; }
 @keyframes pIn { from { opacity: 0; transform: translate(-50%, 10px); } }
-#prompt .key {
+#prompt .key, #wprompt .key {
   width: 34px; height: 34px; display: grid; place-items: center; border-radius: 9px;
   background: linear-gradient(180deg, var(--amber) 0%, var(--amber-d) 100%);
   color: #1a1400; font-weight: 900; font-size: 15px;
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.4), 0 3px 0 rgba(90,66,0,0.9);
 }
-#prompt .lbl { font-size: 13px; font-weight: 700; color: var(--text); }
+#prompt .lbl, #wprompt .lbl { font-size: 13px; font-weight: 700; color: var(--text); }
 
 /* -------------------------------------------------- SHIFT HUD ---- */
 #hud {
@@ -48,10 +49,10 @@ body { font-family: 'Inter', system-ui, sans-serif; color: var(--text); -webkit-
   border-radius: 12px; box-shadow: 0 14px 34px rgba(0,0,0,0.5);
 }
 .hud-title { font-size: 9.5px; font-weight: 800; letter-spacing: 0.16em; color: var(--amber); }
-.hud-count { font-size: 13px; font-weight: 700; margin: 4px 0 8px; font-variant-numeric: tabular-nums; }
-.hud-count b { color: #fff; }
-.hud-bar { height: 5px; border-radius: 3px; background: rgba(255,255,255,0.08); overflow: hidden; }
-.hud-bar i { display: block; height: 100%; width: 0%; background: linear-gradient(90deg, var(--amber-d), var(--amber)); transition: width .35s var(--ease); }
+.hud-count { font-size: 13px; font-weight: 700; margin: 5px 0 2px; letter-spacing: 0.1em; color: var(--dim); font-variant-numeric: tabular-nums; }
+.hud-count b { color: #fff; font-size: 18px; margin-left: 4px; }
+.hud-earned { font-size: 11.5px; font-weight: 600; color: var(--dim); font-variant-numeric: tabular-nums; }
+.hud-earned b { color: var(--ok); font-weight: 800; }
 
 /* -------------------------------------------------- TOASTS ---- */
 #toasts { position: fixed; top: 3vh; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; gap: 8px; align-items: center; pointer-events: none; }
@@ -115,30 +116,85 @@ body { font-family: 'Inter', system-ui, sans-serif; color: var(--text); -webkit-
 .mg-timer { height: 5px; border-radius: 3px; background: rgba(255,255,255,0.08); overflow: hidden; margin-bottom: 16px; }
 .mg-timer i { display: block; height: 100%; width: 100%; background: linear-gradient(90deg, var(--amber), var(--err)); transition: width .1s linear; }
 
-/* circuit */
-#circuit-grid { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-bottom: 18px; }
-.wire {
-  position: relative; width: 62px; height: 62px; border-radius: 12px;
-  background: rgba(255,255,255,0.03); border: 1px solid var(--line);
+#mg .btn.primary { width: 100%; }
+
+/* ---- 1 · WIRES CONNECT ---- */
+#wires-wrap { position: relative; display: flex; justify-content: space-between; padding: 6px 8px 2px; margin-bottom: 6px; }
+#wires-lines { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
+.wcol { display: flex; flex-direction: column; gap: 14px; z-index: 1; }
+.wnode {
+  display: flex; align-items: center; gap: 8px; cursor: pointer;
+  padding: 4px; border-radius: 10px; transition: background .12s var(--ease);
+}
+.wcol-r .wnode { flex-direction: row-reverse; }
+.wnode:hover { background: rgba(255,255,255,0.05); }
+.wnode i {
+  width: 22px; height: 22px; border-radius: 50%; background: var(--wc);
+  border: 2px solid rgba(255,255,255,0.25);
+  box-shadow: 0 0 0 3px rgba(0,0,0,0.35), 0 0 10px var(--wc);
+  transition: transform .1s var(--ease);
+}
+.wnode.sel i { transform: scale(1.22); border-color: #fff; }
+.wnode.done i { border-color: rgba(255,255,255,0.7); }
+.wnode.done { opacity: 0.95; }
+.wcol-l .wnode.bad i { border-color: var(--err); box-shadow: 0 0 0 3px rgba(0,0,0,0.35), 0 0 10px var(--err); }
+
+/* ---- 2 · CONNECT TO ELECTRICITY ---- */
+#flow-row { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 4px; margin-bottom: 8px; }
+.tube {
+  position: relative; width: 42px; height: 42px; border-radius: 8px;
+  background: rgba(255,255,255,0.04); border: 1px solid var(--line);
   cursor: pointer; display: grid; place-items: center;
   transition: border-color .12s var(--ease), background .12s var(--ease);
 }
-.wire:hover { border-color: var(--line-2); }
-.wire svg { width: 46px; height: 46px; transition: transform .16s var(--ease); }
-.wire .ghost { position: absolute; inset: 8px; opacity: 0.22; }
-.wire .live  { position: absolute; inset: 8px; color: var(--dim); }
-.wire.ok { border-color: rgba(74,222,128,0.6); background: rgba(74,222,128,0.10); }
-.wire.ok .live { color: var(--ok); filter: drop-shadow(0 0 6px rgba(74,222,128,0.8)); }
-.wire.ok .ghost { opacity: 0; }
-
-/* voltage */
-#volt-track {
-  position: relative; height: 30px; border-radius: 8px; overflow: hidden;
-  background: repeating-linear-gradient(90deg, rgba(255,255,255,0.05) 0 2px, transparent 2px 22px);
-  border: 1px solid var(--line); margin-bottom: 18px;
+.tube:hover:not(.fixed) { border-color: var(--line-2); }
+.tube i {
+  width: 100%; height: 10px; border-radius: 5px;
+  background: linear-gradient(180deg, #6b6f78, #3c3f47);
+  transform: rotate(var(--rot, 0deg)); transition: transform .14s var(--ease), background .18s var(--ease);
 }
-#volt-zone { position: absolute; top: 0; bottom: 0; background: rgba(74,222,128,0.28); border-left: 2px solid var(--ok); border-right: 2px solid var(--ok); }
-#volt-cursor { position: absolute; top: -4px; bottom: -4px; width: 4px; background: var(--amber); box-shadow: 0 0 10px var(--amber); border-radius: 2px; left: 0; }
+.tube.lit i { background: linear-gradient(180deg, #6fb6ff, #2f7bf0); box-shadow: 0 0 12px rgba(58,123,240,0.9); }
+.tube.fixed { cursor: default; background: rgba(58,123,240,0.10); border-color: rgba(58,123,240,0.4); }
+.tube.fixed i { transform: none; }
+.tube.fixed b {
+  position: absolute; bottom: -15px; left: 50%; transform: translateX(-50%);
+  font-size: 8px; font-weight: 800; letter-spacing: 0.12em; color: var(--dim);
+}
+#flow-row { padding-bottom: 14px; }
+
+/* ---- 3 · SEARCH THE CODE ---- */
+#code-lock { width: 58px; height: 62px; margin: 4px auto 14px; position: relative; }
+#code-lock .lk-shackle {
+  position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+  width: 34px; height: 34px; border: 6px solid var(--dim); border-bottom: none;
+  border-radius: 18px 18px 0 0; transition: transform .5s var(--ease);
+}
+#code-lock .lk-body {
+  position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
+  width: 52px; height: 40px; border-radius: 9px;
+  background: linear-gradient(180deg, var(--amber) 0%, var(--amber-d) 100%);
+  display: grid; place-items: center;
+}
+#code-lock .lk-hole { width: 9px; height: 9px; border-radius: 50%; background: #1a1400; box-shadow: 0 8px 0 -3px #1a1400; }
+#code-lock.open .lk-shackle { transform: translateX(-40%) rotate(28deg); border-color: var(--ok); }
+#code-lock.open .lk-body { background: linear-gradient(180deg, #6ee7a0 0%, var(--ok) 100%); }
+
+#code-digits { display: flex; justify-content: center; gap: 12px; margin-bottom: 16px; }
+.cdig {
+  width: 56px; display: flex; flex-direction: column; align-items: center; gap: 4px;
+  padding: 6px 0; border-radius: 12px; background: rgba(255,255,255,0.04); border: 1px solid var(--line);
+  transition: border-color .16s var(--ease), background .16s var(--ease);
+}
+.cdig .cval { font-size: 26px; font-weight: 900; color: #fff; font-variant-numeric: tabular-nums; line-height: 1; }
+.cbtn {
+  width: 30px; height: 20px; border: none; border-radius: 6px; cursor: pointer;
+  background: rgba(255,255,255,0.06); color: var(--dim); font-size: 10px; line-height: 1;
+  transition: background .12s var(--ease), color .12s var(--ease);
+}
+.cbtn:hover { background: rgba(246,190,0,0.16); color: var(--text); }
+.cdig.locked { border-color: rgba(74,222,128,0.6); background: rgba(74,222,128,0.12); }
+.cdig.locked .cval { color: var(--ok); text-shadow: 0 0 12px rgba(74,222,128,0.7); }
+.cdig.locked .cbtn { visibility: hidden; }
 
 /* -------------------------------------------------- DONE ---- */
 #done { text-align: center; }

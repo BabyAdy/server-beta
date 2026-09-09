@@ -262,6 +262,18 @@ body.preview { background: #0a0710; }
     padding: 1px 4px;
     font-variant-numeric: tabular-nums;
 }
+.ammo {
+    position: absolute; right: 4px; top: 4px;
+    font-size: 10px; font-weight: 700;
+    color: #f6b8c1;
+    background: rgba(240, 87, 111, 0.20);
+    box-shadow: inset 0 0 0 1px rgba(240, 87, 111, 0.45);
+    border-radius: 5px;
+    padding: 1px 4px;
+    font-variant-numeric: tabular-nums;
+    pointer-events: none;
+}
+.ammo::before { content: "▮ "; opacity: 0.7; }
 .dura {
     position: absolute; left: 5px; right: 5px; bottom: 4px;
     height: 3px; border-radius: 2px;

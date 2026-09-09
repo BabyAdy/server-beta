@@ -42,6 +42,8 @@ function DB.seedJobs()
             local sc = Config.Skills[s]
             shiftsCsv[#shiftsCsv + 1] = tostring(sc and sc.requiredShifts or 0)
         end
+        -- informativ in tabelul `jobs`: intervalul de plata / checkpoint la Skill 1
+        local p1 = Config.SkillPay(1)
         MySQL.update.await([[
             INSERT INTO jobs (id, name, label, min_level, base_pay_min, base_pay_max,
                               required_tasks, max_skill, skill_shifts)
@@ -53,7 +55,7 @@ function DB.seedJobs()
                 skill_shifts = VALUES(skill_shifts)
         ]], {
             job.id, job.name, job.label, job.minLevel,
-            job.pay.min, job.pay.max, job.shift.requiredTasks, job.maxSkill,
+            p1.base + p1.min, p1.base + p1.max, 0, job.maxSkill,   -- required_tasks: nefolosit (panouri nelimitate)
             table.concat(shiftsCsv, ',')
         })
     end

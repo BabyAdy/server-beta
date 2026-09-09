@@ -24,7 +24,8 @@ CreateThread(function()
 
         if dist < 18.0 then
             wait = 0
-            local canTalk = dist < R and not JB.menuOpen and not JB.mgOpen and not JB.isWorking
+            -- se poate deschide meniul si in timpul lucrului (ca sa poti da Quit Job)
+            local canTalk = dist < R and not JB.menuOpen and not JB.mgOpen and not JB.doneOpen
             setPrompt(canTalk)
             JB.nearNpc = canTalk
             if canTalk and IsControlJustReleased(0, KEY) then

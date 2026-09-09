@@ -8,7 +8,7 @@ Config = {}
 
 Config.Debug = true
 
--- Unde ajung banii de la ture: 'money' (cash) sau 'bank'.
+-- Unde ajung banii de la panouri: 'money' (cash) sau 'bank'.
 Config.PayTo = 'money'
 
 -- Tasta de interactiune cu NPC-ul (fara comanda). 246 = Y (INPUT_MP_TEXT_CHAT_TEAM).
@@ -17,48 +17,59 @@ Config.Interaction = {
     radius = 2.2,    -- m: cat de aproape trebuie sa fii de NPC ca sa apesi Y (verificat si server-side)
 }
 
+-- Tasta de START a unui panou (cand ai ajuns la checkpoint, PE JOS). 38 = E.
+Config.StartWorkKey = 38
+
 -- ---- SECURITATE / ANTI-EXPLOIT (toate verificate server-side) -----------
 Config.Security = {
-    actionCooldownMs  = 600,     -- interval minim intre doua actiuni de shift (anti-spam)
-    shiftCooldownMs   = 5000,    -- interval minim dupa terminarea/anularea unei ture
-    minigameGraceMs   = 1500,    -- toleranta peste time-limit-ul minigame-ului
-    minigameMinMs     = 400,     -- sub asta = "instant", respins
-    retryCooldownMs   = 2000,    -- dupa un minigame esuat, cat astepti pana la un altul
-    taskRadius        = 3.5,     -- m: raza in care poti interactiona cu un panou (server-side)
-    maxTaskTravelM    = 1200.0,  -- m: distanta max plauzibila NPC->task (anti coordonate false)
-    voltageEpsilon    = 0.06,    -- toleranta la potrivirea pozitiei indicatorului cu timpul scurs
-    circuitGrace      = 0,       -- cate segmente gresite tolereaza validarea (0 = circuitul trebuie COMPLET corect)
+    actionCooldownMs     = 600,     -- interval minim intre doua actiuni de tura (anti-spam)
+    shiftCooldownMs      = 4000,    -- interval minim dupa oprirea unei sesiuni de lucru
+    minigameGraceMs      = 1500,    -- toleranta peste time-limit-ul minigame-ului
+    minigameMinMs        = 400,     -- sub asta = "instant", respins
+    retryCooldownMs      = 2000,    -- dupa un minigame esuat, cat astepti pana la un altul
+    taskRadius           = 3.5,     -- m: raza in care poti porni un panou (server-side)
+    maxTaskTravelM       = 1200.0,  -- m: distanta max plauzibila NPC->task (anti coordonate false)
+    codeGuessCooldownMs  = 280,     -- rate-limit pe fiecare incercare la minigame-ul "Search the code"
+    codeMaxAttempts      = 60,      -- peste atat de incercari la "Search the code" -> esuat
 }
 
 -- ===========================================================================
 --  SKILL-uri  (identice pentru toate joburile; se pot suprascrie per job)
---  requiredShifts = numarul CUMULAT de ture finalizate ca sa AI acel skill.
---  multiplier     = inmultitorul platii (Skill 1 = x1.00, +20% / skill).
+--  requiredShifts = numarul CUMULAT de PANOURI reparate ca sa AI acel skill.
+--  pay = { base, min, max }  -> plata / CHECKPOINT = base + random(min, max).
 --  Restul = dificultatea minigame-urilor la acel skill.
 -- ===========================================================================
 Config.Skills = {
-    [1] = { requiredShifts = 0,  multiplier = 1.00,
-            circuit = { segments = 4, timeMs = 22000 },
-            voltage = { zone = 0.24, speed = 0.55, timeMs = 9500 } },
-    [2] = { requiredShifts = 15, multiplier = 1.20,
-            circuit = { segments = 5, timeMs = 19000 },
-            voltage = { zone = 0.19, speed = 0.72, timeMs = 8500 } },
-    [3] = { requiredShifts = 30, multiplier = 1.40,
-            circuit = { segments = 6, timeMs = 16000 },
-            voltage = { zone = 0.15, speed = 0.90, timeMs = 7500 } },
-    [4] = { requiredShifts = 45, multiplier = 1.60,
-            circuit = { segments = 7, timeMs = 14000 },
-            voltage = { zone = 0.12, speed = 1.08, timeMs = 6800 } },
-    [5] = { requiredShifts = 60, multiplier = 1.80,
-            circuit = { segments = 8, timeMs = 12000 },
-            voltage = { zone = 0.10, speed = 1.25, timeMs = 6000 } },
+    [1] = { requiredShifts = 0,   pay = { base = 20,  min = 10,  max = 50  },
+            wires = { timeMs = 24000 },
+            flow  = { n = 5,  timeMs = 22000 },
+            code  = { timeMs = 32000 } },
+    [2] = { requiredShifts = 60,  pay = { base = 40,  min = 30,  max = 60  },
+            wires = { timeMs = 21000 },
+            flow  = { n = 6,  timeMs = 19000 },
+            code  = { timeMs = 28000 } },
+    [3] = { requiredShifts = 140, pay = { base = 60,  min = 50,  max = 100 },
+            wires = { timeMs = 18000 },
+            flow  = { n = 7,  timeMs = 17000 },
+            code  = { timeMs = 24000 } },
+    [4] = { requiredShifts = 260, pay = { base = 80,  min = 70,  max = 120 },
+            wires = { timeMs = 15000 },
+            flow  = { n = 8,  timeMs = 15000 },
+            code  = { timeMs = 21000 } },
+    [5] = { requiredShifts = 420, pay = { base = 100, min = 100, max = 150 },
+            wires = { timeMs = 13000 },
+            flow  = { n = 9,  timeMs = 13000 },
+            code  = { timeMs = 18000 } },
+    [6] = { requiredShifts = 620, pay = { base = 200, min = 150, max = 200 },
+            wires = { timeMs = 11000 },
+            flow  = { n = 10, timeMs = 12000 },
+            code  = { timeMs = 16000 } },
 }
 
--- Formula fallback daca un skill nu are `multiplier` in tabel: 1 + (skill-1)*0.20
-function Config.SkillMultiplier(skill)
-    local s = Config.Skills[skill]
-    if s and s.multiplier then return s.multiplier end
-    return 1.0 + (math.max(1, skill) - 1) * 0.20
+-- plata (base/min/max) pentru un skill, cu fallback pe Skill 1
+function Config.SkillPay(skill)
+    local s = Config.Skills[skill] or Config.Skills[1]
+    return s.pay or { base = 0, min = 0, max = 0 }
 end
 
 function Config.SkillCfg(job, skill)
@@ -77,16 +88,15 @@ Config.Jobs = {
         name     = 'electrician',
         label    = 'Electrician',
         minLevel = 1,
-        maxSkill = 5,
+        maxSkill = 6,
 
-        -- venitul de BAZA ($/tura). Plata finala = random(min,max) * SkillMultiplier(skill).
-        pay = { min = 1000, max = 2000 },
+        -- Plata se face / CHECKPOINT, creditata IMEDIAT dupa fiecare panou (fara
+        -- limita de panouri pe sesiune). Suma = Config.Skills[skill].pay.base +
+        -- random(.pay.min, .pay.max) — vezi tabelul Config.Skills de mai sus.
 
-        -- o tura = atatea panouri reparate
-        shift = { requiredTasks = 5 },
-
-        -- minigame-urile folosite de job (in ordine ciclica / random). Valide: 'circuit', 'voltage'.
-        minigames = { 'circuit', 'voltage' },
+        -- minigame-urile folosite de job (in ordine ciclica, cu offset random pe sesiune).
+        -- Valide: 'wires' (Connect the wires), 'flow' (Connect to electricity), 'code' (Search the code).
+        minigames = { 'wires', 'flow', 'code' },
 
         npc = {
             model  = 's_m_y_construct_01',
@@ -96,7 +106,15 @@ Config.Jobs = {
 
         blip = { sprite = 402, color = 5, scale = 0.85, label = 'Electrician Job' },
 
-        -- puncte de lucru (panouri electrice) — GTA V map, zone urbane
+        -- ===================================================================
+        --  CHECKPOINT-URI (punctele de lucru / panourile electrice)
+        --  AICI adaugi/stergi puncte. Fiecare linie = un vector3(x, y, z).
+        --  Serverul alege aleator un checkpoint dupa fiecare panou (fara sa-l
+        --  repete imediat pe cel precedent). Minim 3 checkpoint-uri.
+        --
+        --  Ca sa iei coordonate din joc: du-te la locul dorit (PE JOS) si scrie
+        --  in chat  /jobcoord  — iti afiseaza in consola (F8) linia gata de copiat.
+        -- ===================================================================
         workLocations = {
             vector3(704.13, 113.44, 79.72),
             vector3(548.02, 82.30, 96.66),

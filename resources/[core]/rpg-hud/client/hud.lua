@@ -86,6 +86,21 @@ RegisterNetEvent('hud:updatePaycheck', function(d) push('paycheck', d) end)
 RegisterNetEvent('hud:updateActivity', function(d) push('activity', d) end)
 RegisterNetEvent('hud:clearActivity',  function() push('activityClear', true) end)
 
+-- ----- ascunde HUD-ul default GTA (bani + cash-change) --------------
+--  Avem HUD propriu pentru cash/bank. Componentele native se re-afiseaza
+--  singure la fiecare frame, deci trebuie ascunse in bucla.
+if Config.Hud.hideNativeHud then
+    CreateThread(function()
+        local comps = Config.Hud.hideNativeComponents or { 3, 4, 13 }
+        while true do
+            for i = 1, #comps do
+                HideHudComponentThisFrame(comps[i])
+            end
+            Wait(0)
+        end
+    end)
+end
+
 -- ----- exports client ---------------------------------------
 exports('setFood',      function(v) hud.food = tonumber(v) or hud.food; push('food', math.floor(hud.food)) end)
 exports('setWater',     function(v) hud.water = tonumber(v) or hud.water; push('water', math.floor(hud.water)) end)

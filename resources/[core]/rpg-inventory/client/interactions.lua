@@ -17,6 +17,30 @@ for i = 1, Config.FastSlotCount do
     end
 end
 
+-- ----- blocheaza controalele native de arme -----------------------------
+--  1..5 = slot rapid inventar (nu "selectie arma" GTA).
+--  TAB  = fara roata de arme nativa (exista meniu separat).
+if Config.BlockDefaultWeaponSelect or Config.BlockWeaponWheel then
+    CreateThread(function()
+        while true do
+            if Inv.charLoaded then
+                if Config.BlockWeaponWheel then
+                    DisableControlAction(0, 37, true)   -- INPUT_SELECT_WEAPON (roata TAB)
+                    HideHudComponentThisFrame(19)       -- HUD_WEAPON_WHEEL
+                end
+                if Config.BlockDefaultWeaponSelect then
+                    for c = 157, 165 do
+                        DisableControlAction(0, c, true) -- INPUT_SELECT_WEAPON_* (tastele 1..9)
+                    end
+                end
+                Wait(0)
+            else
+                Wait(500)
+            end
+        end
+    end)
+end
+
 -- ----- "nearby" cat timp inventarul e deschis (event-driven + safety poll) -
 CreateThread(function()
     while true do

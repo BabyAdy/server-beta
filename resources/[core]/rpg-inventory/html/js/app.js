@@ -70,6 +70,17 @@ window.INV = window.INV || {};
             const q = document.createElement('span'); q.className = 'qty'; q.textContent = '×' + view.quantity; s.appendChild(q);
         }
 
+        // munitia incarcata in arma (metadata.ammo)
+        if (view.category === 'weapon') {
+            const wdef = INV.def(view.itemId);
+            if (wdef && wdef.ammo) {
+                const a = document.createElement('span');
+                a.className = 'ammo';
+                a.textContent = ((view.metadata && view.metadata.ammo) || 0);
+                s.appendChild(a);
+            }
+        }
+
         if (view.durable && view.maxDurability) {
             const cur = (view.durability != null) ? view.durability : view.maxDurability;
             const pct = Math.max(0, Math.min(1, cur / view.maxDurability));
@@ -81,7 +92,7 @@ window.INV = window.INV || {};
 
         const md = view.metadata || {};
         const extra = Object.keys(md).some(function (k) {
-            return ['equipped', 'durability'].indexOf(k) === -1 && md[k] != null && md[k] !== '';
+            return ['equipped', 'durability', 'ammo'].indexOf(k) === -1 && md[k] != null && md[k] !== '';
         });
         if (extra) { const t = document.createElement('div'); t.className = 'tag-meta'; s.appendChild(t); }
 
@@ -121,6 +132,23 @@ window.INV = window.INV || {};
     INV.move = function (p, dest) {
         if (!p || !dest) return;
         if (p.container === dest.container && p.slot === dest.slot) return;
+
+        // REINCARCARE: munitie trasa peste o arma din acelasi grid
+        const snap = INV.state.snapshot;
+        if (snap && p.kind === 'item' && p.container === dest.container && typeof dest.slot === 'number') {
+            const target = snap.grid[String(dest.slot)];
+            if (target && target.category === 'weapon') {
+                const wdef = INV.def(target.itemId);
+                if (wdef && wdef.ammo && wdef.ammo === p.itemId) {
+                    INV.request('reloadWeapon', { from: p.slot, weapon: dest.slot }).then(function (res) {
+                        INV.afterAction(res);
+                        if (res && res.ok) INV.toast('Ai reîncărcat „' + target.label + '” — ' + res.ammo + ' cartușe.', 'ok');
+                    });
+                    return;
+                }
+            }
+        }
+
         INV.request('move', {
             from: { container: p.container, slot: p.slot, rowId: p.rowId },
             to: { container: dest.container, slot: (dest.slot === undefined ? null : dest.slot) },
@@ -343,7 +371,8 @@ window.INV = window.INV || {};
         const D = {
             water: { id: 'water', label: 'Sticlă cu apă', category: 'consumable', weight: .5, maxStack: 24, value: 5 },
             bandage: { id: 'bandage', label: 'Bandaj', category: 'consumable', weight: .2, maxStack: 20, value: 15 },
-            weapon_pistol: { id: 'weapon_pistol', label: 'Pistol compact', category: 'weapon', weight: 1.1, maxStack: 1, value: 1200, durable: true, maxDurability: 40, stats: { damage: 32, caliber: '9mm' } },
+            weapon_pistol: { id: 'weapon_pistol', label: 'Pistol compact', category: 'weapon', weight: 1.1, maxStack: 1, value: 1200, durable: true, maxDurability: 40, stats: { damage: 32, caliber: '9mm' }, ammo: 'ammo_pistol', magSize: 90 },
+            ammo_pistol: { id: 'ammo_pistol', label: 'Cartușe 9mm', category: 'misc', weight: .02, maxStack: 250, value: 2 },
             tshirt: { id: 'tshirt', label: 'Tricou simplu', category: 'clothing', weight: .4, maxStack: 1, value: 45, equipSlot: 'shirt' },
             phone: { id: 'phone', label: 'Telefon', category: 'misc', weight: .3, maxStack: 1, value: 400 },
         };
@@ -363,7 +392,8 @@ window.INV = window.INV || {};
             container: 'char:1', slots: 100, used: 5, definitions: D,
             grid: {
                 '1': mk('water', 1, 12), '2': mk('bandage', 2, 6),
-                '4': mk('weapon_pistol', 4, 1, { durability: 31 }),
+                '3': mk('ammo_pistol', 3, 120),
+                '4': mk('weapon_pistol', 4, 1, { durability: 31, ammo: 24 }),
                 '7': mk('phone', 7, 1, { phoneNumber: '555 0134' }),
                 '9': mk('tshirt', 9, 1),
             },

@@ -8,16 +8,21 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <!-- prompt [Y] -->
+  <!-- prompt [Y] NPC -->
   <div id="prompt" class="hidden">
     <span class="key">Y</span><span class="lbl" id="prompt-lbl">Talk to Electrician</span>
+  </div>
+
+  <!-- prompt [E] pornire panou -->
+  <div id="wprompt" class="hidden">
+    <span class="key">E</span><span class="lbl" id="wprompt-lbl">Start the repair</span>
   </div>
 
   <!-- shift HUD -->
   <div id="hud" class="hidden">
     <div class="hud-title">ELECTRICIAN · SHIFT</div>
-    <div class="hud-count"><b id="hud-i">0</b> / <span id="hud-t">5</span> panels</div>
-    <div class="hud-bar"><i id="hud-fill"></i></div>
+    <div class="hud-count">PANELS <b id="hud-done">0</b></div>
+    <div class="hud-earned">Earned <b id="hud-earned">$0</b></div>
   </div>
 
   <!-- toasts -->
@@ -34,9 +39,9 @@
       <div class="m-rows">
         <div class="m-row"><span>Current Job</span><b id="m-current">Unemployed</b></div>
         <div class="m-row need-job"><span>Skill</span><b><span id="m-skill">1</span> <em id="m-mult">(+0%)</em></b></div>
-        <div class="m-row need-job"><span>Completed Shifts</span><b id="m-shifts">0</b></div>
+        <div class="m-row need-job"><span>Panels Done</span><b id="m-shifts">0</b></div>
         <div class="m-row need-job"><span>Next Skill</span><b id="m-next">Max</b></div>
-        <div class="m-row need-job"><span>Estimated Salary</span><b id="m-salary">$1,000 – $2,000</b></div>
+        <div class="m-row need-job"><span>Pay / Panel</span><b id="m-salary">$220 – $400</b></div>
         <div class="m-prog need-job"><i id="m-bar"></i></div>
         <div class="m-hint" id="m-hint"></div>
       </div>
@@ -55,30 +60,41 @@
     <div id="mg" class="card">
       <div class="mg-timer"><i id="mg-timer-fill"></i></div>
 
-      <!-- circuit -->
-      <section id="mg-circuit" class="hidden">
+      <!-- 1 · WIRES CONNECT -->
+      <section id="mg-wires" class="hidden">
         <div class="kicker">Repair · Minigame</div>
-        <h2>CONNECT THE CIRCUIT</h2>
-        <p class="mg-sub">Rotate every piece to match the highlighted target. Then confirm.</p>
-        <div id="circuit-grid"></div>
-        <button class="btn primary" id="circuit-confirm" disabled>Confirm</button>
+        <h2>CONNECT THE WIRES</h2>
+        <p class="mg-sub">Link every terminal to the one of the same colour on the other side.</p>
+        <div id="wires-wrap"></div>
       </section>
 
-      <!-- voltage -->
-      <section id="mg-voltage" class="hidden">
+      <!-- 2 · CONNECT TO ELECTRICITY -->
+      <section id="mg-flow" class="hidden">
         <div class="kicker">Repair · Minigame</div>
-        <h2>STABILIZE THE VOLTAGE</h2>
-        <p class="mg-sub">Stop the marker inside the green zone. [SPACE] or click.</p>
-        <div id="volt-track"><div id="volt-zone"></div><div id="volt-cursor"></div></div>
-        <button class="btn primary" id="volt-stop">Stop</button>
+        <h2>CONNECT TO ELECTRICITY</h2>
+        <p class="mg-sub">Rotate the tubes so the current flows from START to END.</p>
+        <div id="flow-row"></div>
+      </section>
+
+      <!-- 3 · SEARCH THE CODE -->
+      <section id="mg-code" class="hidden">
+        <div class="kicker">Repair · Minigame</div>
+        <h2>SEARCH THE CODE</h2>
+        <p class="mg-sub">Guess the 3-digit code. A digit in the right slot locks green. [ENTER]</p>
+        <div id="code-lock" aria-hidden="true">
+          <div class="lk-shackle"></div>
+          <div class="lk-body"><span class="lk-hole"></span></div>
+        </div>
+        <div id="code-digits"></div>
+        <button class="btn primary" id="code-enter">Enter</button>
       </section>
     </div>
   </div>
 
-  <!-- ================= SHIFT COMPLETE ================= -->
+  <!-- ================= SESSION SUMMARY ================= -->
   <div id="done-overlay" class="overlay hidden">
     <div id="done" class="card">
-      <div class="kicker">Shift Complete</div>
+      <div class="kicker">Work Session</div>
       <h2>NICE WORK</h2>
       <div class="reward" id="d-reward">+$0</div>
       <div class="d-sub" id="d-sub"></div>

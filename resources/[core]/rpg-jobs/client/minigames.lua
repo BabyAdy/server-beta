@@ -18,6 +18,25 @@ RegisterNetEvent('rpg-jobs:minigame', function(payload)
     })
 end)
 
+-- "Search the code": fiecare incercare NUI -> aici -> server (serverul tine codul)
+RegisterNUICallback('codeGuess', function(data, cb)
+    if data and data.token and type(data.guess) == 'table' then
+        TriggerServerEvent('rpg-jobs:codeGuess', tostring(data.token), data.guess)
+    end
+    cb('ok')
+end)
+
+-- server -> NUI: ce pozitii s-au blocat la "Search the code"
+RegisterNetEvent('rpg-jobs:codeResult', function(d)
+    if type(d) ~= 'table' then return end
+    SendNUIMessage({
+        action = 'codeResult',
+        locked = d.locked or {},
+        solved = d.solved == true,
+        attempts = d.attempts or 0,
+    })
+end)
+
 -- rezultatul minigame-ului: NUI -> aici -> server
 RegisterNUICallback('minigameResult', function(data, cb)
     JB.mgOpen = false
@@ -36,5 +55,12 @@ RegisterNUICallback('minigameAbort', function(data, cb)
     if data and data.token then
         TriggerServerEvent('rpg-jobs:submitMinigame', tostring(data.token), { aborted = true })
     end
+    cb('ok')
+end)
+
+-- ecranul "SHIFT COMPLETE" a fost inchis (buton CONTINUE sau ESC) -> elibereaza cursorul
+RegisterNUICallback('doneClose', function(_, cb)
+    JB.doneOpen = false
+    JB.setFocus(false)
     cb('ok')
 end)

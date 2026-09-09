@@ -397,6 +397,62 @@ function Inventory.use(src, slot)
     return ok()
 end
 
+-- ---- REINCARCARE ARMA (tragand munitia peste arma in inventar) --------
+--  ammoSlot / weaponSlot = sloturi din grid-ul personajului.
+function Inventory.reloadWeapon(src, ammoSlot, weaponSlot)
+    local charId = charOf(src); if not charId then return err('Fără personaj.') end
+    local c = C.character(charId); if not c then return err('Inventar neîncărcat.') end
+
+    local ammoIt = bySlot(c, V.gridSlot(ammoSlot)   and tonumber(ammoSlot)   or ammoSlot)
+    local wpnIt  = bySlot(c, V.gridSlot(weaponSlot) and tonumber(weaponSlot) or weaponSlot)
+    if not ammoIt or not wpnIt then return err('Articolul nu mai există.') end
+
+    local wDef = defOf(wpnIt.itemId)
+    local aDef = defOf(ammoIt.itemId)
+    if not wDef or wDef.category ~= 'weapon' then return err('Ținta nu e o armă.') end
+    if not aDef then return err('Muniție necunoscută.') end
+    if wDef.ammo ~= ammoIt.itemId then return err('Muniție incompatibilă cu arma.') end
+
+    local cap = tonumber(wDef.magSize) or 0
+    if cap <= 0 then return err('Arma asta nu se reîncarcă.') end
+
+    -- arma stricata nu se reincarca
+    if wDef.durable then
+        local dur = wpnIt.metadata and wpnIt.metadata.durability
+        if dur ~= nil and dur <= 0 then return err('Arma e stricată.') end
+    end
+
+    wpnIt.metadata = wpnIt.metadata or {}
+    local cur  = tonumber(wpnIt.metadata.ammo) or 0
+    local need = cap - cur
+    if need <= 0 then return err('Arma e deja plină.') end
+
+    local take = math.min(need, ammoIt.quantity)
+    if take <= 0 then return err('Nu ai muniție.') end
+
+    wpnIt.metadata.ammo = cur + take
+    ammoIt.quantity = ammoIt.quantity - take
+    if ammoIt.quantity <= 0 then c.items[ammoIt.id] = nil end
+
+    markDirty(c)
+    TriggerEvent('rpg-inventory:weaponReloaded', src, charId, tonumber(weaponSlot) or weaponSlot, wpnIt.metadata.ammo)
+    Inventory.pushSync(charId)
+    return ok({ ammo = wpnIt.metadata.ammo, taken = take })
+end
+
+-- scade muniția din arma (folosit de weapon system la fiecare glont tras)
+function Inventory.consumeAmmo(charId, slot, amount)
+    local c = C.character(charId); if not c then return false end
+    local it = bySlot(c, tonumber(slot) or slot); if not it then return false end
+    local d = defOf(it.itemId); if not d or d.category ~= 'weapon' or not d.ammo then return false end
+    it.metadata = it.metadata or {}
+    local cur = tonumber(it.metadata.ammo) or 0
+    if cur <= 0 then return false end
+    it.metadata.ammo = math.max(0, cur - (tonumber(amount) or 1))
+    markDirty(c); Inventory.pushSync(charId)
+    return true, it.metadata.ammo
+end
+
 -- scade durabilitatea (folosit de weapon system la fiecare glont tras)
 function Inventory.damageDurability(charId, slot, amount)
     local c = C.character(charId); if not c then return false end
@@ -646,6 +702,7 @@ local HANDLERS = {
     give   = function(src, p) return Inventory.give(src, p.slot, p.quantity, p.target) end,
     bindFast = function(src, p) return Inventory.bindFast(src, p.index, p.slot) end,
     useFast  = function(src, p) return Inventory.useFast(src, p.index) end,
+    reloadWeapon = function(src, p) return Inventory.reloadWeapon(src, p.from, p.weapon) end,
     inspect  = function(src, p)
         TriggerEvent('rpg-inventory:inspect', src, charOf(src), p and p.slot)
         return ok()

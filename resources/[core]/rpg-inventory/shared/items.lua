@@ -39,6 +39,13 @@ function Items.register(def)
     def.durable       = def.durable == true
     def.maxDurability = def.durable and (tonumber(def.maxDurability) or 100) or nil
 
+    -- ARME: munitie compatibila + capacitatea de incarcat (rezerva din item).
+    --   def.ammo    = id-ul itemului de munitie care intra in arma
+    --   def.magSize = cate cartuse poate tine arma (metadata.ammo <= magSize)
+    -- Reincarcarea se face TRAGAND stack-ul de munitie peste arma in inventar.
+    def.ammo    = def.ammo or nil
+    def.magSize = def.ammo and (tonumber(def.magSize) or 120) or tonumber(def.magSize) or nil
+
     -- echipabil in unul din Config.EquipmentSlots (clothing/armor) -> def.equipSlot
     -- armele se "echipeaza" separat (in mana), nu intr-un slot din grid
     def.equipSlot = def.equipSlot
@@ -129,11 +136,13 @@ Items.register{ id = 'repairkit',    label = 'Set reparații', category = 'misc'
 Items.register{ id = 'radio',        label = 'Stație radio',  category = 'misc', weight = 0.60, maxStack = 1, usable = true, value = 200 }
 
 Items.register{ id = 'weapon_pistol',label = 'Pistol compact',category = 'weapon', weight = 1.10, maxStack = 1, value = 1200,
-                durable = true, maxDurability = 40, stats = { damage = 32, caliber = '9mm' } }
+                durable = true, maxDurability = 40, stats = { damage = 32, caliber = '9mm' },
+                ammo = 'ammo_pistol', magSize = 90 }
 Items.register{ id = 'ammo_pistol',  label = 'Cartușe 9mm',   category = 'misc',   weight = 0.02, maxStack = 250, value = 2 }
 
 Items.register{ id = 'weapon_pistol50', label = 'Pistol .50',  category = 'weapon', weight = 1.30, maxStack = 1, value = 2200,
-                durable = true, maxDurability = 40, stats = { damage = 51, caliber = '.50' } }
+                durable = true, maxDurability = 40, stats = { damage = 51, caliber = '.50' },
+                ammo = 'pistol50_ammo', magSize = 60 }
 Items.register{ id = 'pistol50_ammo',   label = 'Cartușe .50', category = 'misc',   weight = 0.03, maxStack = 500, value = 4 }
 
 Items.register{ id = 'armor_plate',  label = 'Vestă antiglonț', category = 'armor', weight = 3.50, maxStack = 1, value = 800,

@@ -15,6 +15,14 @@ Config.DefaultKey = 'I'
 Config.FastSlotKeys = { '1', '2', '3', '4', '5' }
 Config.FastSlotCount = 5
 
+-- Tastele 1..5 sunt implicit "selectie arma" in GTA V. Le blocam ca sa ramana
+-- doar pentru sloturile rapide ale inventarului.
+Config.BlockDefaultWeaponSelect = true
+
+-- Roata de arme default (TAB) — dezactivata; selectia armelor se face din
+-- meniul separat (alt sistem), nu din roata nativa.
+Config.BlockWeaponWheel = true
+
 -- ===========================================================================
 --  GRID / CAPACITATE
 --  Capacitatea e pe SLOTURI, nu pe greutate. Indicatorul din UI e "X / N".

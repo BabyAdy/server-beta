@@ -28,15 +28,18 @@ function Jobs.recomputeSkill(job, completedShifts)
     return skill
 end
 
-function Jobs.multiplier(skill)
-    return Config.SkillMultiplier(skill)
+-- intervalul de plata / checkpoint pentru un skill: (minTotal, maxTotal, base)
+function Jobs.payRange(skill)
+    local p = Config.SkillPay(skill)
+    return p.base + p.min, p.base + p.max, p.base
 end
 
 -- ---- PLATA (server-side, singura sursa) -------------------------------
--- reward = random(pay.min, pay.max) * multiplier(skill), rotunjit
-function Jobs.calcReward(job, skill)
-    local base = math.random(job.pay.min, job.pay.max)
-    return math.floor(base * Jobs.multiplier(skill) + 0.5), base
+-- reward / CHECKPOINT = pay.base + random(pay.min, pay.max)   (per skill)
+function Jobs.calcReward(_, skill)
+    local p = Config.SkillPay(skill)
+    local rnd = math.random(p.min, p.max)
+    return p.base + rnd, p.base
 end
 
 -- ---- GET JOB ---------------------------------------------------------
@@ -65,9 +68,9 @@ function Jobs.quitJob(src, jobId)
     if not job then return false, 'no_job_def' end
     if Framework.GetJob(src) ~= job.id then return false, 'not_this_job' end
 
-    -- opreste orice tura activa a acestui job (Security defineste functia)
-    if Security and Security.abortShift then
-        Security.abortShift(src, 'quit')
+    -- opreste sesiunea de lucru activa (banii per-panou raman incasati)
+    if Security and Security.stopShift then
+        Security.stopShift(src, 'quit')
     end
 
     if not Framework.SetJob(src, 0) then return false, 'db_error' end
@@ -87,7 +90,7 @@ function Jobs.menuData(src, jobId)
     local d = DB.peek(src, job.id)
     local skill = d and d.skill or 1
     local completed = d and d.completed_shifts or 0
-    local mult  = Jobs.multiplier(skill)
+    local payMin, payMax = Jobs.payRange(skill)
     local nextT = Jobs.nextSkillThreshold(job, skill)
 
     local curLabel = 'Unemployed'
@@ -112,15 +115,13 @@ function Jobs.menuData(src, jobId)
         totalEarnings  = d and d.total_earnings or 0,
         nextSkill      = (nextT and (skill + 1)) or nil,
         nextSkillShifts = nextT,               -- prag cumulat pt. skill-ul urmator
-        multiplier     = mult,
-        multiplierPct  = math.floor((mult - 1) * 100 + 0.5),
 
-        payMin         = job.pay.min,
-        payMax         = job.pay.max,
-        estMin         = math.floor(job.pay.min * mult + 0.5),
-        estMax         = math.floor(job.pay.max * mult + 0.5),
+        payMin         = payMin,               -- plata minima / checkpoint la skill-ul curent
+        payMax         = payMax,               -- plata maxima / checkpoint la skill-ul curent
+        estMin         = payMin,
+        estMax         = payMax,
+        avgPay         = math.floor((payMin + payMax) / 2 + 0.5),
 
-        requiredTasks  = job.shift.requiredTasks,
         isWorking      = (Security and Security.isWorking and Security.isWorking(src)) or false,
     }
 end
