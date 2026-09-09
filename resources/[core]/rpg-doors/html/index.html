@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>rpg-doors</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="wrap" class="hidden">
+    <div id="panel">
+      <header>
+        <div>
+          <div class="kicker">Administrare</div>
+          <h1>UȘI · ÎNCUIETORI</h1>
+        </div>
+        <button id="btn-close" title="Închide (ESC)">✕</button>
+      </header>
+
+      <div id="add-row">
+        <button id="btn-scan" class="btn">Scanează ușa din fața ta</button>
+        <div id="scan-fail" class="hint err hidden">Nicio ușă în raza privirii. Apropie-te și privește direct spre ușă.</div>
+        <div id="scan-box" class="hidden">
+          <div class="scan-info" id="scan-info"></div>
+          <div class="scan-form">
+            <input id="scan-name" maxlength="64" placeholder="Nume ușă (ex: Poartă depozit)" />
+            <button id="btn-add" class="btn primary">Adaugă (încuiată)</button>
+            <button id="btn-cancel" class="btn ghost">Renunță</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="list"></div>
+
+      <footer>
+        <span><b id="count">0</b> uși</span>
+        <span class="dim">Se aplică în toate lumile virtuale · fără marcaj vizibil în lume</span>
+      </footer>
+    </div>
+  </div>
+
+  <div id="toasts"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>

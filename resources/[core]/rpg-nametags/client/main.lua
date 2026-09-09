@@ -74,12 +74,30 @@ CreateThread(function()
                                 local slug = (st and st.staff) or ''
                                 local hasRank = slug ~= '' and Staff.RANKS[slug] ~= nil
 
+                                -- iconuri de subscriptie ACTIVE, in ordinea Legend | Platinum | Gold.
+                                -- Langa iconul de staff (daca e staff), altfel in locul lui.
+                                local subs = nil
+                                local sm = st and st.subs
+                                if type(sm) == 'table' then
+                                    for _, key in ipairs(Subs.ORDER) do
+                                        if sm[key] == true then
+                                            local d = Subs.TYPES[key]
+                                            if d then
+                                                subs = subs or {}
+                                                subs[#subs + 1] = { icon = d.icon, color = d.color }
+                                            end
+                                        end
+                                    end
+                                end
+
                                 list[#list + 1] = {
                                     id    = sid,
                                     sqlId = (st and st.charId) or '?',
                                     name  = (st and st.accountName) or GetPlayerName(pi) or 'Player',
                                     icon  = hasRank and Staff.iconSvg(slug) or nil,
                                     color = hasRank and Staff.color(slug) or nil,
+                                    subs  = subs,
+                                    talk  = NetworkIsPlayerTalking(pi) and true or false,  -- difuzor animat deasupra
                                     x     = sx,
                                     y     = sy,
                                     s     = math.floor(scale * 1000) / 1000,

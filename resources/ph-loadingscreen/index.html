@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Purple Havoc Community</title>
+    
+    <!-- Fonturi Curate (Inter & Poppins) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome pentru Iconițe -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --purple-primary: #a855f7;
+            --purple-bright: #c084fc;
+            --purple-glow: rgba(168, 85, 247, 0.6);
+            --bg-card: rgba(13, 10, 22, 0.75);
+            --border-card: rgba(168, 85, 247, 0.25);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            user-select: none;
+        }
+
+        body, html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: #090611;
+            color: #f3f4f6;
+        }
+
+        /* Video Background */
+        #bg-video {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            min-width: 100%;
+            min-height: 100%;
+            width: auto;
+            height: auto;
+            z-index: 1;
+            transform: translate(-50%, -50%);
+            object-fit: cover;
+            filter: brightness(0.4) contrast(1.05);
+            transition: opacity 0.5s ease;
+        }
+
+        /* Gradient Overlay */
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 30% 30%, rgba(168, 85, 247, 0.15) 0%, transparent 60%),
+                        linear-gradient(to bottom, rgba(9, 6, 17, 0.4), rgba(9, 6, 17, 0.9));
+            z-index: 2;
+        }
+
+        /* Main Container */
+        .container {
+            position: relative;
+            z-index: 3;
+            width: 100%;
+            height: 100%;
+            padding: 60px 80px;
+            display: grid;
+            grid-template-columns: 380px 1fr;
+            grid-template-rows: auto 1fr auto;
+            gap: 20px;
+            grid-template-areas: 
+                "header social"
+                "team empty"
+                "footer footer";
+        }
+
+        /* Header & Brand cu Animație */
+        .header-box {
+            grid-area: header;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .header-box img {
+            height: 52px;
+            width: auto;
+            filter: drop-shadow(0 0 12px var(--purple-primary));
+        }
+
+        .brand-title {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.4rem;
+            font-weight: 800;
+            letter-spacing: -0.3px;
+            color: #ffffff;
+            line-height: 1.2;
+        }
+
+        .brand-title span {
+            background: linear-gradient(90deg, #ffffff, #c084fc, #a855f7, #ffffff);
+            background-size: 300% 100%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: textShine 5s linear infinite;
+            display: block;
+        }
+
+        @keyframes textShine {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Social Cards */
+        .social-box {
+            grid-area: social;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .social-card {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-card);
+            padding: 10px 18px;
+            border-radius: 10px;
+            backdrop-filter: blur(20px);
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #e5e7eb;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+            transition: all 0.3s ease;
+        }
+
+        .social-card:hover {
+            border-color: var(--purple-bright);
+            box-shadow: 0 0 15px var(--purple-glow);
+            transform: translateY(-2px);
+        }
+
+        .social-card i {
+            color: var(--purple-bright);
+            font-size: 1rem;
+        }
+
+        /* Team Card */
+        .team-box {
+            grid-area: team;
+            align-self: center;
+            background: var(--bg-card);
+            border: 1px solid var(--border-card);
+            border-left: 4px solid var(--purple-primary);
+            border-radius: 16px;
+            padding: 24px;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .team-header {
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 600;
+            letter-spacing: 0.2px;
+            color: #f3f4f6;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding-bottom: 14px;
+        }
+
+        .team-header i {
+            color: #c084fc;
+            font-size: 1rem;
+            filter: drop-shadow(0 0 8px var(--purple-primary));
+        }
+
+        .role-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .role-title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: #9ca3af;
+        }
+
+        .member-list {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .member-item {
+            font-size: 0.95rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .member-item::before {
+            content: '';
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background: currentColor;
+            box-shadow: 0 0 6px currentColor;
+        }
+
+        /* EFECTE PE NUME */
+        .role-owner {
+            color: #e9d5ff;
+            text-shadow: 0 0 8px #a855f7, 0 0 18px #7e22ce, 0 0 25px #581c87;
+        }
+
+        .role-dev {
+            color: #ffffff;
+            text-shadow: 0 0 6px #fff, 0 0 12px #3b82f6, 0 0 20px #8b5cf6;
+            animation: devGlow 2.5s infinite alternate ease-in-out;
+        }
+
+        @keyframes devGlow {
+            0% { text-shadow: 0 0 6px #fff, 0 0 12px #3b82f6, 0 0 20px #8b5cf6; }
+            100% { text-shadow: 0 0 8px #fff, 0 0 16px #ec4899, 0 0 25px #a855f7; }
+        }
+
+        .role-manager {
+            color: #fca5a5;
+            text-shadow: 0 0 8px #ef4444, 0 0 16px #b91c1c;
+        }
+
+        .role-sdev {
+            color: #0099ff;
+            text-shadow: 0 0 8px #4c00ff, 0 0 16px #00eeff;
+        }
+
+        /* Footer - Player & Loading */
+        .footer-box {
+            grid-area: footer;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            width: 100%;
+        }
+
+        .player-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--bg-card);
+            border: 1px solid var(--border-card);
+            padding: 10px 20px;
+            border-radius: 12px;
+            backdrop-filter: blur(20px);
+        }
+
+        .song-details {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            width: 240px;
+        }
+
+        .song-details i {
+            color: var(--purple-bright);
+            font-size: 1rem;
+        }
+
+        .song-title {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #e5e7eb;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .controls {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .ctrl-btn {
+            background: none;
+            border: none;
+            color: #9ca3af;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .ctrl-btn:hover {
+            color: #ffffff;
+            transform: scale(1.15);
+            text-shadow: 0 0 8px var(--purple-bright);
+        }
+
+        .volume-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            width: 180px;
+            justify-content: flex-end;
+        }
+
+        .volume-container i {
+            color: #6b7280;
+            font-size: 0.85rem;
+        }
+
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 80px;
+            background: rgba(255, 255, 255, 0.1);
+            height: 4px;
+            border-radius: 2px;
+            outline: none;
+        }
+
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--purple-bright);
+            cursor: pointer;
+            box-shadow: 0 0 8px var(--purple-primary);
+        }
+
+        /* Loading Bar Minimalist */
+        .loading-container {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .loading-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: #9ca3af;
+        }
+
+        .progress-bg {
+            width: 100%;
+            height: 5px;
+            background: rgba(255, 255, 255, 0.06);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, #9333ea, #c084fc, #e9d5ff);
+            box-shadow: 0 0 12px var(--purple-glow);
+            border-radius: 10px;
+            transition: width 0.2s ease-out;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Video Fundal -->
+    <video autoplay muted loop id="bg-video">
+        <source id="video-source" src="bg.mp4" type="video/mp4">
+    </video>
+
+    <div class="overlay"></div>
+
+    <div class="container">
+        
+        <!-- Header -->
+        <div class="header-box">
+            <img src="logo.svg" alt="Logo" onerror="this.style.display='none'">
+            <div class="brand-title">
+                Purple Havoc
+                <span>Community</span>
+            </div>
+        </div>
+
+        <!-- Social Links -->
+        <div class="social-box">
+            <div class="social-card">
+                <i class="fab fa-discord"></i>
+                <span>discord.gg/purple-havoc</span>
+            </div>
+            <div class="social-card">
+                <i class="fas fa-globe"></i>
+                <span>ucp.purple-havoc.ro</span>
+            </div>
+        </div>
+
+        <!-- Echipa / Staff -->
+        <div class="team-box">
+            <div class="team-header">
+                <i class="fas fa-crown"></i> Echipa Administrativă
+            </div>
+
+            <!-- Owners -->
+            <div class="role-group">
+                <span class="role-title">Owner</span>
+                <div class="member-list">
+                    <span class="member-item role-owner">BabyAdy</span>
+                </div>
+            </div>
+
+            <!-- Developers -->
+            <div class="role-group">
+                <span class="role-title">Developer</span>
+                <div class="member-list">
+                    <span class="member-item role-dev">BabyAdy</span>
+                </div>
+            </div>
+
+            <!-- Managers -->
+            <div class="role-group">
+                <span class="role-title">Manager</span>
+                <div class="member-list">
+                    <span class="member-item role-manager">Nectagon</span>
+                    <span class="member-item role-manager">XannyS</span>
+                </div>
+            </div>
+
+            <div class="role-group">
+                <span class="role-title">Sound Developer</span>
+                <div class="member-list">
+                    <span class="member-item role-sdev">Nectagon</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Media Player & Progress Bar -->
+        <div class="footer-box">
+            <div class="player-bar">
+                <div class="song-details">
+                    <i class="fas fa-music"></i>
+                    <span class="song-title" id="song-title">Se încarcă piesa...</span>
+                </div>
+
+                <div class="controls">
+                    <button class="ctrl-btn" onclick="prevSong()"><i class="fas fa-step-backward"></i></button>
+                    <button class="ctrl-btn" onclick="togglePlay()"><i class="fas fa-pause" id="play-icon"></i></button>
+                    <button class="ctrl-btn" onclick="nextSong()"><i class="fas fa-step-forward"></i></button>
+                </div>
+
+                <div class="volume-container">
+                    <i class="fas fa-volume-up"></i>
+                    <input type="range" id="volume-slider" min="0" max="1" step="0.01" value="0.3" oninput="changeVolume(this.value)">
+                </div>
+            </div>
+
+            <div class="loading-container">
+                <div class="loading-info">
+                    <span id="loading-label">Se încarcă resursele...</span>
+                    <span id="loading-percentage">0%</span>
+                </div>
+                <div class="progress-bg">
+                    <div class="progress-fill" id="progress-bar"></div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <audio id="audio-player" loop></audio>
+
+    <script>
+        // Playlist Muzica & Videoclipuri Asociate
+        const playlist = [
+            { title: "Purple Havoc - Theme Song 1", file: "song1.mp3", video: "bg.mp4" },
+            { title: "Nectagon - Jessie J Do it like a dude (Remix)", file: "song2.mp3", video: "bg2.mp4" },
+            { title: "CEZIC - D DEALER", file: "song3.mp3", video: "bg3.mp4" }
+        ];
+
+        let currentSongIndex = 0;
+        const audio = document.getElementById('audio-player');
+        const bgVideo = document.getElementById('bg-video');
+        const videoSource = document.getElementById('video-source');
+        const songTitle = document.getElementById('song-title');
+        const playIcon = document.getElementById('play-icon');
+        const volumeSlider = document.getElementById('volume-slider');
+
+        function loadSong(index) {
+            const song = playlist[index];
+            
+            // Schimbă Audio
+            audio.src = song.file;
+            songTitle.innerText = song.title;
+            audio.volume = volumeSlider.value;
+
+            // Schimbă Videoclipul doar dacă e diferit de cel actual
+            if (videoSource.getAttribute('src') !== song.video) {
+                videoSource.src = song.video;
+                bgVideo.load();
+                bgVideo.play();
+            }
+        }
+
+        function togglePlay() {
+            if (audio.paused) {
+                audio.play();
+                playIcon.className = "fas fa-pause";
+            } else {
+                audio.pause();
+                playIcon.className = "fas fa-play";
+            }
+        }
+
+        function nextSong() {
+            currentSongIndex = (currentSongIndex + 1) % playlist.length;
+            loadSong(currentSongIndex);
+            audio.play();
+            playIcon.className = "fas fa-pause";
+        }
+
+        function prevSong() {
+            currentSongIndex = (currentSongIndex - 1 + playlist.length) % playlist.length;
+            loadSong(currentSongIndex);
+            audio.play();
+            playIcon.className = "fas fa-pause";
+        }
+
+        function changeVolume(val) {
+            audio.volume = val;
+        }
+
+        // Auto Start Sound
+        loadSong(currentSongIndex);
+        audio.play().catch(() => {
+            playIcon.className = "fas fa-play";
+        });
+
+        // Sincronizare Loading Bar cu FiveM
+        const countData = { count: 0, total: 0 };
+
+        window.addEventListener('message', function(e) {
+            if (e.data.eventName === 'loadProgress') {
+                let percentage = Math.floor(e.data.loadFraction * 100);
+                document.getElementById('progress-bar').style.width = percentage + '%';
+                document.getElementById('loading-percentage').innerText = percentage + '%';
+            }
+            
+            if (e.data.eventName === 'performMapLoadFunction') {
+                countData.count++;
+                document.getElementById('loading-label').innerText = "Se inițializează harta...";
+            }
+        });
+    </script>
+</body>
+</html>

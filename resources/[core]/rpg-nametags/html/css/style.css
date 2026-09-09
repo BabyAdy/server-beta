@@ -23,16 +23,56 @@ html, body {
   will-change: transform, left, top, opacity;
 }
 
-/* icon de grad (deasupra) */
-.nt-icon {
+/* rand de badge-uri: icon grad staff + iconuri subscriptii (Legend|Platinum|Gold) */
+.nt-badges {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  line-height: 0;
+}
+.nt-b {
   display: flex;
   line-height: 0;
   filter: drop-shadow(0 0 4px currentColor) drop-shadow(0 1px 2px rgba(0, 0, 0, 0.9));
 }
-.nt-icon svg {
+.nt-b svg {
   width: 17px;
   height: 17px;
   display: block;
+}
+.nt-b.nt-sub svg { width: 15px; height: 15px; }
+
+/* difuzor animat cand jucatorul vorbeste (cel mai de sus element din tag) */
+.nt-voice {
+  display: flex;
+  line-height: 0;
+  color: #4ade80;
+  filter: drop-shadow(0 0 5px rgba(74, 222, 128, 0.9)) drop-shadow(0 1px 2px rgba(0, 0, 0, 0.9));
+  animation: ntVoicePulse 1s ease-in-out infinite;
+}
+.nt-voice svg {
+  width: 16px;
+  height: 16px;
+  display: block;
+  overflow: visible;
+}
+.nt-voice .spk-cone { fill: currentColor; }
+.nt-voice .spk-w {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+.nt-voice .spk-w1 { animation: ntWave 1.05s ease-in-out infinite; }
+.nt-voice .spk-w2 { animation: ntWave 1.05s ease-in-out infinite 0.2s; }
+
+@keyframes ntVoicePulse {
+  0%, 100% { transform: scale(0.9); }
+  50%      { transform: scale(1.06); }
+}
+@keyframes ntWave {
+  0%, 100% { opacity: 0.15; }
+  50%      { opacity: 1; }
 }
 
 /* linia [id] Username */

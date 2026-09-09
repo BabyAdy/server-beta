@@ -1,7 +1,7 @@
 (function () {
   'use strict';
   var host = document.getElementById('tags');
-  var nodes = {};   // [serverId] = { el, iconWrap, idEl, nameEl, sig }
+  var nodes = {};   // [serverId] = { el, voiceEl, badgesEl, idEl, nameEl, sig }
 
   function esc(s) {
     return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) {
@@ -13,16 +13,43 @@
     var el = document.createElement('div');
     el.className = 'nt';
     el.innerHTML =
-      '<div class="nt-icon" hidden></div>' +
+      '<div class="nt-voice" hidden>' +
+        '<svg viewBox="0 0 24 24" aria-hidden="true">' +
+          '<path class="spk-cone" d="M4 9h3.5L12 5v14L7.5 15H4z"/>' +
+          '<path class="spk-w spk-w1" d="M15.4 9.3a3.8 3.8 0 0 1 0 5.4"/>' +
+          '<path class="spk-w spk-w2" d="M17.7 7a7 7 0 0 1 0 10"/>' +
+        '</svg>' +
+      '</div>' +
+      '<div class="nt-badges" hidden></div>' +
       '<div class="nt-line"><span class="nt-id"></span><span class="nt-name"></span></div>';
     host.appendChild(el);
     return {
       el: el,
-      iconWrap: el.querySelector('.nt-icon'),
+      voiceEl: el.querySelector('.nt-voice'),
+      badgesEl: el.querySelector('.nt-badges'),
       idEl: el.querySelector('.nt-id'),
       nameEl: el.querySelector('.nt-name'),
       sig: ''
     };
+  }
+
+  // randul de badge-uri: [icon grad staff?] apoi [icoane subscriptii] (ordine Legend|Platinum|Gold,
+  // ordonarea o face serverul). Daca nu e staff -> doar subscriptiile, in acelasi loc.
+  function badgesHtml(t) {
+    var parts = '';
+    if (t.icon) {
+      parts += '<span class="nt-b nt-staff" style="color:' + (t.color || '#fff') + '">' +
+               '<svg viewBox="0 0 24 24">' + t.icon + '</svg></span>';
+    }
+    (t.subs || []).forEach(function (s) {
+      parts += '<span class="nt-b nt-sub" style="color:' + (s.color || '#fff') + '">' +
+               '<svg viewBox="0 0 24 24">' + s.icon + '</svg></span>';
+    });
+    return parts;
+  }
+
+  function subsSig(t) {
+    return (t.subs || []).map(function (s) { return s.color; }).join(',');
   }
 
   function render(list) {
@@ -32,21 +59,19 @@
       var n = nodes[t.id];
       if (!n) { n = build(); nodes[t.id] = n; }
 
-      // continut (rebuild doar cand se schimba) — icon-ul de grad e trusted (staff.lua)
-      var sig = t.sqlId + '|' + t.name + '|' + (t.color || '') + '|' + (t.icon || '');
+      // continut (rebuild doar cand se schimba) — iconurile sunt trusted (staff.lua / subs.lua)
+      var sig = t.sqlId + '|' + t.name + '|' + (t.color || '') + '|' + (t.icon || '') + '|' + subsSig(t);
       if (sig !== n.sig) {
         n.sig = sig;
         n.idEl.textContent = '[' + esc(t.sqlId) + ']';
         n.nameEl.textContent = t.name || 'Player';
-        if (t.icon) {
-          n.iconWrap.hidden = false;
-          n.iconWrap.style.color = t.color || '#fff';
-          n.iconWrap.innerHTML = '<svg viewBox="0 0 24 24">' + t.icon + '</svg>';
-        } else {
-          n.iconWrap.hidden = true;
-          n.iconWrap.innerHTML = '';
-        }
+        var html = badgesHtml(t);
+        n.badgesEl.innerHTML = html;
+        n.badgesEl.hidden = (html === '');
       }
+
+      // difuzor animat cand jucatorul vorbeste (se schimba des -> in afara sig-ului)
+      n.voiceEl.hidden = !t.talk;
 
       // pozitie + scalare + fade
       n.el.style.left = (t.x * 100) + '%';
@@ -67,12 +92,16 @@
 
   /* preview in browser */
   if (typeof window.GetParentResourceName !== 'function') {
+    var STAR = '<path fill="currentColor" d="M12 2.6l2.75 5.57 6.15.9-4.45 4.34 1.05 6.13L12 16.65l-5.5 2.89 1.05-6.13L3.1 9.07l6.15-.9L12 2.6z"/>';
+    var GEM = '<path fill="currentColor" d="M5 3h14l3 5.6L12 21 2 8.6 5 3z"/>';
+    var BOLT = '<path fill="currentColor" d="M13 2L3 14h6l-2 8 10-12h-6l2-8z"/>';
     render([
-      { id: 1, sqlId: 152, name: 'John Doe', x: 0.5, y: 0.42, s: 1, a: 1,
-        color: '#5100ff', icon: '<path fill="currentColor" d="M2 8l4.5 3L12 4l5.5 7L22 8l-2 12H4L2 8z"/>' },
-      { id: 2, sqlId: 77, name: 'Jane Smith', x: 0.32, y: 0.6, s: 0.8, a: 0.85,
-        color: '#ff6a00', icon: '<path fill="currentColor" d="M12 2l8 3v6c0 5.05-3.4 8.9-8 11-4.6-2.1-8-5.95-8-11V5l8-3z"/>' },
-      { id: 3, sqlId: 210, name: 'Civilian Guy', x: 0.68, y: 0.55, s: 0.9, a: 1 }
+      { id: 1, sqlId: 152, name: 'John Doe', x: 0.5, y: 0.4, s: 1, a: 1, talk: true,
+        color: '#5100ff', icon: '<path fill="currentColor" d="M2 8l4.5 3L12 4l5.5 7L22 8l-2 12H4L2 8z"/>',
+        subs: [ { icon: BOLT, color: '#3d9bff' }, { icon: GEM, color: '#a855f7' }, { icon: STAR, color: '#ffd633' } ] },
+      { id: 2, sqlId: 77, name: 'Jane Smith', x: 0.3, y: 0.62, s: 0.85, a: 0.9,
+        subs: [ { icon: GEM, color: '#a855f7' }, { icon: STAR, color: '#ffd633' } ] },
+      { id: 3, sqlId: 210, name: 'Civilian Guy', x: 0.7, y: 0.55, s: 0.9, a: 1, talk: true }
     ]);
   }
 })();

@@ -14,7 +14,7 @@ HUD.mods.chat = (function () {
 
     var cfg = {
         lifetime: 5000, fade: 1000,
-        maxMessages: 100, visibleInactive: 6, lineHeight: 1.45, width: 470,
+        maxMessages: 100, visibleInactive: 6, lineHeight: 1.45, width: 560,
         channels: {}, placeholder: '',
         lines: { default: 6, min: 3, max: 14 },
         font: { default: 12.5, min: 10, max: 18 },
@@ -34,6 +34,7 @@ HUD.mods.chat = (function () {
     var ICON_ADMIN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l7 3v5c0 4.5-3 8.3-7 9.5C8 19.3 5 15.5 5 11V6l7-3z" stroke-linecap="round" stroke-linejoin="round"/></svg>';
     var ICON_HELPER = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3.5"/><path d="M5.6 5.6l3.6 3.6M14.8 14.8l3.6 3.6M18.4 5.6l-3.6 3.6M9.2 14.8l-3.6 3.6" stroke-linecap="round"/></svg>';
     var ICON_ANNO = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10v4a1 1 0 0 0 1 1h2l5 4V5L7 9H5a1 1 0 0 0-1 1z"/><path d="M15 8.5a4 4 0 0 1 0 7"/><path d="M18 6a8 8 0 0 1 0 12"/></svg>';
+    var ICON_PC = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="4" width="19" height="12.5" rx="2"/><path d="M8.5 20.5h7M12 16.5v4"/></svg>';
 
     function esc(s) {
         return String(s).replace(/[&<>"]/g, function (c) {
@@ -195,6 +196,22 @@ HUD.mods.chat = (function () {
             }
             html += '<span class="c-auth">' + esc(msg.author || '') + '</span>';
             html += '<span class="c-text"' + textStyle + '>: ' + esc(msg.text || '') + '</span>';
+        } else if (msg.vip) {
+            /* chat VIP (mov):  (icon-pc) [icon-grad-staff?] [icoane subscriptii...] Username (sql id): text
+               Ordinea subscriptiilor (Legend|Platinum|Gold) o stabileste serverul in msg.subs.
+               Toate iconurile sunt trusted (staff.lua / subs.lua), NU input de user. */
+            html += '<span class="c-pc">' + ICON_PC + '</span>';
+            if (msg.staffIcon) {
+                html += '<span class="c-sbadge" style="color:' + (msg.staffColor || '#fff') + '">' +
+                        '<svg viewBox="0 0 24 24">' + msg.staffIcon + '</svg></span>';
+            }
+            (msg.subs || []).forEach(function (s) {
+                html += '<span class="c-subbadge" style="color:' + (s.color || '#fff') + '">' +
+                        '<svg viewBox="0 0 24 24">' + s.icon + '</svg></span>';
+            });
+            html += '<span class="c-auth">' + esc(msg.author || '') + '</span>';
+            if (msg.id != null && msg.id !== '') html += '<span class="c-vid">(' + esc(msg.id) + ')</span>';
+            html += '<span class="c-text"' + textStyle + '>: ' + esc(msg.text || '') + '</span>';
         } else if (chKey && cfg.channels && cfg.channels[chKey]) {
             var ch = cfg.channels[chKey];
             html += '<span class="c-chan" style="color:' + ch.color + '">[' + esc(ch.label) + ']</span>';
@@ -303,15 +320,28 @@ HUD.mods.chat = (function () {
         applySettings(); saveSettings();
     });
 
+    // seteaza textul si pune cursorul la FINAL (recall istoric cu sagetile)
+    function caretToEnd(text) {
+        var el = input();
+        el.value = text || '';
+        var n = el.value.length;
+        try { el.setSelectionRange(n, n); } catch (e) {}
+    }
+
     input().addEventListener('keydown', function (e) {
         if (e.key === 'Escape' && settingsOpen) { e.preventDefault(); toggleSettings(false); return; }
         if (e.key === 'Enter') { e.preventDefault(); submit(); }
         else if (e.key === 'Escape') { e.preventDefault(); hideUI(); HUD.post('chatClose', {}); }
         else if (e.key === 'ArrowUp') {
-            if (history.length) { histIdx = Math.min(histIdx + 1, history.length - 1); input().value = history[histIdx]; }
+            e.preventDefault();   // fara asta, browserul muta cursorul la inceputul liniei
+            if (history.length) {
+                histIdx = Math.min(histIdx + 1, history.length - 1);
+                caretToEnd(history[histIdx]);
+            }
         } else if (e.key === 'ArrowDown') {
-            if (histIdx > 0) { histIdx--; input().value = history[histIdx]; }
-            else { histIdx = -1; input().value = ''; }
+            e.preventDefault();
+            if (histIdx > 0) { histIdx--; caretToEnd(history[histIdx]); }
+            else { histIdx = -1; caretToEnd(''); }
         }
     });
 

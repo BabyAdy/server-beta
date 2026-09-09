@@ -71,7 +71,7 @@ body.preview {
 #chat {
     top: 2.1vh;
     left: var(--edge);
-    width: min(var(--chat-w, 470px), 44vw);
+    width: min(var(--chat-w, 560px), 50vw);
     display: flex;
     flex-direction: column;
     gap: 6px;
@@ -247,6 +247,25 @@ body.preview {
 .cmsg.ch-STAFF_ADMIN .c-auth,
 .cmsg.ch-STAFF_HELPER .c-auth { color: #fff; }
 .c-sid { color: var(--faint); margin: 0 4px 0 1px; font-variant-numeric: tabular-nums; }
+
+/* --- chat VIP ( /vip ) — mov --- */
+.c-pc {
+    display: inline-flex;
+    vertical-align: -0.12em;
+    margin-right: 4px;
+    color: #c6a6ff;
+}
+.c-pc svg { width: 1em; height: 1em; }
+.c-subbadge {
+    display: inline-flex;
+    vertical-align: -0.16em;
+    margin-right: 3px;
+    filter: drop-shadow(0 0 3px currentColor);
+}
+.c-subbadge svg { width: 1.12em; height: 1.12em; display: block; }
+.c-vid { color: #9a86c4; margin: 0 4px 0 1px; font-variant-numeric: tabular-nums; }
+.cmsg.ch-VIP .c-auth { color: #e6d8ff; font-weight: 700; }
+.cmsg.ch-VIP .c-text { color: #d9c8ff; }
 
 #chat-input-wrap {
     position: relative;

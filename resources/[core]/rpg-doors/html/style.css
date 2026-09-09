@@ -1,0 +1,146 @@
+/* ==========================================================================
+   rpg-doors — NUI (dark, accent mov). Fara backdrop-filter (CEF).
+   ========================================================================== */
+:root {
+  --bg-0:  rgba(10, 9, 14, 0.92);
+  --bg-1:  rgba(20, 18, 26, 0.98);
+  --bg-2:  rgba(28, 25, 36, 0.98);
+  --line:  rgba(167, 139, 250, 0.16);
+  --line-2: rgba(167, 139, 250, 0.4);
+  --mov:   #a78bfa;
+  --mov-d: #7c5cf0;
+  --text:  #f2f0f7;
+  --dim:   #a9a2ba;
+  --faint: #6f6982;
+  --ok:    #4ade80;
+  --err:   #f87186;
+  --ease:  cubic-bezier(0.22, 0.7, 0.2, 1);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 100%; height: 100%; overflow: hidden; background: transparent; }
+body { font-family: 'Inter', system-ui, Segoe UI, sans-serif; color: var(--text); user-select: none; -webkit-font-smoothing: antialiased; }
+.hidden { display: none !important; }
+.dim { color: var(--faint); }
+.kicker { font-size: 10px; font-weight: 800; letter-spacing: 0.22em; text-transform: uppercase; color: var(--mov); }
+
+#wrap {
+  position: fixed; inset: 0;
+  display: grid; place-items: center;
+  background: rgba(0, 0, 0, 0.45);
+  animation: fade .16s ease;
+}
+@keyframes fade { from { opacity: 0; } }
+
+#panel {
+  width: min(92vw, 560px);
+  max-height: 82vh;
+  display: flex; flex-direction: column;
+  background: linear-gradient(180deg, var(--bg-2), var(--bg-1));
+  border: 1px solid var(--line-2);
+  border-radius: 16px;
+  box-shadow: 0 40px 90px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  animation: pop .2s var(--ease);
+  overflow: hidden;
+}
+@keyframes pop { from { opacity: 0; transform: scale(0.97) translateY(10px); } }
+
+header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 18px;
+  border-bottom: 1px solid var(--line);
+}
+header h1 { font-size: 18px; font-weight: 900; letter-spacing: 0.04em; margin-top: 3px; }
+#btn-close {
+  width: 30px; height: 30px; border-radius: 8px; cursor: pointer;
+  border: 1px solid var(--line); background: rgba(255,255,255,0.03); color: var(--dim);
+  font-size: 13px; transition: background .12s var(--ease), color .12s var(--ease);
+}
+#btn-close:hover { background: rgba(248,113,134,0.14); color: #fff; }
+
+#add-row { padding: 14px 18px; border-bottom: 1px solid var(--line); display: flex; flex-direction: column; gap: 10px; }
+.scan-info { font-size: 11.5px; color: var(--dim); font-variant-numeric: tabular-nums; }
+.scan-form { display: flex; gap: 8px; flex-wrap: wrap; }
+.scan-form input { flex: 1 1 200px; }
+
+input[type="text"], input:not([type]) {
+  padding: 9px 11px; border-radius: 9px;
+  border: 1px solid var(--line); background: rgba(255,255,255,0.04);
+  color: var(--text); font: inherit; font-size: 12.5px; outline: none;
+}
+input:focus { border-color: var(--line-2); }
+
+.hint { font-size: 11px; line-height: 1.45; }
+.hint.err { color: var(--err); }
+
+.btn {
+  padding: 9px 13px; border-radius: 9px; cursor: pointer;
+  border: 1px solid rgba(167,139,250,0.3);
+  background: rgba(255,255,255,0.04); color: var(--text);
+  font: inherit; font-size: 11.5px; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase;
+  transition: filter .14s var(--ease), background .14s var(--ease), transform .07s var(--ease);
+}
+.btn:hover { background: rgba(167,139,250,0.14); }
+.btn:active { transform: translateY(1px); }
+.btn.primary {
+  color: #14101f; border-color: rgba(220, 210, 255, 0.5);
+  background: linear-gradient(180deg, var(--mov), var(--mov-d));
+  box-shadow: 0 3px 0 rgba(60, 40, 130, 0.7), inset 0 1px 0 rgba(255,255,255,0.3);
+}
+.btn.primary:hover { filter: brightness(1.08); }
+.btn.ghost { border-color: transparent; background: transparent; color: var(--faint); }
+.btn.ghost:hover { color: var(--text); }
+.btn.mini {
+  padding: 6px 9px; font-size: 10px; letter-spacing: 0.04em;
+}
+.btn.danger { border-color: rgba(248,113,134,0.4); color: #f6b8c1; }
+.btn.danger:hover { background: rgba(248,113,134,0.16); }
+
+#list { overflow-y: auto; padding: 8px 12px; flex: 1; min-height: 80px; }
+#list::-webkit-scrollbar { width: 7px; }
+#list::-webkit-scrollbar-thumb { background: rgba(167,139,250,0.28); border-radius: 4px; }
+
+.door {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px; margin: 5px 0;
+  border: 1px solid var(--line); border-radius: 11px;
+  background: rgba(255,255,255,0.02);
+}
+.door .d-main { flex: 1; min-width: 0; }
+.door .d-name {
+  font-size: 13px; font-weight: 700; color: #fff;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.door .d-name input {
+  width: 100%; font-size: 13px; font-weight: 700; padding: 4px 6px;
+}
+.door .d-sub { font-size: 10.5px; color: var(--faint); font-variant-numeric: tabular-nums; margin-top: 2px; }
+.door .d-actions { display: flex; gap: 6px; flex-shrink: 0; }
+
+.pill {
+  flex-shrink: 0;
+  font-size: 9.5px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase;
+  padding: 4px 8px; border-radius: 999px;
+}
+.pill.locked   { color: #f6b8c1; background: rgba(248,113,134,0.16); box-shadow: inset 0 0 0 1px rgba(248,113,134,0.4); }
+.pill.unlocked { color: #b9f2da; background: rgba(74,222,128,0.16);  box-shadow: inset 0 0 0 1px rgba(74,222,128,0.4); }
+
+.empty { text-align: center; color: var(--faint); font-size: 12px; padding: 26px 0; }
+
+footer {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  padding: 12px 18px; border-top: 1px solid var(--line);
+  font-size: 11px; color: var(--dim);
+}
+footer b { color: var(--text); }
+
+#toasts {
+  position: fixed; top: 3vh; left: 50%; transform: translateX(-50%);
+  display: flex; flex-direction: column; gap: 8px; align-items: center; pointer-events: none;
+}
+.toast {
+  padding: 10px 16px; border-radius: 10px; font-size: 12px; font-weight: 600;
+  background: var(--bg-0); border: 1px solid var(--line); border-left: 3px solid var(--mov);
+  box-shadow: 0 12px 30px rgba(0,0,0,0.5); animation: tin .18s var(--ease), tout .4s ease 3s forwards;
+}
+@keyframes tin  { from { opacity: 0; transform: translateY(-8px); } }
+@keyframes tout { to { opacity: 0; transform: translateY(-8px); } }
