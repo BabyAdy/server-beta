@@ -97,7 +97,10 @@ CreateThread(function()
                                     icon  = hasRank and Staff.iconSvg(slug) or nil,
                                     color = hasRank and Staff.color(slug) or nil,
                                     subs  = subs,
-                                    talk  = NetworkIsPlayerTalking(pi) and true or false,  -- difuzor animat deasupra
+                                    -- difuzor animat: DOAR cand chiar transmite voce.
+                                    -- MumbleIsPlayerTalking = activitate reala de vorbire (respecta
+                                    -- push-to-talk). NetworkIsPlayerTalking ramanea "pornit" cu voice-ul FiveM.
+                                    talk  = MumbleIsPlayerTalking(pi) and true or false,
                                     x     = sx,
                                     y     = sy,
                                     s     = math.floor(scale * 1000) / 1000,

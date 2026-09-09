@@ -15,21 +15,21 @@ Subs.ORDER = { 'legend', 'platinum', 'gold' }
 
 -- slug -> { key, label, color (#hex), icon (interior SVG, viewBox 0 0 24 24),
 --          buyable = se poate cumpara din /shop cu Premium Points }
+-- Toate cele 3 folosesc ACELASI icon (diamant), diferentiat DOAR prin culoare. Fara glow.
+local SUB_ICON = '<path fill="currentColor" d="M5 3h14l3 6-10 12L2 9l3-6z"/>'
+
 Subs.TYPES = {
     gold = {
-        key = 'gold', label = 'Gold', color = '#ffd633', buyable = true,  -- GALBEN
-        -- stea
-        icon = '<path fill="currentColor" d="M12 2.6l2.75 5.57 6.15.9-4.45 4.34 1.05 6.13L12 16.65l-5.5 2.89 1.05-6.13L3.1 9.07l6.15-.9L12 2.6z"/>',
+        key = 'gold', label = 'Gold', color = '#ffd633', buyable = true,   -- GALBEN
+        icon = SUB_ICON,
     },
     platinum = {
-        key = 'platinum', label = 'Platinum', color = '#a855f7', buyable = true,  -- MOV
-        -- diamant / gema
-        icon = '<path fill="currentColor" d="M5 3h14l3 5.6L12 21 2 8.6 5 3z"/>',
+        key = 'platinum', label = 'Platinum', color = '#a855f7', buyable = true,   -- MOV
+        icon = SUB_ICON,
     },
     legend = {
-        key = 'legend', label = 'Legend', color = '#3d9bff', buyable = false,  -- ALBASTRU. EXCLUSIV prin plati / setat de owner
-        -- fulger
-        icon = '<path fill="currentColor" d="M13 2L3 14h6l-2 8 10-12h-6l2-8z"/>',
+        key = 'legend', label = 'Legend', color = '#3d9bff', buyable = false,   -- ALBASTRU. Exclusiv prin plati / setat de owner
+        icon = SUB_ICON,
     },
 }
 

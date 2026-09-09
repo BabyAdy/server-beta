@@ -229,7 +229,6 @@ body.preview {
     display: inline-flex;
     vertical-align: -0.16em;
     margin-right: 5px;
-    filter: drop-shadow(0 0 3px currentColor);
 }
 .c-sbadge svg { width: 1.12em; height: 1.12em; display: block; }
 
@@ -260,7 +259,6 @@ body.preview {
     display: inline-flex;
     vertical-align: -0.16em;
     margin-right: 3px;
-    filter: drop-shadow(0 0 3px currentColor);
 }
 .c-subbadge svg { width: 1.12em; height: 1.12em; display: block; }
 .c-vid { color: #9a86c4; margin: 0 4px 0 1px; font-variant-numeric: tabular-nums; }

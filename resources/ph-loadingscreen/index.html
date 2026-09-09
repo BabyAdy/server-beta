@@ -38,20 +38,21 @@
             color: #f3f4f6;
         }
 
-        /* Video Background */
-        #bg-video {
+        /* Image Background — zoom in / zoom out lent (Ken Burns) */
+        #bg {
             position: absolute;
-            top: 50%;
-            left: 50%;
-            min-width: 100%;
-            min-height: 100%;
-            width: auto;
-            height: auto;
+            inset: 0;
             z-index: 1;
-            transform: translate(-50%, -50%);
-            object-fit: cover;
+            background: #0b0713 url('bg.jpg') center center / cover no-repeat;
             filter: brightness(0.4) contrast(1.05);
-            transition: opacity 0.5s ease;
+            transform-origin: center center;
+            animation: bgZoom 26s ease-in-out infinite alternate;
+            will-change: transform;
+        }
+
+        @keyframes bgZoom {
+            from { transform: scale(1.03); }
+            to   { transform: scale(1.15); }
         }
 
         /* Gradient Overlay */
@@ -247,8 +248,8 @@
         }
 
         .role-manager {
-            color: #fca5a5;
-            text-shadow: 0 0 8px #ef4444, 0 0 16px #b91c1c;
+            color: #e9d5ff;
+            text-shadow: 0 0 8px #ff0000, 0 0 16px #ff0000;
         }
 
         .role-sdev {
@@ -386,10 +387,8 @@
 </head>
 <body>
 
-    <!-- Video Fundal -->
-    <video autoplay muted loop id="bg-video">
-        <source id="video-source" src="bg.mp4" type="video/mp4">
-    </video>
+    <!-- Imagine Fundal -->
+    <div id="bg"></div>
 
     <div class="overlay"></div>
 
@@ -491,35 +490,24 @@
     <audio id="audio-player" loop></audio>
 
     <script>
-        // Playlist Muzica & Videoclipuri Asociate
+        // Playlist Muzica
         const playlist = [
-            { title: "Purple Havoc - Theme Song 1", file: "song1.mp3", video: "bg.mp4" },
-            { title: "Nectagon - Jessie J Do it like a dude (Remix)", file: "song2.mp3", video: "bg2.mp4" },
-            { title: "CEZIC - D DEALER", file: "song3.mp3", video: "bg3.mp4" }
+            { title: "Nectagon - Jessie J Do it like a dude (Remix)", file: "song1.mp3" },
+            { title: "CEZIC - D DEALER", file: "song2.mp3" },
+            { title: "Purple Havoc - Official Song", file: "song3.mp3" }
         ];
 
         let currentSongIndex = 0;
         const audio = document.getElementById('audio-player');
-        const bgVideo = document.getElementById('bg-video');
-        const videoSource = document.getElementById('video-source');
         const songTitle = document.getElementById('song-title');
         const playIcon = document.getElementById('play-icon');
         const volumeSlider = document.getElementById('volume-slider');
 
         function loadSong(index) {
             const song = playlist[index];
-            
-            // Schimbă Audio
             audio.src = song.file;
             songTitle.innerText = song.title;
             audio.volume = volumeSlider.value;
-
-            // Schimbă Videoclipul doar dacă e diferit de cel actual
-            if (videoSource.getAttribute('src') !== song.video) {
-                videoSource.src = song.video;
-                bgVideo.load();
-                bgVideo.play();
-            }
         }
 
         function togglePlay() {

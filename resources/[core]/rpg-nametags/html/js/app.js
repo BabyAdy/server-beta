@@ -92,15 +92,13 @@
 
   /* preview in browser */
   if (typeof window.GetParentResourceName !== 'function') {
-    var STAR = '<path fill="currentColor" d="M12 2.6l2.75 5.57 6.15.9-4.45 4.34 1.05 6.13L12 16.65l-5.5 2.89 1.05-6.13L3.1 9.07l6.15-.9L12 2.6z"/>';
-    var GEM = '<path fill="currentColor" d="M5 3h14l3 5.6L12 21 2 8.6 5 3z"/>';
-    var BOLT = '<path fill="currentColor" d="M13 2L3 14h6l-2 8 10-12h-6l2-8z"/>';
+    var GEM = '<path fill="currentColor" d="M5 3h14l3 6-10 12L2 9l3-6z"/>';
     render([
       { id: 1, sqlId: 152, name: 'John Doe', x: 0.5, y: 0.4, s: 1, a: 1, talk: true,
         color: '#5100ff', icon: '<path fill="currentColor" d="M2 8l4.5 3L12 4l5.5 7L22 8l-2 12H4L2 8z"/>',
-        subs: [ { icon: BOLT, color: '#3d9bff' }, { icon: GEM, color: '#a855f7' }, { icon: STAR, color: '#ffd633' } ] },
+        subs: [ { icon: GEM, color: '#3d9bff' }, { icon: GEM, color: '#a855f7' }, { icon: GEM, color: '#ffd633' } ] },
       { id: 2, sqlId: 77, name: 'Jane Smith', x: 0.3, y: 0.62, s: 0.85, a: 0.9,
-        subs: [ { icon: GEM, color: '#a855f7' }, { icon: STAR, color: '#ffd633' } ] },
+        subs: [ { icon: GEM, color: '#a855f7' }, { icon: GEM, color: '#ffd633' } ] },
       { id: 3, sqlId: 210, name: 'Civilian Guy', x: 0.7, y: 0.55, s: 0.9, a: 1, talk: true }
     ]);
   }

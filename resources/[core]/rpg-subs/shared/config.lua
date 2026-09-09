@@ -14,7 +14,7 @@ Config.StaffChatRank = 'trialhelper'
 Config.ChatColor = '#b57bff'
 
 -- Comanda chat-ului VIP.
-Config.ChatCommand = 'vip'
+Config.ChatCommand = 'pc'
 
 -- /shop — pret in Premium Points / ZI, per tip. Legend NU e cumparabil.
 Config.ShopPricePerDay = {
