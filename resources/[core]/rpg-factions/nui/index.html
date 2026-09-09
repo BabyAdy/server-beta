@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>rpg-factions</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div id="toasts"></div>
+
+  <div id="hqprompt" class="hidden"><span class="key">E</span><span id="hqprompt-lbl">Enter HQ</span></div>
+
+  <!-- invite popup -->
+  <div id="invite" class="overlay hidden">
+    <div class="card sm">
+      <div class="kicker">Faction Invite</div>
+      <p id="invite-text">You have been invited.</p>
+      <div class="row">
+        <button class="btn primary" data-inv="1">Accept</button>
+        <button class="btn ghost"  data-inv="0">Decline</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- main -->
+  <div id="app" class="overlay hidden">
+    <div class="card">
+      <header class="app-head">
+        <button id="back" class="iconbtn hidden">&larr;</button>
+        <div class="titles"><div class="kicker" id="fac-type">FACTION</div><h1 id="fac-name">—</h1></div>
+        <button id="close" class="iconbtn">&times;</button>
+      </header>
+
+      <!-- DASHBOARD -->
+      <section id="dash" class="page">
+        <div class="stat-grid">
+          <div class="stat"><span>Rank</span><b id="d-rank">—</b></div>
+          <div class="stat"><span>Supervisor</span><b id="d-sup">NO</b></div>
+          <div class="stat"><span>Tester</span><b id="d-test">NO</b></div>
+          <div class="stat"><span>Members</span><b id="d-members">0</b></div>
+          <div class="stat wide"><span>Warning Points</span>
+            <div class="warnbar"><i id="d-warnfill"></i></div><small id="d-warn">0 / 100</small></div>
+          <div class="stat wide"><span>Joined</span><b id="d-join">—</b></div>
+        </div>
+        <div class="menu" id="dash-menu"></div>
+      </section>
+
+      <!-- MEMBERS -->
+      <section id="members" class="page hidden">
+        <input id="m-search" class="search" placeholder="Search members…" />
+        <div class="list" id="m-list"></div>
+      </section>
+
+      <!-- APPLICATIONS -->
+      <section id="applications" class="page hidden">
+        <div class="list" id="a-list"></div>
+        <div class="empty hidden" id="a-empty">No pending applications.</div>
+      </section>
+
+      <!-- LOGS -->
+      <section id="logs" class="page hidden">
+        <div class="list" id="l-list"></div>
+        <div class="pager"><button id="l-prev" class="btn ghost">Prev</button>
+          <span id="l-page">1 / 1</span><button id="l-next" class="btn ghost">Next</button></div>
+      </section>
+
+      <!-- MANAGE -->
+      <section id="manage" class="page hidden">
+        <div class="sub">Settings</div>
+        <div class="form">
+          <label>Color <input id="s-color" type="text" placeholder="#3498db" /></label>
+          <label>Type <input id="s-type" type="text" placeholder="police" /></label>
+          <label>Min level <input id="s-minlevel" type="number" min="0" /></label>
+          <label>Min hours <input id="s-minhours" type="number" min="0" /></label>
+          <label>Max members <input id="s-maxmembers" type="number" min="0" /></label>
+          <label class="chk"><input id="s-application" type="checkbox" /> Applications open</label>
+          <button class="btn primary" id="s-save">Save settings</button>
+        </div>
+        <div class="sub">Leader / Manager <small>(enter member User ID)</small></div>
+        <div class="form row2">
+          <label>Set Leader <input id="mg-leader" type="number" min="1" /></label>
+          <button class="btn" id="mg-leader-btn">Transfer</button>
+          <label>Set Manager (0 = none) <input id="mg-manager" type="number" min="0" /></label>
+          <button class="btn" id="mg-manager-btn">Set</button>
+        </div>
+        <div class="sub">HQ</div>
+        <div class="form row2">
+          <button class="btn" data-hq="enter">Set HQ Enter (my pos)</button>
+          <button class="btn" data-hq="leave">Set HQ Leave (my pos)</button>
+          <label>HQ Virtual World <input id="hq-vw" type="number" min="0" /></label>
+          <button class="btn" id="hq-vw-btn">Set VW</button>
+        </div>
+      </section>
+
+      <!-- NO FACTION (apply) -->
+      <section id="nofaction" class="page hidden">
+        <p class="muted" id="nf-me">Level — · — h</p>
+        <div class="list" id="nf-list"></div>
+        <div class="empty hidden" id="nf-empty">No factions are accepting applications.</div>
+        <div class="sub">Your pending applications</div>
+        <div class="list" id="nf-mine"></div>
+      </section>
+    </div>
+  </div>
+
+  <script src="js/app.js"></script>
+</body>
+</html>
