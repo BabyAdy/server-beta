@@ -19,7 +19,9 @@ function Members.pushState(src)
     if not src or src <= 0 then return end
     local uid = Framework.GetUserId(src); if not uid then return end
     local u = DB.userRow(uid)
-    local st = Player(src).state
+    -- playerul putea sa se deconecteze in timpul await-ului de mai sus
+    local okp, st = pcall(function() return Player(src).state end)
+    if not okp or not st then return end
     local fid = tonumber(u and u.group) or 0
     st:set('faction', fid, true)
     st:set('factionRank', tonumber(u and u.group_rank) or 0, true)

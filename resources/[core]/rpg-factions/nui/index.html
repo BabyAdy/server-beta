@@ -105,6 +105,36 @@
     </div>
   </div>
 
+  <!-- FACTION CREATOR (admin /createfaction) -->
+  <div id="fcreator" class="overlay hidden">
+    <div class="card">
+      <header class="app-head">
+        <div class="titles"><div class="kicker">Faction Creator</div><h1>New Faction</h1></div>
+        <button id="fc-x" class="iconbtn">&times;</button>
+      </header>
+      <section class="page" id="fc-page">
+        <div class="form">
+          <label>ID <input id="fc-id" type="text" readonly /></label>
+          <label>Faction Name <input id="fc-name" type="text" maxlength="64" placeholder="Los Santos Police" /></label>
+          <label>Faction Color <input id="fc-color" type="text" maxlength="9" placeholder="#3498db" /></label>
+          <label>Faction Type <select id="fc-type"></select></label>
+          <label>Level Min <input id="fc-minlevel" type="number" min="0" value="0" /></label>
+          <label>Hours Min <input id="fc-minhours" type="number" min="0" value="0" /></label>
+          <label>Max Members <small>(0 = unlimited)</small> <input id="fc-maxmembers" type="number" min="0" value="0" /></label>
+          <label>Interior Virtual World <small>(0 = auto)</small> <input id="fc-vw" type="number" min="0" value="0" /></label>
+        </div>
+        <div class="sub">Checkpoints <small>(uses your current position)</small></div>
+        <div class="form row2">
+          <button class="btn" id="fc-cap-enter">Set Enter Checkpoint</button>
+          <small class="muted" id="fc-enter-lbl">not set</small>
+          <button class="btn" id="fc-cap-exit">Set Exit Checkpoint</button>
+          <small class="muted" id="fc-exit-lbl">not set</small>
+        </div>
+        <button class="btn primary" id="fc-create">Create Faction</button>
+      </section>
+    </div>
+  </div>
+
   <script src="js/app.js"></script>
 </body>
 </html>

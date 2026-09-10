@@ -10,8 +10,10 @@ Config.ManageRank = 'trialadmin'
 Config.OpenCommand = 'doors'
 Config.OpenKey     = ''          -- '' = doar comanda. Ex: 'F10'
 
--- Cat de departe (m) cauti o usa cu privirea la "Scaneaza usa din fata".
-Config.RayDistance = 8.0
+-- SELECTARE MANUALA cu cursorul ("Selecteaza usa"):
+Config.PickDistance    = 14.0   -- m: distanta max de la camera pana la usa pe care poti da click
+Config.PickMatchRadius = 1.5    -- m: cat de aproape trebuie sa fie o usa INREGISTRATA de obiectul
+                                --    pe care ai dat click, ca sa fie considerata aceeasi usa
 
 -- La cate secunde re-aplica starea usilor (protectie la streaming / alte scripturi).
 Config.ReassertSec = 15

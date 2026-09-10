@@ -56,8 +56,12 @@ local function put(ped, e)
     end
 end
 
+-- cat timp esti pe duty (rpg-duty), hainele de serviciu au prioritate -> nu
+-- re-aplicam hainele echipate din inventar (ar suprascrie uniforma).
+local function onDuty() return LocalPlayer.state.duty == true end
+
 local function apply()
-    if not charReady then return end
+    if not charReady or onDuty() then return end
     local ped  = PlayerPedId()
     local snap = Inv and Inv.snapshot or nil
     local equip = (snap and snap.equipment) or {}
@@ -87,7 +91,7 @@ end
 
 -- re-aplica doar (fara logica de "removed") — pt. reassert periodic
 local function reassert()
-    if not charReady or not next(applied) then return end
+    if not charReady or onDuty() or not next(applied) then return end
     local ped = PlayerPedId()
     for _, e in pairs(applied) do put(ped, e) end
 end

@@ -102,7 +102,12 @@ body{font-family:'Inter',system-ui,sans-serif;color:var(--text);-webkit-font-smo
 .form.row2{display:grid;grid-template-columns:1fr auto;gap:8px 10px;align-items:end}
 .form label{font-size:11px;color:var(--dim);display:flex;flex-direction:column;gap:4px}
 .form label.chk{flex-direction:row;align-items:center;gap:8px;font-size:12px}
-.form input[type=text],.form input[type=number]{padding:8px 10px;background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:9px;color:var(--text);font:inherit;font-size:12.5px;outline:none}
+.form input[type=text],.form input[type=number],.form select{padding:8px 10px;background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:9px;color:var(--text);font:inherit;font-size:12.5px;outline:none}
+.form select{appearance:none;-webkit-appearance:none;cursor:pointer}
+.form select option{background:#1a1f2b;color:var(--text)}
+.form input[readonly]{opacity:.7;cursor:not-allowed}
+.form label small{font-weight:600;color:var(--faint)}
+#fc-page{overflow-y:auto;padding-right:2px}
 
 /* perm editor (inline in member acts) */
 .perms{display:grid;grid-template-columns:1fr 1fr;gap:4px 10px;margin-top:8px;width:100%}

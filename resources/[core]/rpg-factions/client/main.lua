@@ -41,6 +41,23 @@ function FX.closeMenu()
     SendNUIMessage({ action = 'close' })
 end
 
+-- ---- Faction Creator (admin, /createfaction) --------------
+function FX.openCreator(data)
+    if FX.menuOpen then FX.closeMenu() end
+    FX.menuOpen = 'creator'
+    FX.setFocus(true)
+    SendNUIMessage({ action = 'openCreator', data = data or {} })
+end
+
+function FX.closeCreator()
+    if FX.menuOpen ~= 'creator' then return end
+    FX.menuOpen = false
+    FX.setFocus(false)
+    SendNUIMessage({ action = 'creatorClose' })
+end
+
+RegisterNetEvent('rpg-factions:openCreator', function(data) FX.openCreator(data) end)
+
 -- ---- server -> client --------------------------------------
 RegisterNetEvent('rpg-factions:sync', function(payload)
     FX.self = payload or { inFaction = false }
@@ -72,6 +89,8 @@ CreateThread(function()
             if IsControlJustReleased(0, 322) then
                 if FX.menuOpen == 'invite' then
                     SendNUIMessage({ action = 'invite', data = nil }); FX.pendingInvite = nil; FX.setFocus(false); FX.menuOpen = false
+                elseif FX.menuOpen == 'creator' then
+                    FX.closeCreator()
                 else
                     FX.closeMenu()
                 end

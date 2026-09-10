@@ -40,7 +40,7 @@
     if (!doors.length) {
       var e = document.createElement('div');
       e.className = 'empty';
-      e.textContent = 'Nicio ușă înregistrată. Scanează una mai sus.';
+      e.textContent = 'Nicio ușă înregistrată. Folosește „Selectează ușă în lume".';
       host.appendChild(e);
       return;
     }
@@ -119,16 +119,16 @@
     inp.addEventListener('blur', commit);
   }
 
-  /* ------------------------------------------------------- scan / add */
+  /* ------------------------------------------------------- pick / add */
   function resetScanUI() {
     $('#scan-box').classList.add('hidden');
-    $('#scan-fail').classList.add('hidden');
     $('#scan-name').value = '';
   }
 
-  $('#btn-scan').addEventListener('click', function () {
+  $('#btn-pick').addEventListener('click', function () {
     resetScanUI();
-    post('scan');
+    post('pick');
+    $('#wrap').classList.add('hidden');   // clientul inchide oricum focus-ul
   });
   $('#btn-cancel').addEventListener('click', resetScanUI);
   $('#btn-add').addEventListener('click', function () {
@@ -156,13 +156,11 @@
       render();
     } else if (m.action === 'scanResult') {
       if (m.ok) {
-        $('#scan-info').textContent = 'Ușă găsită — model ' + m.model + ' @ ' + m.x + ', ' + m.y + ', ' + m.z;
+        $('#scan-info').textContent = 'Ușă nouă — model ' + m.model + ' @ ' + m.x + ', ' + m.y + ', ' + m.z;
         $('#scan-box').classList.remove('hidden');
-        $('#scan-fail').classList.add('hidden');
         $('#scan-name').focus();
       } else {
         $('#scan-box').classList.add('hidden');
-        $('#scan-fail').classList.remove('hidden');
       }
     } else if (m.action === 'toast') {
       toast(m.text);

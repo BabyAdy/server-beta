@@ -55,6 +55,27 @@ RegisterNUICallback('rejectApplication', function(d, cb) TriggerServerEvent('rpg
 -- leave
 RegisterNUICallback('leaveFaction', function(_, cb) TriggerServerEvent('rpg-factions:leave') cb('ok') end)
 
+-- ---- Faction Creator (admin) --------------------------------
+RegisterNUICallback('creatorCapture', function(d, cb)
+    local ped = PlayerPedId()
+    local c = GetEntityCoords(ped)
+    SendNUIMessage({
+        action = 'creatorCaptured',
+        which  = d and d.which,
+        coords = { x = c.x, y = c.y, z = c.z, h = GetEntityHeading(ped) },
+    })
+    cb('ok')
+end)
+RegisterNUICallback('creatorSubmit', function(d, cb)
+    TriggerServerEvent('rpg-factions:adminCreate', d or {})
+    FX.closeCreator()
+    cb('ok')
+end)
+RegisterNUICallback('creatorClose', function(_, cb)
+    FX.closeCreator()
+    cb('ok')
+end)
+
 -- HQ din meniu (buton)
 RegisterNUICallback('hqEnter', function(_, cb) FX.closeMenu() TriggerServerEvent('rpg-factions:hqEnter') cb('ok') end)
 

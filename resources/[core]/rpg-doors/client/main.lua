@@ -96,43 +96,159 @@ CreateThread(function()
     end
 end)
 
--- ---- raycast: gaseste usa din fata ----------------------------
-local function rotToDir(rot)
-    local z = math.rad(rot.z)
-    local x = math.rad(rot.x)
-    local n = math.abs(math.cos(x))
-    return vector3(-math.sin(z) * n, math.cos(z) * n, math.sin(x))
-end
-
-local function scanDoor()
-    local cam  = GetGameplayCamCoord()
-    local dir  = rotToDir(GetGameplayCamRot(2))
-    local dest = cam + dir * ((Config.RayDistance or 8.0) + 0.0)
-    local ray  = StartExpensiveSynchronousShapeTestLosProbe(
-        cam.x, cam.y, cam.z, dest.x, dest.y, dest.z, 16, PlayerPedId(), 7)
-    local _, hit, _, _, ent = GetShapeTestResult(ray)
-    if hit ~= 1 or not ent or ent == 0 or not DoesEntityExist(ent) then return nil end
-    if GetEntityType(ent) ~= 3 then return nil end   -- 3 = obiect (usile sunt obiecte)
-    local c = GetEntityCoords(ent)
-    return {
-        model   = GetEntityModel(ent) + 0,
-        x = c.x + 0.0, y = c.y + 0.0, z = c.z + 0.0,
-        heading = GetEntityHeading(ent) + 0.0,
-    }
-end
-
 -- ---- meniu NUI -----------------------------------------------
 local function canManage()
     local slug = LocalPlayer.state.staff
     return slug ~= nil and slug ~= '' and Staff.atLeast(slug, Config.ManageRank)
 end
 
-local function openMenu()
+local function feed(msg)
+    BeginTextCommandThefeedPost('STRING')
+    AddTextComponentSubstringPlayerName(msg)
+    EndTextCommandThefeedPostTicker(false, true)
+end
+
+-- ===========================================================================
+--  SELECTARE MANUALA A USII CU CURSORUL
+--  Fara detectie automata: intri in "mod selectare", apare cursorul, muti
+--  cursorul pe o usa (se contureaza) si dai click ca s-o incui/descui.
+-- ===========================================================================
+local openMenu, closeMenu   -- definite mai jos (forward declaration pt. startPick)
+local pickMode = false
+local hoverEnt = 0
+local stopPick
+
+local function vnorm(v) local m = #v; if m == 0.0 then return v end return v / m end
+local function vcross(a, b)
+    return vector3(a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x)
+end
+
+-- (nx, ny) = pozitia cursorului 0..1 -> ray din camera prin acel punct de ecran
+local function screenToWorld(nx, ny, dist)
+    local camPos = GetFinalRenderedCamCoord()
+    local camRot = GetFinalRenderedCamRot(2)
+    local fov    = GetFinalRenderedCamFov()
+    local w, h   = GetActiveScreenResolution()
+    local aspect = (h > 0) and (w / h) or (16.0 / 9.0)
+    local t      = math.tan(math.rad(fov) * 0.5)
+
+    local rz, rx = math.rad(camRot.z), math.rad(camRot.x)
+    local cxr = math.abs(math.cos(rx))
+    local fwd = vnorm(vector3(-math.sin(rz) * cxr, math.cos(rz) * cxr, math.sin(rx)))
+    local right = vnorm(vcross(fwd, vector3(0.0, 0.0, 1.0)))
+    local up    = vnorm(vcross(right, fwd))
+
+    local sx = (nx * 2.0) - 1.0
+    local sy = 1.0 - (ny * 2.0)
+    local dir = vnorm(fwd + right * (sx * t * aspect) + up * (sy * t))
+    return camPos, camPos + dir * (dist + 0.0)
+end
+
+local function clearHover()
+    if hoverEnt ~= 0 and DoesEntityExist(hoverEnt) then SetEntityDrawOutline(hoverEnt, false) end
+    hoverEnt = 0
+end
+
+-- gaseste usa INREGISTRATA care corespunde obiectului pe care s-a dat click
+local function matchRegistered(model, coords)
+    local best, bestD
+    for _, d in pairs(doors) do
+        if (d.model + 0) == (model + 0) then
+            local dd = #(coords - vector3(d.x, d.y, d.z))
+            if dd <= (Config.PickMatchRadius or 1.5) and (not bestD or dd < bestD) then
+                best, bestD = d, dd
+            end
+        end
+    end
+    return best
+end
+
+local function drawPickHint()
+    SetTextFont(4); SetTextScale(0.0, 0.42); SetTextColour(255, 255, 255, 220)
+    SetTextCentre(true); SetTextOutline()
+    BeginTextCommandDisplayText('STRING')
+    AddTextComponentSubstringPlayerName('Click stânga: comută încuietoarea   •   Click dreapta / ESC: gata')
+    EndTextCommandDisplayText(0.5, 0.045)
+end
+
+local function startPick()
+    if pickMode or not canManage() then return end
+    pickMode = true
+    CreateThread(function()
+        local nextClickAt = 0
+        while pickMode do
+            Wait(0)
+            SetMouseCursorActiveThisFrame()
+            -- blocheaza look / atac / pauza cat timp selectezi
+            for _, c in ipairs({ 1, 2, 24, 25, 106, 122, 140, 141, 142, 199, 200, 257, 322 }) do
+                DisableControlAction(0, c, true)
+            end
+            drawPickHint()
+
+            local nx, ny = GetControlNormal(0, 239), GetControlNormal(0, 240)
+            local from, to = screenToWorld(nx, ny, Config.PickDistance or 14.0)
+            local ray = StartExpensiveSynchronousShapeTestLosProbe(
+                from.x, from.y, from.z, to.x, to.y, to.z, 16, PlayerPedId(), 7)
+            local _, hit, _, _, ent = GetShapeTestResult(ray)
+
+            local valid = hit == 1 and ent and ent ~= 0 and DoesEntityExist(ent) and GetEntityType(ent) == 3
+            if valid then
+                if ent ~= hoverEnt then
+                    clearHover()
+                    hoverEnt = ent
+                    SetEntityDrawOutline(ent, true)
+                    SetEntityDrawOutlineColor(60, 190, 255, 255)
+                end
+            else
+                clearHover()
+            end
+
+            -- CLICK STANGA -> selecteaza usa de sub cursor
+            if valid and IsDisabledControlJustPressed(0, 24) and GetGameTimer() >= nextClickAt then
+                nextClickAt = GetGameTimer() + 350
+                local c     = GetEntityCoords(ent)
+                local model = GetEntityModel(ent) + 0
+                local reg   = matchRegistered(model, c)
+                if reg then
+                    -- usa deja inregistrata -> comuta incuietoarea, ramai in mod selectare
+                    TriggerServerEvent('rpg-doors:setLocked', reg.id, not reg.locked)
+                    feed(('Ușa "%s" → %s'):format(reg.label, reg.locked and '~g~descuiată' or '~r~încuiată'))
+                else
+                    -- usa noua -> iesi din mod selectare si deschide meniul cu casuta de nume
+                    local scan = {
+                        model = model,
+                        x = c.x + 0.0, y = c.y + 0.0, z = c.z + 0.0,
+                        heading = GetEntityHeading(ent) + 0.0,
+                    }
+                    stopPick()
+                    openMenu()                 -- openMenu reseteaza pendingScan -> il setam DUPA
+                    pendingScan = scan
+                    SendNUIMessage({
+                        action = 'scanResult', ok = true, model = model,
+                        x = math.floor(c.x * 100) / 100,
+                        y = math.floor(c.y * 100) / 100,
+                        z = math.floor(c.z * 100) / 100,
+                    })
+                end
+            end
+
+            -- ANULARE -> click dreapta / ESC / Backspace
+            if IsDisabledControlJustPressed(0, 25) or IsDisabledControlJustPressed(0, 322)
+               or IsControlJustPressed(0, 177) or IsControlJustPressed(0, 202) then
+                stopPick()
+                openMenu()
+            end
+        end
+        clearHover()
+    end)
+end
+
+stopPick = function() pickMode = false end
+
+openMenu = function()
     if menuOpen then return end
     if not canManage() then
-        BeginTextCommandThefeedPost('STRING')
-        AddTextComponentSubstringPlayerName('~r~Nu ai acces la meniul de usi.')
-        EndTextCommandThefeedPostTicker(false, true)
+        feed('~r~Nu ai acces la meniul de usi.')
         return
     end
     menuOpen = true
@@ -141,7 +257,7 @@ local function openMenu()
     SendNUIMessage({ action = 'open', doors = sortedDoors() })
 end
 
-local function closeMenu()
+closeMenu = function()
     if not menuOpen then return end
     menuOpen = false
     SetNuiFocus(false, false)
@@ -155,19 +271,10 @@ end
 
 RegisterNUICallback('close', function(_, cb) closeMenu(); cb('ok') end)
 
-RegisterNUICallback('scan', function(_, cb)
-    local s = scanDoor()
-    pendingScan = s
-    if s then
-        SendNUIMessage({
-            action = 'scanResult', ok = true, model = s.model,
-            x = math.floor(s.x * 100) / 100,
-            y = math.floor(s.y * 100) / 100,
-            z = math.floor(s.z * 100) / 100,
-        })
-    else
-        SendNUIMessage({ action = 'scanResult', ok = false })
-    end
+-- NUI: "Selecteaza usa" -> inchide meniul si intra in modul de selectare cu cursorul
+RegisterNUICallback('pick', function(_, cb)
+    closeMenu()
+    startPick()
     cb('ok')
 end)
 
@@ -218,6 +325,8 @@ end)
 -- ---- lifecycle ---------------------------------------------
 AddEventHandler('onResourceStop', function(res)
     if res ~= RES then return end
+    pickMode = false
+    clearHover()
     if menuOpen then SetNuiFocus(false, false) end
     for id in pairs(doors) do unapplyDoor(id) end
 end)

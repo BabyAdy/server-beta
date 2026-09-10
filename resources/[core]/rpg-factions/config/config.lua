@@ -87,9 +87,9 @@ Config.DefaultInitialRank = 1        -- rank_order acordat la join
 Config.Warning = { min = 0, max = 100 }
 
 -- ===========================================================================
---  TIPURI DE FACȚIUNE (doar pt. UI / validare; extensibil)
+--  TIPURI DE FACȚIUNE (UI + validare la creare). Primul = default.
 -- ===========================================================================
-Config.FactionTypes = { 'police', 'ems', 'government', 'mechanic', 'gang', 'mafia', 'other' }
+Config.FactionTypes = { 'department', 'peacefull', 'hitman', 'gang' }
 
 -- ===========================================================================
 --  SECURITY

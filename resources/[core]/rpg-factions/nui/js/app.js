@@ -235,10 +235,58 @@
   $$('#invite [data-inv]').forEach(function (b) { b.addEventListener('click', function () { post('inviteResponse', { accept: b.dataset.inv === '1' }); $('#invite').classList.add('hidden'); }); });
 
   /* ---------------- bus ---------------- */
+  /* ---------------- faction creator (admin) ---------------- */
+  var CR = { enter: null, exit: null };
+  function crPos(p) { return p ? (p.x.toFixed(1) + ', ' + p.y.toFixed(1) + ', ' + p.z.toFixed(1)) : 'not set'; }
+  function openCreator(d) {
+    d = d || {};
+    CR.enter = null; CR.exit = null;
+    $('#fc-id').value = (d.nextId != null) ? ('#' + d.nextId + '  (auto)') : 'auto';
+    $('#fc-name').value = '';
+    $('#fc-color').value = '#3498db';
+    $('#fc-minlevel').value = 0; $('#fc-minhours').value = 0;
+    $('#fc-maxmembers').value = 0; $('#fc-vw').value = 0;
+    var sel = $('#fc-type'); sel.innerHTML = '';
+    (d.types && d.types.length ? d.types : ['department']).forEach(function (t) {
+      var o = document.createElement('option');
+      o.value = t; o.textContent = t.charAt(0).toUpperCase() + t.slice(1);
+      sel.appendChild(o);
+    });
+    $('#fc-enter-lbl').textContent = 'not set';
+    $('#fc-exit-lbl').textContent = 'not set';
+    $('#fcreator').classList.remove('hidden');
+  }
+  function hideCreator() { $('#fcreator').classList.add('hidden'); }
+
+  $('#fc-x').addEventListener('click', function () { post('creatorClose'); hideCreator(); });
+  $('#fc-cap-enter').addEventListener('click', function () { post('creatorCapture', { which: 'enter' }); });
+  $('#fc-cap-exit').addEventListener('click', function () { post('creatorCapture', { which: 'exit' }); });
+  $('#fc-create').addEventListener('click', function () {
+    var name = ($('#fc-name').value || '').trim();
+    if (!name) { toast('Faction name is required.', 'error'); return; }
+    post('creatorSubmit', {
+      name: name,
+      color: ($('#fc-color').value || '#3498db').trim(),
+      type: $('#fc-type').value,
+      minLevel: parseInt($('#fc-minlevel').value, 10) || 0,
+      minHours: parseInt($('#fc-minhours').value, 10) || 0,
+      maxMembers: parseInt($('#fc-maxmembers').value, 10) || 0,
+      vw: parseInt($('#fc-vw').value, 10) || 0,
+      enter: CR.enter, exit: CR.exit
+    });
+    hideCreator();
+  });
+
   window.addEventListener('message', function (e) {
     var m = e.data || {};
     switch (m.action) {
       case 'open': S.self = m.self || { inFaction: false }; renderDash(); break;
+      case 'openCreator': openCreator(m.data || {}); break;
+      case 'creatorCaptured':
+        if (m.which === 'enter') { CR.enter = m.coords; $('#fc-enter-lbl').textContent = crPos(m.coords); }
+        else if (m.which === 'exit') { CR.exit = m.coords; $('#fc-exit-lbl').textContent = crPos(m.coords); }
+        break;
+      case 'creatorClose': hideCreator(); break;
       case 'self': S.self = m.self || { inFaction: false }; if (!$('#app').classList.contains('hidden')) { if (($('#dash').classList.contains('hidden')) === false) renderDash(); } break;
       case 'close': $('#app').classList.add('hidden'); break;
       case 'toast': toast(m.text, m.kind); break;
@@ -253,7 +301,8 @@
   });
   window.addEventListener('keyup', function (e) {
     if (e.key !== 'Escape') return;
-    if (!$('#invite').classList.contains('hidden')) { post('inviteResponse', { accept: false }); $('#invite').classList.add('hidden'); }
+    if (!$('#fcreator').classList.contains('hidden')) { post('creatorClose'); hideCreator(); }
+    else if (!$('#invite').classList.contains('hidden')) { post('inviteResponse', { accept: false }); $('#invite').classList.add('hidden'); }
     else if (!$('#app').classList.contains('hidden')) { post('close'); $('#app').classList.add('hidden'); }
   });
 

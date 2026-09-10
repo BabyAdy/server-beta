@@ -265,6 +265,20 @@ body.preview {
 .cmsg.ch-VIP .c-auth { color: #e6d8ff; font-weight: 700; }
 .cmsg.ch-VIP .c-text { color: #d9c8ff; }
 
+/* --- chat de factiune ( /f ) — culoarea liniei = culoarea factiunii --- */
+.c-ftag { font-weight: 800; margin-right: 5px; letter-spacing: .02em; }
+.c-frank {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-width: 1.35em; height: 1.35em; padding: 0 .18em;
+    margin-right: 5px; border-radius: 4px;
+    color: #fff; font-weight: 800; font-size: .82em; line-height: 1;
+    font-variant-numeric: tabular-nums;
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,.25);
+    vertical-align: -0.12em;
+}
+.c-frole { font-weight: 700; margin-right: 4px; }
+.cmsg.ch-FCHAT .c-auth { font-weight: 700; }
+
 #chat-input-wrap {
     position: relative;
     display: flex;

@@ -150,7 +150,11 @@ function Factions.create(actorUid, data)
         return nil, 'name_taken'
     end
     local color = tostring(data.color or '#3498db'):sub(1, 9)
-    local ftype = tostring(data.type or 'other'):sub(1, 32)
+    -- tipul trebuie sa fie unul din Config.FactionTypes; altfel -> primul (default)
+    local ftype = tostring(data.type or ''):lower():sub(1, 32)
+    local typeOk = false
+    for _, t in ipairs(Config.FactionTypes) do if t == ftype then typeOk = true; break end end
+    if not typeOk then ftype = Config.FactionTypes[1] end
 
     local fid = MySQL.insert.await([[
         INSERT INTO factions (g_name, g_color, g_type, g_minlevel, g_minhours, g_application, g_maxmembers, initial_rank)
@@ -182,7 +186,11 @@ end
 local SETTING_FIELDS = {
     name = { col = 'g_name', clamp = function(v) return tostring(v):sub(1, 64) end },
     color = { col = 'g_color', clamp = function(v) return tostring(v):sub(1, 9) end },
-    type = { col = 'g_type', clamp = function(v) return tostring(v):sub(1, 32) end },
+    type = { col = 'g_type', clamp = function(v)
+        v = tostring(v or ''):lower():sub(1, 32)
+        for _, t in ipairs(Config.FactionTypes) do if t == v then return v end end
+        return Config.FactionTypes[1]
+    end },
     minLevel = { col = 'g_minlevel', clamp = function(v) return math.max(0, math.floor(tonumber(v) or 0)) end },
     minHours = { col = 'g_minhours', clamp = function(v) return math.max(0, math.floor(tonumber(v) or 0)) end },
     application = { col = 'g_application', clamp = function(v) return (v == true or v == 1 or v == '1') and 1 or 0 end },

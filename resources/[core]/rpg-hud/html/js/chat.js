@@ -41,6 +41,7 @@ HUD.mods.chat = (function () {
             return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
         });
     }
+    function safeColor(c) { return /^#[0-9a-fA-F]{3,8}$/.test(c || '') ? c : '#3498db'; }
 
     function config(c) {
         if (!c.chat) return;
@@ -212,6 +213,17 @@ HUD.mods.chat = (function () {
             html += '<span class="c-auth">' + esc(msg.author || '') + '</span>';
             if (msg.id != null && msg.id !== '') html += '<span class="c-vid">(' + esc(msg.id) + ')</span>';
             html += '<span class="c-text"' + textStyle + '>: ' + esc(msg.text || '') + '</span>';
+        } else if (msg.factionChat) {
+            /* chat de factiune:  [/f] [numar rank] RankLabel Username (id): text
+               Culoarea intregii linii = culoarea factiunii. Patratelul de rank are
+               fundalul = culoarea factiunii. */
+            var fc = safeColor(msg.color);
+            html += '<span class="c-ftag" style="color:' + fc + '">[/f]</span>';
+            html += '<span class="c-frank" style="background:' + fc + '">' + esc(msg.rankNum != null ? msg.rankNum : '?') + '</span>';
+            if (msg.rankLabel) html += '<span class="c-frole" style="color:' + fc + '">' + esc(msg.rankLabel) + '</span>';
+            html += '<span class="c-auth" style="color:' + fc + '">' + esc(msg.author || '') + '</span>';
+            if (msg.id != null && msg.id !== '') html += '<span class="c-vid">(' + esc(msg.id) + ')</span>';
+            html += '<span class="c-text" style="color:' + fc + '">: ' + esc(msg.text || '') + '</span>';
         } else if (chKey && cfg.channels && cfg.channels[chKey]) {
             var ch = cfg.channels[chKey];
             html += '<span class="c-chan" style="color:' + ch.color + '">[' + esc(ch.label) + ']</span>';

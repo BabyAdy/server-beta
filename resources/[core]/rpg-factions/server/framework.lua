@@ -69,9 +69,12 @@ function Framework.GetPlaytimeHoursByUserId(uid)
 end
 
 -- users.`group` (id facțiune). Cache pe statebag + DB.
+--  src invalid / offline (ex. `source` pierdut dupa un await) -> nu crapa, cade pe 0.
 function Framework.GetGroup(src)
-    local st = Player(src).state
-    if st and st.faction ~= nil then return tonumber(st.faction) or 0 end
+    src = tonumber(src)
+    if not src or src <= 0 then return 0 end
+    local okp, st = pcall(function() return Player(src).state end)
+    if okp and st and st.faction ~= nil then return tonumber(st.faction) or 0 end
     local uid = Framework.GetUserId(src)
     if not uid then return 0 end
     local v = MySQL.scalar.await('SELECT `group` FROM users WHERE id = ? LIMIT 1', { uid })
