@@ -427,6 +427,87 @@ RegisterNetEvent('rpg-factions:adminCreate', function(payload)
     for _, pid in ipairs(GetPlayers()) do Members.pushState(tonumber(pid)) end
 end)
 
+-- ===========================================================================
+--  /editfaction (owner)  — Faction Editor Menu (NUI): alegi o facțiune si-i
+--  editezi setarile + checkpoint-urile HQ.
+-- ===========================================================================
+RegisterCommand('editfaction', function(src)
+    if not ownerOnly(src) then return end
+    if src <= 0 then return print('[rpg-factions] /editfaction e disponibila doar in joc.') end
+    local rows = MySQL.query.await('SELECT id, g_name FROM factions ORDER BY id ASC') or {}
+    local list = {}
+    for _, r in ipairs(rows) do list[#list + 1] = { id = tonumber(r.id), name = r.g_name } end
+    TriggerClientEvent('rpg-factions:openEditor', src, {
+        factions = list,
+        types    = Config.FactionTypes,
+    })
+end, false)
+
+-- clientul a ales o facțiune -> ii trimitem datele curente
+RegisterNetEvent('rpg-factions:editRequest', function(fid)
+    local src = source
+    if not ownerOnly(src) then return end
+    fid = tonumber(fid)
+    local e = fid and Factions.get(fid) or nil
+    if not e then return Framework.Notify(src, 'Faction not found.', 'error') end
+    local row = e.row
+    TriggerClientEvent('rpg-factions:editorData', src, {
+        id         = row.id,
+        name       = row.name,
+        color      = row.color,
+        type       = row.type,
+        minLevel   = row.minLevel,
+        minHours   = row.minHours,
+        maxMembers = row.maxMembers,
+        vw         = (row.hq and row.hq.vw) or 0,
+        enter      = row.hq and row.hq.enter or nil,
+        exit       = row.hq and row.hq.leave or nil,
+    })
+end)
+
+RegisterNetEvent('rpg-factions:adminEdit', function(payload)
+    local src = source
+    if not ownerOnly(src) then return end
+    payload = (type(payload) == 'table') and payload or {}
+    local fid = tonumber(payload.id)
+    local e = fid and Factions.get(fid) or nil
+    if not e then return Framework.Notify(src, 'Faction not found.', 'error') end
+    local actor = actorUid(src)
+
+    local changes = {}
+    if type(payload.name) == 'string' and payload.name:gsub('%s', '') ~= '' then changes.name = payload.name:sub(1, 64) end
+    if payload.color      ~= nil then changes.color = payload.color end
+    if payload.type       ~= nil then changes.type = payload.type end
+    if payload.minLevel   ~= nil then changes.minLevel = payload.minLevel end
+    if payload.minHours   ~= nil then changes.minHours = payload.minHours end
+    if payload.maxMembers ~= nil then changes.maxMembers = payload.maxMembers end
+    if next(changes) then
+        Factions.updateSettings(fid, actor, changes, 'admin /editfaction')
+    end
+
+    -- HQ: aplicam doar daca s-a trimis ceva (enter/exit ca {x,y,z,h} sau vw)
+    local enter = (type(payload.enter) == 'table') and payload.enter or e.row.hq and e.row.hq.enter or nil
+    local exitp = (type(payload.exit)  == 'table') and payload.exit  or e.row.hq and e.row.hq.leave or nil
+    local vw    = tonumber(payload.vw)
+    if type(payload.enter) == 'table' or type(payload.exit) == 'table' or vw ~= nil then
+        vw = math.max(0, math.floor(vw or (e.row.hq and e.row.hq.vw) or 0))
+        Factions.setHQ(fid, actor, enter, exitp, vw ~= 0 and vw or (1000 + fid))
+    end
+
+    Framework.Notify(src, ('Faction #%d updated.'):format(fid), 'success')
+    for _, pid in ipairs(GetPlayers()) do Members.pushState(tonumber(pid)) end
+end)
+
+RegisterNetEvent('rpg-factions:adminDelete', function(fid)
+    local src = source
+    if not ownerOnly(src) then return end
+    fid = tonumber(fid)
+    if not fid then return end
+    local ok = Factions.delete(fid, actorUid(src))
+    Framework.Notify(src, ok and ('Faction #%d deleted.'):format(fid) or 'Delete failed.', ok and 'success' or 'error')
+    for _, pid in ipairs(GetPlayers()) do Members.pushState(tonumber(pid)) end
+end)
+
 -- ---- exports (pt. alte resurse) ---------------------------------
 exports('getFaction', function(src) return Framework.GetGroup(src) end)
 exports('getRank', function(src)

@@ -58,6 +58,22 @@ end
 
 RegisterNetEvent('rpg-factions:openCreator', function(data) FX.openCreator(data) end)
 
+-- ---- Faction Editor (admin, /editfaction) ----------------
+function FX.openEditor(data)
+    if FX.menuOpen then FX.closeMenu() end
+    FX.menuOpen = 'editor'
+    FX.setFocus(true)
+    SendNUIMessage({ action = 'openEditor', data = data or {} })
+end
+function FX.closeEditor()
+    if FX.menuOpen ~= 'editor' then return end
+    FX.menuOpen = false
+    FX.setFocus(false)
+    SendNUIMessage({ action = 'editorClose' })
+end
+RegisterNetEvent('rpg-factions:openEditor', function(data) FX.openEditor(data) end)
+RegisterNetEvent('rpg-factions:editorData', function(data) SendNUIMessage({ action = 'editorData', data = data }) end)
+
 -- ---- server -> client --------------------------------------
 RegisterNetEvent('rpg-factions:sync', function(payload)
     FX.self = payload or { inFaction = false }
@@ -91,6 +107,8 @@ CreateThread(function()
                     SendNUIMessage({ action = 'invite', data = nil }); FX.pendingInvite = nil; FX.setFocus(false); FX.menuOpen = false
                 elseif FX.menuOpen == 'creator' then
                     FX.closeCreator()
+                elseif FX.menuOpen == 'editor' then
+                    FX.closeEditor()
                 else
                     FX.closeMenu()
                 end

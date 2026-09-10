@@ -123,14 +123,83 @@
           <label>Max Members <small>(0 = unlimited)</small> <input id="fc-maxmembers" type="number" min="0" value="0" /></label>
           <label>Interior Virtual World <small>(0 = auto)</small> <input id="fc-vw" type="number" min="0" value="0" /></label>
         </div>
-        <div class="sub">Checkpoints <small>(uses your current position)</small></div>
+        <div class="sub">Enter Checkpoint <small>(exterior)</small></div>
         <div class="form row2">
-          <button class="btn" id="fc-cap-enter">Set Enter Checkpoint</button>
+          <button class="btn" id="fc-cap-enter">Use my position</button>
           <small class="muted" id="fc-enter-lbl">not set</small>
-          <button class="btn" id="fc-cap-exit">Set Exit Checkpoint</button>
+        </div>
+        <div class="cxyz">
+          <label>X<input id="fc-enter-x" type="number" step="0.01" /></label>
+          <label>Y<input id="fc-enter-y" type="number" step="0.01" /></label>
+          <label>Z<input id="fc-enter-z" type="number" step="0.01" /></label>
+          <label>Heading<input id="fc-enter-h" type="number" step="0.1" /></label>
+        </div>
+
+        <div class="sub">Exit Checkpoint <small>(interior, in the VW above)</small></div>
+        <div class="form row2">
+          <button class="btn" id="fc-cap-exit">Use my position</button>
           <small class="muted" id="fc-exit-lbl">not set</small>
         </div>
+        <div class="cxyz">
+          <label>X<input id="fc-exit-x" type="number" step="0.01" /></label>
+          <label>Y<input id="fc-exit-y" type="number" step="0.01" /></label>
+          <label>Z<input id="fc-exit-z" type="number" step="0.01" /></label>
+          <label>Heading<input id="fc-exit-h" type="number" step="0.1" /></label>
+        </div>
+
         <button class="btn primary" id="fc-create">Create Faction</button>
+      </section>
+    </div>
+  </div>
+
+  <!-- FACTION EDITOR (admin /editfaction) -->
+  <div id="feditor" class="overlay hidden">
+    <div class="card">
+      <header class="app-head">
+        <div class="titles"><div class="kicker">Faction Editor</div><h1>Edit Faction</h1></div>
+        <button id="fe-x" class="iconbtn">&times;</button>
+      </header>
+      <section class="page" id="fe-page">
+        <div class="form">
+          <label>Select Faction <select id="fe-fac"></select></label>
+        </div>
+        <div id="fe-body" class="hidden">
+          <div class="form">
+            <label>Faction Name <input id="fe-name" type="text" maxlength="64" /></label>
+            <label>Faction Color <input id="fe-color" type="text" maxlength="9" placeholder="#3498db" /></label>
+            <label>Faction Type <select id="fe-type"></select></label>
+            <label>Level Min <input id="fe-minlevel" type="number" min="0" /></label>
+            <label>Hours Min <input id="fe-minhours" type="number" min="0" /></label>
+            <label>Max Members <small>(0 = unlimited)</small> <input id="fe-maxmembers" type="number" min="0" /></label>
+            <label>Interior Virtual World <small>(0 = auto)</small> <input id="fe-vw" type="number" min="0" /></label>
+          </div>
+          <div class="sub">Enter Checkpoint <small>(exterior)</small></div>
+          <div class="form row2">
+            <button class="btn" id="fe-cap-enter">Use my position</button>
+            <small class="muted" id="fe-enter-lbl">not set</small>
+          </div>
+          <div class="cxyz">
+            <label>X<input id="fe-enter-x" type="number" step="0.01" /></label>
+            <label>Y<input id="fe-enter-y" type="number" step="0.01" /></label>
+            <label>Z<input id="fe-enter-z" type="number" step="0.01" /></label>
+            <label>Heading<input id="fe-enter-h" type="number" step="0.1" /></label>
+          </div>
+          <div class="sub">Exit Checkpoint <small>(interior)</small></div>
+          <div class="form row2">
+            <button class="btn" id="fe-cap-exit">Use my position</button>
+            <small class="muted" id="fe-exit-lbl">not set</small>
+          </div>
+          <div class="cxyz">
+            <label>X<input id="fe-exit-x" type="number" step="0.01" /></label>
+            <label>Y<input id="fe-exit-y" type="number" step="0.01" /></label>
+            <label>Z<input id="fe-exit-z" type="number" step="0.01" /></label>
+            <label>Heading<input id="fe-exit-h" type="number" step="0.1" /></label>
+          </div>
+          <div class="form row2" style="margin-top:12px">
+            <button class="btn primary" id="fe-save">Save Changes</button>
+            <button class="btn danger" id="fe-del">Delete Faction</button>
+          </div>
+        </div>
       </section>
     </div>
   </div>

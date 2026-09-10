@@ -236,11 +236,29 @@
 
   /* ---------------- bus ---------------- */
   /* ---------------- faction creator (admin) ---------------- */
-  var CR = { enter: null, exit: null };
-  function crPos(p) { return p ? (p.x.toFixed(1) + ', ' + p.y.toFixed(1) + ', ' + p.z.toFixed(1)) : 'not set'; }
+  function cpFields(which) {
+    var g = function (a) { return $('#fc-' + which + '-' + a); };
+    return { x: g('x'), y: g('y'), z: g('z'), h: g('h') };
+  }
+  // citeste un checkpoint din campurile X/Y/Z/H; null daca X,Y,Z sunt goale
+  function readCP(which) {
+    var f = cpFields(which);
+    if (f.x.value === '' || f.y.value === '' || f.z.value === '') return null;
+    return {
+      x: parseFloat(f.x.value), y: parseFloat(f.y.value), z: parseFloat(f.z.value),
+      h: parseFloat(f.h.value) || 0
+    };
+  }
+  function fillCP(which, c) {
+    if (!c) return;
+    var f = cpFields(which);
+    f.x.value = (+c.x).toFixed(2); f.y.value = (+c.y).toFixed(2);
+    f.z.value = (+c.z).toFixed(2); f.h.value = (+(c.h || 0)).toFixed(1);
+    $('#fc-' + which + '-lbl').textContent = 'set: ' + (+c.x).toFixed(1) + ', ' + (+c.y).toFixed(1) + ', ' + (+c.z).toFixed(1);
+  }
+
   function openCreator(d) {
     d = d || {};
-    CR.enter = null; CR.exit = null;
     $('#fc-id').value = (d.nextId != null) ? ('#' + d.nextId + '  (auto)') : 'auto';
     $('#fc-name').value = '';
     $('#fc-color').value = '#3498db';
@@ -252,8 +270,10 @@
       o.value = t; o.textContent = t.charAt(0).toUpperCase() + t.slice(1);
       sel.appendChild(o);
     });
-    $('#fc-enter-lbl').textContent = 'not set';
-    $('#fc-exit-lbl').textContent = 'not set';
+    ['enter', 'exit'].forEach(function (w) {
+      var f = cpFields(w); f.x.value = ''; f.y.value = ''; f.z.value = ''; f.h.value = '';
+      $('#fc-' + w + '-lbl').textContent = 'not set';
+    });
     $('#fcreator').classList.remove('hidden');
   }
   function hideCreator() { $('#fcreator').classList.add('hidden'); }
@@ -272,9 +292,92 @@
       minHours: parseInt($('#fc-minhours').value, 10) || 0,
       maxMembers: parseInt($('#fc-maxmembers').value, 10) || 0,
       vw: parseInt($('#fc-vw').value, 10) || 0,
-      enter: CR.enter, exit: CR.exit
+      enter: readCP('enter'), exit: readCP('exit')
     });
     hideCreator();
+  });
+
+  /* ---------------- faction editor (admin) ---------------- */
+  var FE = { types: ['department'], fid: 0 };
+  function feCP(which) { var g = function (a) { return $('#fe-' + which + '-' + a); }; return { x: g('x'), y: g('y'), z: g('z'), h: g('h') }; }
+  function feReadCP(which) {
+    var f = feCP(which);
+    if (f.x.value === '' || f.y.value === '' || f.z.value === '') return null;
+    return { x: parseFloat(f.x.value), y: parseFloat(f.y.value), z: parseFloat(f.z.value), h: parseFloat(f.h.value) || 0 };
+  }
+  function feFillCP(which, c) {
+    var f = feCP(which);
+    if (!c) { f.x.value = ''; f.y.value = ''; f.z.value = ''; f.h.value = ''; $('#fe-' + which + '-lbl').textContent = 'not set'; return; }
+    f.x.value = (+c.x).toFixed(2); f.y.value = (+c.y).toFixed(2); f.z.value = (+c.z).toFixed(2); f.h.value = (+(c.h || 0)).toFixed(1);
+    $('#fe-' + which + '-lbl').textContent = 'set: ' + (+c.x).toFixed(1) + ', ' + (+c.y).toFixed(1) + ', ' + (+c.z).toFixed(1);
+  }
+  function openEditor(d) {
+    d = d || {};
+    FE.types = (d.types && d.types.length) ? d.types : ['department'];
+    FE.fid = 0;
+    var sel = $('#fe-fac');
+    sel.innerHTML = '<option value="">— select faction —</option>';
+    (d.factions || []).forEach(function (f) {
+      var o = document.createElement('option');
+      o.value = f.id; o.textContent = '#' + f.id + '   ' + f.name;
+      sel.appendChild(o);
+    });
+    var ts = $('#fe-type'); ts.innerHTML = '';
+    FE.types.forEach(function (t) {
+      var o = document.createElement('option');
+      o.value = t; o.textContent = t.charAt(0).toUpperCase() + t.slice(1);
+      ts.appendChild(o);
+    });
+    $('#fe-body').classList.add('hidden');
+    var db = $('#fe-del'); db.dataset.armed = ''; db.textContent = 'Delete Faction';
+    $('#feditor').classList.remove('hidden');
+  }
+  function hideEditor() { $('#feditor').classList.add('hidden'); }
+  function fillEditor(d) {
+    d = d || {};
+    FE.fid = d.id || 0;
+    $('#fe-name').value = d.name || '';
+    $('#fe-color').value = d.color || '#3498db';
+    $('#fe-type').value = d.type || FE.types[0];
+    $('#fe-minlevel').value = d.minLevel || 0;
+    $('#fe-minhours').value = d.minHours || 0;
+    $('#fe-maxmembers').value = d.maxMembers || 0;
+    $('#fe-vw').value = d.vw || 0;
+    feFillCP('enter', d.enter);
+    feFillCP('exit', d.exit);
+    $('#fe-body').classList.remove('hidden');
+  }
+
+  $('#fe-x').addEventListener('click', function () { post('editorClose'); hideEditor(); });
+  $('#fe-fac').addEventListener('change', function () {
+    var fid = parseInt(this.value, 10);
+    if (fid) { FE.fid = fid; post('editorPick', { fid: fid }); }
+    else { $('#fe-body').classList.add('hidden'); }
+  });
+  $('#fe-cap-enter').addEventListener('click', function () { post('editorCapture', { which: 'enter' }); });
+  $('#fe-cap-exit').addEventListener('click', function () { post('editorCapture', { which: 'exit' }); });
+  $('#fe-save').addEventListener('click', function () {
+    if (!FE.fid) { toast('Select a faction first.', 'error'); return; }
+    var name = ($('#fe-name').value || '').trim();
+    if (!name) { toast('Name required.', 'error'); return; }
+    post('editorSubmit', {
+      id: FE.fid, name: name,
+      color: ($('#fe-color').value || '#3498db').trim(),
+      type: $('#fe-type').value,
+      minLevel: parseInt($('#fe-minlevel').value, 10) || 0,
+      minHours: parseInt($('#fe-minhours').value, 10) || 0,
+      maxMembers: parseInt($('#fe-maxmembers').value, 10) || 0,
+      vw: parseInt($('#fe-vw').value, 10) || 0,
+      enter: feReadCP('enter'), exit: feReadCP('exit')
+    });
+    hideEditor();
+  });
+  $('#fe-del').addEventListener('click', function () {
+    if (!FE.fid) return;
+    var b = $('#fe-del');
+    if (b.dataset.armed === '1') { post('editorDelete', { fid: FE.fid }); hideEditor(); return; }
+    b.dataset.armed = '1'; b.textContent = 'Confirm delete?';
+    setTimeout(function () { if (b.dataset.armed === '1') { b.dataset.armed = ''; b.textContent = 'Delete Faction'; } }, 3000);
   });
 
   window.addEventListener('message', function (e) {
@@ -283,10 +386,15 @@
       case 'open': S.self = m.self || { inFaction: false }; renderDash(); break;
       case 'openCreator': openCreator(m.data || {}); break;
       case 'creatorCaptured':
-        if (m.which === 'enter') { CR.enter = m.coords; $('#fc-enter-lbl').textContent = crPos(m.coords); }
-        else if (m.which === 'exit') { CR.exit = m.coords; $('#fc-exit-lbl').textContent = crPos(m.coords); }
+        if (m.which === 'enter' || m.which === 'exit') fillCP(m.which, m.coords);
         break;
       case 'creatorClose': hideCreator(); break;
+      case 'openEditor': openEditor(m.data || {}); break;
+      case 'editorData': fillEditor(m.data || {}); break;
+      case 'editorCaptured':
+        if (m.which === 'enter' || m.which === 'exit') feFillCP(m.which, m.coords);
+        break;
+      case 'editorClose': hideEditor(); break;
       case 'self': S.self = m.self || { inFaction: false }; if (!$('#app').classList.contains('hidden')) { if (($('#dash').classList.contains('hidden')) === false) renderDash(); } break;
       case 'close': $('#app').classList.add('hidden'); break;
       case 'toast': toast(m.text, m.kind); break;
@@ -302,6 +410,7 @@
   window.addEventListener('keyup', function (e) {
     if (e.key !== 'Escape') return;
     if (!$('#fcreator').classList.contains('hidden')) { post('creatorClose'); hideCreator(); }
+    else if (!$('#feditor').classList.contains('hidden')) { post('editorClose'); hideEditor(); }
     else if (!$('#invite').classList.contains('hidden')) { post('inviteResponse', { accept: false }); $('#invite').classList.add('hidden'); }
     else if (!$('#app').classList.contains('hidden')) { post('close'); $('#app').classList.add('hidden'); }
   });

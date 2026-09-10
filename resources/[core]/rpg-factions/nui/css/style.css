@@ -107,7 +107,11 @@ body{font-family:'Inter',system-ui,sans-serif;color:var(--text);-webkit-font-smo
 .form select option{background:#1a1f2b;color:var(--text)}
 .form input[readonly]{opacity:.7;cursor:not-allowed}
 .form label small{font-weight:600;color:var(--faint)}
-#fc-page{overflow-y:auto;padding-right:2px}
+#fc-page,#fe-page{overflow-y:auto;padding-right:2px}
+#fe-fac{margin-bottom:4px}
+.cxyz{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:2px 0 4px}
+.cxyz label{font-size:10px;color:var(--faint);display:flex;flex-direction:column;gap:3px}
+.cxyz input{padding:6px 6px;background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:8px;color:var(--text);font:inherit;font-size:11.5px;outline:none;width:100%}
 
 /* perm editor (inline in member acts) */
 .perms{display:grid;grid-template-columns:1fr 1fr;gap:4px 10px;margin-top:8px;width:100%}

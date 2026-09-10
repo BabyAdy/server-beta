@@ -16,6 +16,20 @@ local function setPrompt(kind)
     SendNUIMessage({ action = 'hqPrompt', kind = kind })   -- 'enter' | 'leave' | nil
 end
 
+-- culoarea facțiunii (#RRGGBB) -> r,g,b pentru marker
+local function hexRGB(hex)
+    hex = tostring(hex or ''):gsub('#', '')
+    return tonumber(hex:sub(1, 2), 16) or 90,
+           tonumber(hex:sub(3, 4), 16) or 120,
+           tonumber(hex:sub(5, 6), 16) or 240
+end
+
+-- checkpoint vizibil (cilindru) la un punct HQ
+local function drawCheckpoint(pt, r, g, b)
+    DrawMarker(1, pt.x + 0.0, pt.y + 0.0, pt.z - 0.98, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+        1.5, 1.5, 0.5, r, g, b, 130, false, false, 2, false, nil, nil, false)
+end
+
 RegisterNetEvent('rpg-factions:hqTeleport', function(pos, dir)
     if type(pos) ~= 'table' then return end
     inHQ = (dir == 'in')
@@ -41,16 +55,15 @@ CreateThread(function()
         if hq and hq.vw and hq.vw ~= 0 then
             local pc = GetEntityCoords(PlayerPedId())
             local near = nil
+            local r, g, b = hexRGB(FX.self.faction.color)
 
-            if not inHQ and hq.enter then
-                if #(pc - vector3(hq.enter.x, hq.enter.y, hq.enter.z)) < 12.0 then
+            local pt = (not inHQ) and hq.enter or (inHQ and hq.leave) or nil
+            if pt then
+                local dist = #(pc - vector3(pt.x, pt.y, pt.z))
+                if dist < 18.0 then
                     wait = 0
-                    if #(pc - vector3(hq.enter.x, hq.enter.y, hq.enter.z)) < 2.2 then near = 'enter' end
-                end
-            elseif inHQ and hq.leave then
-                if #(pc - vector3(hq.leave.x, hq.leave.y, hq.leave.z)) < 12.0 then
-                    wait = 0
-                    if #(pc - vector3(hq.leave.x, hq.leave.y, hq.leave.z)) < 2.2 then near = 'leave' end
+                    drawCheckpoint(pt, r, g, b)               -- checkpoint vizibil
+                    if dist < 2.2 then near = (not inHQ) and 'enter' or 'leave' end
                 end
             end
 

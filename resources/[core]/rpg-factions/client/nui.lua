@@ -76,6 +76,36 @@ RegisterNUICallback('creatorClose', function(_, cb)
     cb('ok')
 end)
 
+-- ---- Faction Editor (admin) --------------------------------
+RegisterNUICallback('editorCapture', function(d, cb)
+    local ped = PlayerPedId()
+    local c = GetEntityCoords(ped)
+    SendNUIMessage({
+        action = 'editorCaptured',
+        which  = d and d.which,
+        coords = { x = c.x, y = c.y, z = c.z, h = GetEntityHeading(ped) },
+    })
+    cb('ok')
+end)
+RegisterNUICallback('editorPick', function(d, cb)
+    if d and d.fid then TriggerServerEvent('rpg-factions:editRequest', tonumber(d.fid)) end
+    cb('ok')
+end)
+RegisterNUICallback('editorSubmit', function(d, cb)
+    TriggerServerEvent('rpg-factions:adminEdit', d or {})
+    FX.closeEditor()
+    cb('ok')
+end)
+RegisterNUICallback('editorDelete', function(d, cb)
+    if d and d.fid then TriggerServerEvent('rpg-factions:adminDelete', tonumber(d.fid)) end
+    FX.closeEditor()
+    cb('ok')
+end)
+RegisterNUICallback('editorClose', function(_, cb)
+    FX.closeEditor()
+    cb('ok')
+end)
+
 -- HQ din meniu (buton)
 RegisterNUICallback('hqEnter', function(_, cb) FX.closeMenu() TriggerServerEvent('rpg-factions:hqEnter') cb('ok') end)
 
